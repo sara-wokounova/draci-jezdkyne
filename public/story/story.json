@@ -1,0 +1,154 @@
+{
+  "id": "draci-jezdkyne-z-vlpu",
+  "start": "forest_flight_01",
+  "assets": {
+    "music": {}
+  },
+  "characters": {
+    "emma": {
+      "displayName": "Emma",
+      "color": "#b88765",
+      "hair": "#6a432f",
+      "sprites": {
+        "neutral": "assets/characters/emma/emma_neutral.png",
+        "happy": "assets/characters/emma/emma_happy.png",
+        "excited": "assets/characters/emma/emma_excited.png",
+        "sad": "assets/characters/emma/emma_sad.png",
+        "nervous": "assets/characters/emma/emma_nervous.png",
+        "talking": "assets/characters/emma/emma_talking.png"
+      }
+    },
+    "anna": {
+      "displayName": "Anna",
+      "color": "#9f7258",
+      "hair": "#402f28",
+      "sprites": {
+        "neutral": "assets/characters/anna/anna_neutral.png",
+        "happy": "assets/characters/anna/anna_happy.png",
+        "excited": "assets/characters/anna/anna_excited.png",
+        "sad": "assets/characters/anna/anna_sad.png",
+        "nervous": "assets/characters/anna/anna_nervous.png",
+        "talking": "assets/characters/anna/anna_talking.png"
+      }
+    },
+    "roza": {
+      "displayName": "Róza",
+      "color": "#d6462f",
+      "hair": "#eac470",
+      "sprites": {
+        "neutral": "assets/characters/roza/roza_neutral.png",
+        "happy": "assets/characters/roza/roza_happy.png",
+        "excited": "assets/characters/roza/roza_excited.png",
+        "sad": "assets/characters/roza/roza_sad.png",
+        "nervous": "assets/characters/roza/roza_nervous.png",
+        "talking": "assets/characters/roza/roza_talking.png"
+      }
+    }
+  },
+  "scenes": [
+    {
+      "id": "forest_flight_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [
+      ],
+      "text": "Bylo, nebylo. Byly tři dračí jezdkyně - Róza, Emma a Anna. Byly to kamarádky a každý den dohlížely na svoji část lesa, aby se zvířátka žijící v lesa moc nežraly navzájem.",
+      "next": "forest_flight_02"
+    },
+    {
+      "id": "forest_flight_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "center",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Holky, támhle se něco leskne! Co to je?",
+      "next": "first_choice"
+    },
+    {
+      "id": "first_choice",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind",
+        "snow"
+      ],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "center",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Poleťme se podívat blíž, ať to můžeme prozkoumat.",
+      "choices": [
+        {
+          "text": "Prozkoumat.",
+          "next": "river_dam"
+        },
+        {
+          "text": "Vrátit se domů na oběd.",
+          "next": "village_home"
+        }
+      ]
+    },
+    {
+      "id": "river_dam",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_01.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "center",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Co to je? Na bobří přehradu je to obří. To je fakt divné.",
+      "next": "forest_flight_01"
+    },
+    {
+      "id": "village_home",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/town_01.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "center",
+          "pose": "excited"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Cítím kaši. Rychle, než nám ji ostatní sní!",
+      "next": "forest_flight_01"
+    }
+  ]
+}

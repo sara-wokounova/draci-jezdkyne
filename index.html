@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visual Novel Starter</title>
+  </head>
+  <body>
+    <main id="game-root" aria-label="Visual novel">
+      <section id="pixi-host" aria-hidden="true"></section>
+
+      <nav id="top-controls" aria-label="Story controls">
+        <button id="back-button" class="control-button" type="button" disabled>← Back</button>
+        <button id="restart-button" class="control-button" type="button">Restart</button>
+      </nav>
+
+      <section id="dialogue-panel" class="glass-panel" aria-live="polite">
+        <div class="speaker-row">
+          <h1 id="speaker-name">...</h1>
+          <span id="save-status">Autosave ready</span>
+        </div>
+        <p id="dialogue-text">Loading story...</p>
+        <p id="continue-hint">Click, tap, Space, or Enter to continue</p>
+      </section>
+
+      <section id="choice-panel" class="glass-panel hidden" aria-label="Choices"></section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
