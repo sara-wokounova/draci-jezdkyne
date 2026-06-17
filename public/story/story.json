@@ -203,7 +203,7 @@
       "choices": [
         {
           "text": "Zkusit přesvědčit bobry, aby přehradu zmenšili.",
-          "next": "river_dam"
+          "next": "dam_with_beavers_persuade"
         },
         {
           "text": "Poprat se s bobry, aby nás brali vážně.",
@@ -227,7 +227,79 @@
       ],
       "speaker": "roza",
       "text": "Jsou moc velcí, přeprat by je by nemuselo dopadnout dobře. Mohly bychom přitom poškodit přehradu a způsobit povodeň.",
-      "next": "forest_flight_01"
+      "next": "dam_with_beavers_persuade_01"
+    },
+    {
+      "id": "dam_with_beavers_persuade_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Co by bychom mohly udělat, abyste zmenšili přehradu?",
+      "next": "dam_with_beavers_persuade_02"
+    },
+    {
+      "id": "dam_with_beavers_persuade_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "Velký bobr",
+      "text": "Velcí bobři nemůžou žít v malé přehradě. Museli bychom se zase stát malými bobry.",
+      "next": "dam_with_beavers_persuade_03"
+    },
+    {
+      "id": "dam_with_beavers_persuade_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "anna",
+      "text": "A proč jste vlastně tak velcí? Co se stalo? Nemohli byste se vrátit do normální velikosti?",
+      "next": "dam_with_beavers_persuade_04"
+    },
+    {
+      "id": "dam_with_beavers_persuade_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "Velký bobr",
+      "text": "Přišla sem čarodějnice, mávla kouzelnou hůlkou a byly z nám obří bobři. ",
+      "next": "dam_with_beavers_persuade_05"
     },
     {
       "id": "dam_with_beavers_fight",
