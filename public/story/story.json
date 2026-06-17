@@ -146,7 +146,106 @@
       ],
       "speaker": "anna",
       "text": "Obří bobři! A staví velkou přehradu, aby zadrželi vodu. To je nebezpečné pro ostatní zvířata v lese.",
-      "next": "dam_with_beavers"
+      "next": "dam_with_beavers_roza"
+    },
+    {
+      "id": "dam_with_beavers_roza",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Bobři! Co to děláte? Takhle blokujete vodu všem zvířatům dolů po řece! A můžete způsobit velkou povodeň.",
+      "next": "dam_with_beavers_beaver"
+    },
+    {
+      "id": "dam_with_beavers_beaver",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "Velký bobr",
+      "text": "Jsme velcí bobři, tak potřebujeme velkou přehradu, abychom měli domov. Nechceme nikomu škodit, ale potřebujeme se postarat o sebe.",
+      "next": "dam_with_beavers_choice"
+    },
+    {
+      "id": "dam_with_beavers_choice",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Holky, nemůžeme to tak nechat. Kdyby se přehrada protrhla, mohlo by to způsobit velkou povodeň a zničit domovy mnoha zvířat. Musíme něco udělat.",
+      "choices": [
+        {
+          "text": "Zkusit přesvědčit bobry, aby přehradu zmenšili.",
+          "next": "river_dam"
+        },
+        {
+          "text": "Poprat se s bobry, aby nás brali vážně.",
+          "next": "dam_with_beavers_fight"
+        }
+      ]
+    },
+    {
+      "id": "dam_with_beavers_persuade",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Jsou moc velcí, přeprat by je by nemuselo dopadnout dobře. Mohly bychom přitom poškodit přehradu a způsobit povodeň.",
+      "next": "forest_flight_01"
+    },
+    {
+      "id": "dam_with_beavers_fight",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Nevypadá to, že by nám naslouchali. Dejme jim do nosu a snad nás začnou brát vážně!",
+      "next": "forest_flight_01"
     },
     {
       "id": "village_home",
