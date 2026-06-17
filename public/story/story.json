@@ -128,7 +128,25 @@
       ],
       "speaker": "roza",
       "text": "Co to je? Na bobří přehradu je to obří. To je fakt divné.",
-      "next": "forest_flight_01"
+      "next": "dam_with_beavers"
+    },
+    {
+      "id": "dam_with_beavers",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Obří bobři! A staví velkou přehradu, aby zadrželi vodu. To je nebezpečné pro ostatní zvířata v lese.",
+      "next": "dam_with_beavers"
     },
     {
       "id": "village_home",
