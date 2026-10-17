@@ -17,10 +17,17 @@ export async function createPixiStage(host) {
     background: new Container(),
     characters: new Container(),
     effects: new Container(),
+    minigame: new Container(),
     overlay: new Container(),
   };
 
-  app.stage.addChild(layers.background, layers.characters, layers.effects, layers.overlay);
+  app.stage.addChild(
+    layers.background,
+    layers.characters,
+    layers.effects,
+    layers.minigame,
+    layers.overlay,
+  );
 
   return { app, layers };
 }

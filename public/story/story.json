@@ -317,7 +317,68 @@
       ],
       "speaker": "anna",
       "text": "Nevypadá to, že by nám naslouchali. Dejme jim do nosu a snad nás začnou brát vážně!",
+      "next": "beaver_battle"
+    },
+    {
+      "id": "beaver_battle",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "minigame": {
+        "type": "dragonAttack",
+        "title": "Dračí nálet na bobry",
+        "allowSkip": true,
+        "onVictory": "beaver_battle_win",
+        "onFailure": "beaver_battle_lose",
+        "config": {}
+      }
+    },
+    {
+      "id": "beaver_battle_win",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "center",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Zvládly jsme to! Teď nás bobři určitě budou brát vážně a domluvíme se na menší přehradě.",
       "next": "forest_flight_01"
+    },
+    {
+      "id": "beaver_battle_lose",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "center",
+          "pose": "sad"
+        }
+      ],
+      "speaker": "anna",
+      "text": "To se nepovedlo, bobři jsou prostě moc velcí. Musíme to zkusit znovu, nebo vymyslet jiný plán.",
+      "choices": [
+        {
+          "text": "Zkusit nálet znovu.",
+          "next": "beaver_battle"
+        },
+        {
+          "text": "Raději bobry přesvědčit.",
+          "next": "dam_with_beavers_persuade"
+        }
+      ]
     },
     {
       "id": "village_home",
@@ -337,7 +398,30 @@
       ],
       "speaker": "roza",
       "text": "Cítím kaši. Rychle, než nám ji ostatní sní!",
-      "next": "forest_flight_01"
+      "next": "lunch_in_town"
+    },
+    {
+      "id": "lunch_in_town",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/lunch_in_town.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "text": "Holky se s chutí vrhly na kaši, po dlouhém letu jim fakt vyhládlo.",
+      "next": "flooded_town"
+    },
+    {
+      "id": "flooded_town",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/town_flooded.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "text": "Zatímco dračí jezdkyně jedly kaši, na město se přiřítila povodeň a zaplavila ho."
     }
   ]
 }

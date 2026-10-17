@@ -126,6 +126,95 @@ Put it in:
 public/assets/backgrounds/forest_sunset.png
 ```
 
+## Minigames
+
+Scenes can launch a minigame. Each minigame ends in **victory** or **failure**,
+and the player can always **skip** it and pick the outcome manually.
+
+Add a minigame to the flow by giving a scene a `minigame` field instead of
+`next`/`choices`:
+
+```json
+{
+  "id": "beaver_battle",
+  "background": { "type": "image", "src": "assets/backgrounds/dam_02.png" },
+  "minigame": {
+    "type": "dragonAttack",
+    "title": "Dračí nálet na bobry",
+    "allowSkip": true,
+    "onVictory": "beaver_battle_win",
+    "onFailure": "beaver_battle_lose",
+    "config": {}
+  }
+}
+```
+
+- `onVictory` / `onFailure` — scene id to jump to for each outcome.
+- `allowSkip` — set to `false` to remove the skip button.
+- `config` — minigame-specific numbers (everything is configurable; anything you
+  omit uses the default).
+
+The minigame scene itself is kept out of the back-history, so pressing **Back**
+on an outcome scene returns to whatever came before the minigame.
+
+Minigames live in `src/engine/minigames/`. To add a new one, implement a class
+with `start()` and `destroy()` methods and register it in `minigameManager.js`:
+
+```js
+manager.register('myGame', (context) => new MyGame(context));
+```
+
+### Dragon attack minigame (`type: "dragonAttack"`)
+
+Three dragons fly, one after another, above a line of moving beavers. Each
+flight you get exactly **one** attack (key press, mouse click, or screen touch).
+Each dragon has its own attack angle/speed/gravity and a configurable number of
+flights. **Win** when every beaver is hit; **lose** when the flights run out.
+
+Every number is configurable through `config`. Sprites are optional — vector
+placeholders are drawn until you supply art. Sprite slots:
+
+- `config.background.sprite` — optional dedicated minigame background.
+- `config.beavers.sheetPattern` — per-beaver sprite **sheets** (`beaver1.png` …
+  `beaver7.png`); `{n}` is replaced with `1..count`.
+- `config.dragons[i].sprite` — each dragon (the default list has three).
+- `config.dragons[i].attack.sprite` — each dragon's projectile.
+
+Each beaver sheet is a 6×2 grid (`config.beavers.sheet`). By default the frames
+are: top row (0–5) = walk cycle, then bottom row 6–7 = hit reaction, 8 = a log
+left on the ground, 9–11 = scurry/run. When a beaver is hit it plays the hit
+frames, drops the log, then scurries off-screen before it counts as gone (the
+victory screen waits for the last beaver to flee). Tunables include `walkFps`,
+`hitFps`, `scurryFps`, `scurrySpeed`, `scurryDirection`, `dropLogOnHit` and
+`spriteWidth`.
+
+Key tunables (see `src/engine/minigames/dragonAttack.js` for the full list and
+defaults):
+
+```json
+{
+  "config": {
+    "beavers": { "count": 7, "speed": 90, "spacingPx": 150, "laneY": 0.84 },
+    "dragons": [
+      {
+        "name": "Róza",
+        "sprite": "assets/minigame/dragon_roza.png",
+        "flightY": 0.16,
+        "speed": 320,
+        "entryFrom": "left",
+        "attack": { "speed": 620, "angleDeg": 18, "gravity": 320, "sprite": "assets/minigame/fire_roza.png" }
+      }
+    ],
+    "flightsPerDragon": 5,
+    "flightOrder": "roundRobin",
+    "score": { "perHit": 100, "winBonus": 500, "remainingFlightBonus": 50 }
+  }
+}
+```
+
+Providing a custom `dragons` array fully replaces the three defaults, so include
+every dragon you want.
+
 ## Navigation controls
 
 - Click/tap, Space, or Enter: advance
