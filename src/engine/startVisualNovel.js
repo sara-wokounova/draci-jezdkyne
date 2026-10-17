@@ -121,5 +121,8 @@ export async function startVisualNovel(config) {
     });
   });
 
+  // Read-only hook for tests/mobile.mjs (runs against the live site too, see D11).
+  window.__vn = { stage, minigames, get sceneId() { return currentScene?.id; } };
+
   await showScene(currentScene, { addToHistory: false, saveHistory: true });
 }

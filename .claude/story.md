@@ -1,0 +1,42 @@
+# Story
+
+Title: **Dračí jezdkyně** (story id `draci-jezdkyne-z-vlpu`). Language: Czech.
+Audience: children. Tone: fairy tale ("Bylo, nebylo…").
+
+## Characters
+
+| id | Name | Role | Sprites |
+|---|---|---|---|
+| `roza` | Róza | dragon rider, impulsive, leads | 6 poses |
+| `emma` | Emma | dragon rider, cautious planner | 6 poses |
+| `anna` | Anna | dragon rider, curious, quick to fight | 6 poses |
+| — | Velký bobr | giant beaver, speaks as a literal speaker name | none (a rider sprite is shown instead) |
+| — | čarodějnice | witch who enlarged the beavers (mentioned only) | none |
+
+Poses: `neutral`, `happy`, `excited`, `sad`, `nervous`, `talking`.
+
+Premise: the three riders patrol their part of the forest. They spot something
+shiny — a giant dam built by beavers a witch made huge. The dam threatens a flood.
+
+## Scene graph
+
+```
+forest_flight_01 → forest_flight_02 → first_choice
+  ├─ "Prozkoumat."            → river_dam → dam_with_beavers → dam_with_beavers_roza
+  │                             → dam_with_beavers_beaver → dam_with_beavers_choice
+  │     ├─ persuade → dam_with_beavers_persuade → _01 → _02 → _03 → _04 → _05 ✗ MISSING
+  │     └─ fight    → dam_with_beavers_fight → beaver_battle [minigame dragonAttack]
+  │                     ├─ victory → beaver_battle_win → forest_flight_01 (placeholder loop to start)
+  │                     └─ failure → beaver_battle_lose
+  │                                    ├─ retry    → beaver_battle
+  │                                    └─ persuade → dam_with_beavers_persuade
+  └─ "Vrátit se domů na oběd." → village_home → lunch_in_town → flooded_town ✗ dead end (no next)
+```
+
+## Writing status
+
+- Persuade branch stops after the beaver explains the witch (`_05` not written).
+- Fight branch victory has no real continuation yet.
+- Lunch branch ends with the flooded town — implied consequence of ignoring the
+  dam; no ending screen or follow-up.
+- No music yet (`assets.music` is empty).

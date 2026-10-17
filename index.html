@@ -2,7 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- D12: "Add to Home Screen" launches without browser UI (the only fullscreen an iPhone gets). -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <title>Visual Novel Starter</title>
   </head>
   <body>
@@ -25,6 +29,11 @@
 
       <section id="choice-panel" class="glass-panel hidden" aria-label="Choices"></section>
     </main>
+
+    <div id="rotate-hint">
+      <p>Otoč telefon na šířku</p>
+      <small>Když se obraz neotočí, vypni zámek otáčení.</small>
+    </div>
 
     <script type="module" src="/src/main.js"></script>
   </body>

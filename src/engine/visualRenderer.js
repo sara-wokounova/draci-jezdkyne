@@ -28,23 +28,28 @@ export class VisualRenderer {
   }
 
   async render(scene) {
+    // A newer render (next scene, resize, phone going fullscreen) makes this one stale:
+    // after every await, a stale render stops instead of adding its sprites (D17).
+    const token = (this.renderToken = (this.renderToken ?? 0) + 1);
+
     clear(this.stage.layers.background);
     clear(this.stage.layers.characters);
     clear(this.stage.layers.overlay);
     this.effects.stop();
 
-    await this.drawBackground(scene.background);
-    await this.drawCharacters(scene.characters ?? []);
-    this.effects.start(scene.effects ?? []);
+    await this.drawBackground(scene.background, token);
+    await this.drawCharacters(scene.characters ?? [], token);
+    if (token === this.renderToken) this.effects.start(scene.effects ?? []);
   }
 
-  async drawBackground(background) {
+  async drawBackground(background, token) {
     const { width, height } = this.stage.app.screen;
 
     const imageSource = background?.src ?? (background?.type === 'image' ? background?.preset : null);
 
     if (background?.type === 'image' && imageSource) {
       const texture = await Assets.load(resolveAssetPath(imageSource));
+      if (token !== this.renderToken) return;
       const sprite = new Sprite(texture);
 
       contain(sprite, width, height);
@@ -62,12 +67,13 @@ export class VisualRenderer {
     this.stage.layers.background.addChild(sprite);
   }
 
-  async drawCharacters(sceneCharacters) {
+  async drawCharacters(sceneCharacters, token) {
     const { width, height } = this.stage.app.screen;
 
     for (const entry of sceneCharacters) {
       const character = this.story.characters[entry.id];
       const avatar = await createCharacterSprite(character, entry.pose ?? 'neutral');
+      if (token !== this.renderToken) return;
       const target = positionFor(entry.position, width, height);
 
       avatar.x = target.x;

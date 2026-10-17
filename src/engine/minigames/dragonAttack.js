@@ -17,6 +17,10 @@ import { Assets, Container, Graphics, Rectangle, Sprite, Texture } from 'pixi.js
  * so the minigame is fully playable before the art is dropped in.
  */
 const DEFAULTS = {
+  // Screens shorter than this scale the whole game down uniformly, so every px
+  // number below is in game pixels (D15).
+  designHeight: 600,
+
   // Optional dedicated background for the minigame. If null, whatever the scene
   // already rendered (e.g. the dam background) stays visible behind the action.
   background: { sprite: 'assets/minigames/dragon-attack/background.png' },
@@ -194,6 +198,7 @@ export class DragonAttackMinigame {
     this.elapsedSinceFlight = 0;
     this.state = 'idle'; // 'flying' | 'gap' | 'done'
     this.finished = false;
+    this.touch = matchMedia('(pointer: coarse)').matches;
 
     this.tick = this.tick.bind(this);
     this.handleKey = this.handleKey.bind(this);
@@ -217,6 +222,21 @@ export class DragonAttackMinigame {
 
   // ---------------------------------------------------------------- setup ---
 
+  /** Scales the game to the screen and returns the play area in game pixels (D15).
+   *  Called every tick, so resizes and rotations need no extra handling. */
+  layout() {
+    const { width, height } = this.app.screen;
+    const scale = Math.min(1, height / this.config.designHeight);
+    const size = { width: width / scale, height: height / scale, top: this.hud.coveredTop() / scale };
+    this.root.scale.set(scale);
+    if (this.background) {
+      const { texture } = this.background;
+      this.background.scale.set(Math.max(size.width / texture.width, size.height / texture.height));
+      this.background.position.set(size.width / 2, size.height / 2);
+    }
+    return size;
+  }
+
   async loadBackground() {
     const src = this.config.background?.sprite;
     if (!src) return;
@@ -224,14 +244,10 @@ export class DragonAttackMinigame {
     try {
       const texture = await Assets.load(resolveAssetPath(src));
       const sprite = new Sprite(texture);
-      const { width, height } = this.app.screen;
-      const scale = Math.max(width / texture.width, height / texture.height);
       sprite.anchor.set(0.5);
-      sprite.scale.set(scale);
-      sprite.x = width / 2;
-      sprite.y = height / 2;
       this.background = sprite;
       this.root.addChildAt(sprite, 0);
+      this.layout();
     } catch (error) {
       console.warn('Minigame background failed to load — skipping.', error);
     }
@@ -248,7 +264,7 @@ export class DragonAttackMinigame {
 
   async spawnBeavers() {
     const cfg = this.config.beavers;
-    const { width } = this.app.screen;
+    const { width } = this.layout();
     const singleTexture = await tryLoadTexture(cfg.sprite);
 
     for (let index = 0; index < cfg.count; index += 1) {
@@ -437,7 +453,7 @@ export class DragonAttackMinigame {
       return;
     }
 
-    const { width, height } = this.app.screen;
+    const size = this.layout();
     const dragonIndex = this.flightQueue[this.queueIndex];
     this.queueIndex += 1;
 
@@ -451,8 +467,8 @@ export class DragonAttackMinigame {
       ? makeTexturedSprite(texture, config.width ?? 150, config.height ?? 96)
       : createDragonGraphic(config.width ?? 150, config.height ?? 96, config.color, direction);
 
-    view.x = fromLeft ? -margin : width + margin;
-    view.y = height * config.flightY;
+    view.x = fromLeft ? -margin : size.width + margin;
+    view.y = flightY(config, size);
 
     this.dragonLayer.addChild(view);
 
@@ -471,16 +487,21 @@ export class DragonAttackMinigame {
   }
 
   tick(ticker) {
-    if (this.finished) return;
+    // Paused while #rotate-hint covers the game (portrait phone, D13), so no flights
+    // are lost. Reads app.screen, which Pixi updates a frame after a rotation, so no
+    // tick ever runs on a stale portrait-sized screen.
+    const screen = this.app.screen;
+    if (this.finished || (this.touch && screen.height >= screen.width)) return;
 
     const dt = ticker.deltaMS / 1000;
-    const { width, height } = this.app.screen;
+    const size = this.layout();
+    const { width, height } = size;
     this.time += dt;
 
     this.updateBeavers(dt, width, height);
 
     if (this.state === 'flying') {
-      this.updateDragon(dt, width, height);
+      this.updateDragon(dt, size);
     } else if (this.state === 'gap') {
       this.elapsedSinceFlight += dt;
       if (this.elapsedSinceFlight * 1000 >= this.config.flightGapMs) {
@@ -495,13 +516,20 @@ export class DragonAttackMinigame {
     const cfg = this.config.beavers;
     const laneY = height * cfg.laneY;
     const margin = Math.max(cfg.radius * 2, cfg.spriteWidth ?? cfg.radius * 2.4);
+    const walkers = () => this.beavers.filter((b) => b.state === 'walk').map((b) => b.x);
 
     for (const beaver of this.beavers) {
       switch (beaver.state) {
         case 'walk': {
           beaver.x += cfg.speed * cfg.direction * dt;
-          if (beaver.x > width + margin) beaver.x = -margin;
-          if (beaver.x < -margin) beaver.x = width + margin;
+          // Off the far edge: re-enter behind the last walker, at least spacingPx back,
+          // so beavers never stack, even on narrow screens or after a resize (D15).
+          if (cfg.direction > 0 && beaver.x > width + margin) {
+            beaver.x = Math.min(-margin, Math.min(...walkers()) - cfg.spacingPx);
+          }
+          if (cfg.direction < 0 && beaver.x < -margin) {
+            beaver.x = Math.max(width + margin, Math.max(...walkers()) + cfg.spacingPx);
+          }
           beaver.view.x = beaver.x;
           beaver.view.y = laneY + Math.sin(this.time * cfg.bobSpeed + beaver.phase) * cfg.bobAmplitude;
           this.stepAnimation(beaver, beaver.frames?.walk, cfg.walkFps, true, dt);
@@ -591,7 +619,7 @@ export class DragonAttackMinigame {
       case 'right':
         return 1;
       case 'nearestEdge':
-        return beaver.x < this.app.screen.width / 2 ? -1 : 1;
+        return beaver.x < this.layout().width / 2 ? -1 : 1;
       case 'walk':
       default:
         return cfg.direction;
@@ -606,18 +634,18 @@ export class DragonAttackMinigame {
     log.anchor.set(0.5);
     log.scale.set(frames.displayScale);
     log.x = beaver.x;
-    log.y = this.app.screen.height * this.config.beavers.laneY;
+    log.y = this.layout().height * this.config.beavers.laneY;
     this.logLayer.addChild(log);
   }
 
-  updateDragon(dt, width, height) {
+  updateDragon(dt, size) {
     const dragon = this.currentDragon;
     dragon.view.x += dragon.config.speed * dragon.direction * dt;
-    dragon.view.y = height * dragon.config.flightY;
+    dragon.view.y = flightY(dragon.config, size);
 
     const margin = (dragon.config.width ?? 150);
     const exited =
-      dragon.direction > 0 ? dragon.view.x > width + margin : dragon.view.x < -margin;
+      dragon.direction > 0 ? dragon.view.x > size.width + margin : dragon.view.x < -margin;
 
     if (exited) {
       dragon.view.destroy();
@@ -779,6 +807,11 @@ function mergeConfig(defaults, override) {
     return result;
   }
   return override === undefined ? defaults : override;
+}
+
+/** Dragon y in game px: `flightY` of the height, but never behind the HUD top bar (D15). */
+function flightY(dragon, size) {
+  return Math.max(size.height * dragon.flightY, size.top + (dragon.height ?? 96) / 2);
 }
 
 function isPlainObject(value) {

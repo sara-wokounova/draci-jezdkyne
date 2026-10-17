@@ -13,6 +13,18 @@ export class InputController {
       this.onAdvance();
     });
 
+    // D12/D13: on phones every tap outside fullscreen asks for fullscreen, then a landscape lock.
+    // On document so taps on #rotate-hint (outside the root) count. Browsers may refuse; ignore that.
+    if (matchMedia('(pointer: coarse)').matches) {
+      document.addEventListener('pointerup', () => {
+        const page = document.documentElement;
+        if (document.fullscreenElement || !page.requestFullscreen) return;
+        page.requestFullscreen()
+          .then(() => screen.orientation?.lock?.('landscape'))
+          .catch(() => {});
+      });
+    }
+
     window.addEventListener('keydown', (event) => {
       if (event.key === ' ' || event.key === 'Enter') {
         event.preventDefault();

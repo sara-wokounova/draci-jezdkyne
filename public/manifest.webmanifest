@@ -1,0 +1,10 @@
+{
+  "name": "Dračí jezdkyně",
+  "short_name": "Dračí jezdkyně",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0c0f14",
+  "theme_color": "#0c0f14"
+}

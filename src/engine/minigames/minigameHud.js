@@ -105,6 +105,11 @@ export class MinigameHud {
     if (this.statusEl) this.statusEl.textContent = text ?? '';
   }
 
+  /** Screen px from the top that the top bar covers; games keep key action below it (D15). */
+  coveredTop() {
+    return this.el.querySelector('.mg-topbar').getBoundingClientRect().bottom;
+  }
+
   setInstructions(text) {
     if (this.instructionsEl) this.instructionsEl.textContent = text ?? '';
   }
