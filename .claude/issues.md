@@ -5,38 +5,13 @@ Severity: **P0** broken for everyone · **P1** blocks play on some setups · **P
 
 ## Open
 
-### P1 — Not playable on phones (user-reported 2026-10-17) — fixed in working tree, verified locally 2026-10-17, awaiting deploy (D11)
-Move to Fixed only after `mobile.mjs live` passes. `mobile.mjs` (local) passes on
-all five viewports. This was checked in Chrome emulation only, never on a real
-phone, so real Android rotation-on-lock, re-entering fullscreen after a back
-gesture and the iPhone home-screen manifest path are untested.
-How each cause was addressed:
-- Panels overlapping / too tall, characters hidden, background covered: one
-  short-landscape layout with a compact bottom strip and side-by-side choices (D14).
-- Portrait: no layout. A `#rotate-hint` overlay, plus fullscreen and a landscape
-  lock on tap (D12, D13, D16).
-- `dvh`, safe-area insets, `viewport-fit=cover`, iOS text-size-adjust (D14).
-- Minigame: scaled by screen height, beavers re-enter behind the last walker
-  (never stacked), refit every tick (resize and rotation), dragons kept below the HUD,
-  paused behind the rotate hint (D15). The topbar fits in one row at 640px.
-
-Original report: dialogue panel covers the background; choices are not always visible.
-Suspected causes from the code:
-- `#choice-panel` sits at a fixed `bottom: … + 11rem` (10.5rem on mobile), but
-  `#dialogue-panel` grows with the text. Long text (e.g. `forest_flight_01`)
-  wraps to ~6 lines on a 390px screen → panels overlap.
-- Landscape phone (~390px tall): dialogue + choices are taller than the
-  screen; choices run off the top or under `#top-controls`.
-- Characters are anchored at 98% screen height → hidden behind the dialogue panel.
-- Portrait: contain-fit background is a small strip (see D5).
-- `height: 100%` with no `dvh` / safe-area insets → mobile browser toolbars and
-  notches can hide UI.
-- Minigame: `.mg-instructions` is `white-space: nowrap` (overflows); topbar
-  crams title + stats + skip into one row.
-- Minigame on narrow screens: beavers start at `x = 8% + i·150px`; every beaver
-  past `width + margin` wraps to the same `-margin` spot → several beavers stack.
-  Sizes (`spriteWidth`, dragon `width` 150px) are fixed pixels, not screen-relative.
-- Minigame background / layout isn't recomputed on resize or rotation.
+### P2 — Minigame starts seconds after its HUD appears (verified 2026-10-17)
+Scene preload (D8) only covers backgrounds and characters, and `spawnBeavers()`
+then loads the 7 beaver sheets (~12 MB) one after another. On the live site the
+HUD shows over an empty lane for ~2–4 s on a fast connection; on phone data it
+will be much longer, and taps do nothing until then. Not a regression. Fix: load
+the sheets with `Promise.all`, preload them from the scenes before `beaver_battle`,
+and/or shrink them (see "Heavy assets").
 
 ### P1 — Persuade branch crashes at `dam_with_beavers_persuade_04` (verified 2026-10-17)
 `next: "dam_with_beavers_persuade_05"` doesn't exist. Tapping throws
@@ -46,14 +21,6 @@ Suspected causes from the code:
 DEFAULTS in `dragonAttack.js` point to `background.png`, `dragon_{roza,emma,anna}.png`,
 `flame_roza.png`, `flash_emma.png`, `arrow_anna.png` — none exist. Each 404s and
 falls back to a vector placeholder. Add the art or set those defaults to `null`.
-
-### P2 — Overlapping scene renders (suspected) — fixed in working tree 2026-10-17, awaiting deploy (D11)
-Fixed by D17 (render token). Reproduced and verified locally: a resize while a
-throttled sprite loads now leaves exactly one character. The phone fullscreen tap
-made this happen on the first tap on every Android phone.
-`VisualRenderer.render()` is async and not cancelled. Advancing fast while
-images load (or resizing mid-load) can interleave two renders → both scenes'
-backgrounds/characters stacked on screen.
 
 ### P2 — Story dead ends (verified 2026-10-17)
 `flooded_town` has no `next`/`choices`: the story just stops, and the "continue"
@@ -96,6 +63,21 @@ the beaver lane (`laneY` 0.84). Visual only. Could hide the pill after the first
 attack, or raise `laneY` on short screens.
 
 ## Fixed
+
+### P1 — Not playable on phones (user-reported 2026-10-17) — fixed 2026-10-17 in `8de3d9f`, verified live
+`mobile.mjs live` passes on all five viewports (D11). Chrome emulation only, never
+a real phone: real Android rotation-on-lock, re-entering fullscreen after a back
+gesture and the iPhone home-screen manifest path are untested.
+Was: dialogue covered the background, choices ran off-screen or under the top
+controls, characters hidden behind the panel, portrait a thin strip, minigame
+beavers stacked on narrow screens and the dragon flew behind the HUD.
+Fix: short-landscape layout (D14), rotate hint + fullscreen + landscape lock
+(D12, D13, D16), minigame scaled by screen height (D15).
+
+### P2 — Overlapping scene renders — fixed 2026-10-17 in `8de3d9f`, verified live
+Two async `VisualRenderer.render()` calls (fast advance, or a resize mid-load —
+e.g. the phone fullscreen tap) both added their sprites → ghost character.
+Fix: render token (D17).
 
 ### P2 — Beaver sprite sheets had a baked checkerboard — fixed 2026-10-17
 `beaver1..7.png` were RGB with the checkerboard painted in, so beavers showed in
