@@ -5,7 +5,8 @@
   "assets": {
     "music": {
       "village_day": "assets/music/village_day.mp3",
-      "dragon_flight": "assets/music/dragon_flight_above_the_green_sea.mp3"
+      "dragon_flight": "assets/music/dragon_flight_above_the_green_sea.mp3",
+      "forest_ground": "assets/music/forest_ground_whispering_trees.mp3"
     }
   },
   "characters": {
@@ -152,7 +153,8 @@
       ],
       "speaker": "anna",
       "text": "Obří bobři! A staví velkou přehradu, aby zadrželi vodu. To je nebezpečné pro ostatní zvířata v lese.",
-      "next": "dam_with_beavers_roza"
+      "next": "dam_with_beavers_roza",
+      "music": "forest_ground"
     },
     {
       "id": "dam_with_beavers_roza",
@@ -170,7 +172,8 @@
       ],
       "speaker": "roza",
       "text": "Bobři! Co to děláte? Takhle blokujete vodu všem zvířatům dolů po řece! A můžete způsobit velkou povodeň.",
-      "next": "dam_with_beavers_beaver"
+      "next": "dam_with_beavers_beaver",
+      "music": "forest_ground"
     },
     {
       "id": "dam_with_beavers_beaver",
@@ -188,7 +191,8 @@
       ],
       "speaker": "Velký bobr",
       "text": "Jsme velcí bobři, tak potřebujeme velkou přehradu, abychom měli domov. Nechceme nikomu škodit, ale potřebujeme se postarat o sebe.",
-      "next": "dam_with_beavers_choice"
+      "next": "dam_with_beavers_choice",
+      "music": "forest_ground"
     },
     {
       "id": "dam_with_beavers_choice",
@@ -215,7 +219,8 @@
           "text": "Poprat se s bobry, aby nás brali vážně.",
           "next": "dam_with_beavers_fight"
         }
-      ]
+      ],
+      "music": "forest_ground"
     },
     {
       "id": "dam_with_beavers_persuade",
@@ -233,7 +238,8 @@
       ],
       "speaker": "roza",
       "text": "Jsou moc velcí, přeprat by je by nemuselo dopadnout dobře. Mohly bychom přitom poškodit přehradu a způsobit povodeň.",
-      "next": "dam_with_beavers_persuade_01"
+      "next": "dam_with_beavers_persuade_01",
+      "music": "forest_ground"
     },
     {
       "id": "dam_with_beavers_persuade_01",
@@ -251,7 +257,8 @@
       ],
       "speaker": "emma",
       "text": "Co by bychom mohly udělat, abyste zmenšili přehradu?",
-      "next": "dam_with_beavers_persuade_02"
+      "next": "dam_with_beavers_persuade_02",
+      "music": "forest_ground"
     },
     {
       "id": "dam_with_beavers_persuade_02",
@@ -269,7 +276,8 @@
       ],
       "speaker": "Velký bobr",
       "text": "Velcí bobři nemůžou žít v malé přehradě. Museli bychom se zase stát malými bobry.",
-      "next": "dam_with_beavers_persuade_03"
+      "next": "dam_with_beavers_persuade_03",
+      "music": "forest_ground"
     },
     {
       "id": "dam_with_beavers_persuade_03",
@@ -287,7 +295,8 @@
       ],
       "speaker": "anna",
       "text": "A proč jste vlastně tak velcí? Co se stalo? Nemohli byste se vrátit do normální velikosti?",
-      "next": "dam_with_beavers_persuade_04"
+      "next": "dam_with_beavers_persuade_04",
+      "music": "forest_ground"
     },
     {
       "id": "dam_with_beavers_persuade_04",
@@ -304,8 +313,9 @@
         }
       ],
       "speaker": "Velký bobr",
-      "text": "Přišla sem čarodějnice, mávla kouzelnou hůlkou a byly z nám obří bobři. ",
-      "next": "dam_with_beavers_persuade_05"
+      "text": "Přišla sem čarodějnice, mávla kouzelnou hůlkou a byly z nám obří bobři.",
+      "next": "dam_with_beavers_persuade_05",
+      "music": "forest_ground"
     },
     {
       "id": "dam_with_beavers_fight",
@@ -323,7 +333,8 @@
       ],
       "speaker": "anna",
       "text": "Nevypadá to, že by nám naslouchali. Dejme jim do nosu a snad nás začnou brát vážně!",
-      "next": "beaver_battle"
+      "next": "beaver_battle",
+      "music": "forest_ground"
     },
     {
       "id": "beaver_battle",
@@ -357,7 +368,141 @@
       ],
       "speaker": "roza",
       "text": "Zvládly jsme to! Teď nás bobři určitě budou brát vážně a domluvíme se na menší přehradě.",
-      "next": "forest_flight_01"
+      "next": "beaver_after_battle_win_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "beaver_after_battle_win_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "Velký bobr",
+      "text": "Jde z vás stejně velký strach jako z té čarodějnice. Zmenšíme naši přehradu, ale musíte nám pomoct se zmenšit. Jinak se do ní nevejdeme.",
+      "next": "beaver_after_battle_win_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "beaver_after_battle_win_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "anna",
+      "text": "A proč jste vlastně tak velcí? Co se stalo? Nemohli byste se vrátit do normální velikosti?",
+      "next": "beaver_after_battle_win_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "beaver_after_battle_win_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "Velký bobr",
+      "text": "Přišla sem čarodějnice, mávla kouzelnou hůlkou a byly z nám obří bobři.",
+      "next": "beaver_after_battle_win_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "beaver_after_battle_win_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "A proč to udělala? Jaký pro to mohla mít důvod?",
+      "next": "beaver_after_battle_win_05",
+      "music": "forest_ground"
+    },
+    {
+      "id": "beaver_after_battle_win_05",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "Velký bobr",
+      "text": "Co já vím. Ale když ji najdete, tak by nás mohla zase zmenšit.",
+      "next": "beaver_after_battle_win_06",
+      "music": "forest_ground"
+    },
+    {
+      "id": "beaver_after_battle_win_06",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "anna",
+      "text": "A jak ji poznáme? Kam šla?",
+      "next": "beaver_after_battle_win_07",
+      "music": "forest_ground"
+    },
+    {
+      "id": "beaver_after_battle_win_07",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "Velký bobr",
+      "text": "Měla zrzavé vlasy, hodně bledou pleť a hodně pih. Taky hodně vysoká a vysportovaná, ale měla šarlatové šaty šlechtičny. Kam se poděla těžko říct, ale je nepřehlédnutelná, můžete se zkusit poptat.",
+      "next": "beaver_after_battle_win_06",
+      "music": "forest_ground"
     },
     {
       "id": "beaver_battle_lose",
@@ -384,7 +529,8 @@
           "text": "Raději bobry přesvědčit.",
           "next": "dam_with_beavers_persuade"
         }
-      ]
+      ],
+      "music": "forest_ground"
     },
     {
       "id": "village_home",

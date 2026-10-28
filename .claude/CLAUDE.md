@@ -36,8 +36,8 @@ npm run preview        # serve dist/
 npm run clean-sprites  # strip baked checkerboard from character PNGs (overwrites files!)
 ```
 
-No unit tests and no linter. The Playwright check scripts live outside the repo
-(see the Tests section of workflow.md). Also verify changes by running the game
+No unit tests in the repo and no linter. The Playwright check scripts (and one node check
+for `AutoSave`) live outside the repo (see the Tests section of workflow.md). Also verify changes by running the game
 (`npm run dev`) in a browser, including a phone-sized viewport.
 
 ## Architecture
@@ -54,8 +54,10 @@ src/engine/
   uiController.js          DOM dialogue text, speaker name, choice buttons, end card, main menu + gallery
   inputController.js       click/tap anywhere = advance; keys: Space/Enter, 1-9, Backspace/←, R
   visualRenderer.js        Pixi: background (contain-fit), character sprites, placeholders, preload
+  assetPath.js             resolveAssetPath (story paths → base URL) and backgroundImage (which backgrounds are files)
   pixiStage.js             Pixi Application + layers: background, characters, effects, minigame, overlay
-  audioManager.js          Howler music per scene + menu (HTML5 streaming; same key continues, none = silence)
+  audioManager.js          Howler music per scene + menu (HTML5 streaming; same key continues, none = silence;
+                           nothing starts before the page's first click/tap/key, D22)
   effects/atmosphereEffects.js   sunsetGlow, wind, snow
   minigames/
     minigameManager.js     registry; run(spec) → 'victory' | 'failure'
@@ -63,16 +65,20 @@ src/engine/
     dragonAttack.js        the "Dračí nálet na bobry" minigame (all numbers in DEFAULTS)
 src/styles/main.css        all styling (DOM UI is absolutely positioned over the canvas)
 public/story/story.json    the whole story (fetched at runtime, not bundled)
-public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, minigames/dragon-attack/
+public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, minigames/dragon-attack/,
+                           music/ (mp3, ~3.6–4.2 MB each, streamed)
 scripts/removeCheckerboard.mjs   flood-fills light-gray checkerboard to alpha
 .github/workflows/deploy.yml     push to main → npm ci → build → GitHub Pages
 ```
 
-Startup draws the saved scene (visuals only) behind `#main-menu`; Start calls `showScene`.
+Startup opens `#main-menu` (`openMenu`): queues `menuMusic` (it starts on the page's first
+click, tap or key, D22), draws the saved scene behind
+the menu (visuals only, no minigame) and preloads ahead of it (D20). Start calls `showScene`.
 While the menu is open (`menuOpen`) all story input is ignored, like during a minigame.
 With autoread on (Nastavení), `showScene` ends by scheduling `advance()` (D19).
-Flow: `showScene(scene)` → save to localStorage → DOM text/choices → `visuals.render(scene)`
-(clears layers, draws background, characters, effects) → music → if `scene.minigame`,
+Flow: `showScene(scene)` → save to localStorage → DOM text/choices → music (deliberately
+before the render's await, D21) → `visuals.render(scene)`
+(clears layers, draws background, characters, effects) → if `scene.minigame`,
 run it and jump to `onVictory`/`onFailure`; else preload the next 3 reachable scenes.
 Window resize re-renders the current scene.
 
@@ -100,7 +106,8 @@ on top with CSS. Layout bugs are almost always in `main.css`; scene-fit bugs in
     "characters": [{ "id": "roza", "position": "left|center|right", "pose": "talking", "alpha": 1 }],
     "speaker": "roza",          // character id, or a literal name like "Velký bobr"
     "text": "…",
-    "music": "village_day",     // same key as the previous scene = keeps playing; omitted = silence
+    "music": "village_day",     // same key as the previous scene = keeps playing; omitted = silence;
+                                // a key not in assets.music = console warning + silence
     "next": "other_scene",      // OR
     "choices": [{ "text": "…", "next": "id" }],   // OR
     "minigame": { "type": "dragonAttack", "title": "…", "allowSkip": true,
@@ -122,10 +129,14 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
 - Backgrounds: 1672×941 PNG (~16:9, ~3.3 MB each). Displayed contain-fit (letterboxed).
 - Characters: 1024×1536 RGBA PNG (~2 MB each), 6 poses per character.
 - Beaver sheets: `beaver1..7.png`, 1448×1086, 6×2 grid (walk 0–5, hit 6–7, log 8, scurry 9–11).
+- Music: `public/assets/music/*.mp3` (~3.6–4.2 MB each, streamed as HTML5 audio), referenced
+  by key from `story.assets.music`; scenes pick a track with `music`, the menu with
+  `menuMusic` (D21, D22).
 - Source art arrives with a light-gray checkerboard baked in instead of
   transparency; run `scripts/removeCheckerboard.mjs <dir>` on it. It overwrites
   files in place — make sure they're committed first.
-- Missing sprites never crash: the engine draws vector placeholders.
+- Missing sprites never crash: the engine draws vector placeholders, and a background that
+  fails to load gets a generated one (D20).
 
 ## Deployment
 

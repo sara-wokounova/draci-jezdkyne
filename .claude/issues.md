@@ -22,9 +22,10 @@ DEFAULTS in `dragonAttack.js` point to `background.png`, `dragon_{roza,emma,anna
 `flame_roza.png`, `flash_emma.png`, `arrow_anna.png` — none exist. Each 404s and
 falls back to a vector placeholder. Add the art or set those defaults to `null`.
 
-### P2 — `beaver_battle_win` loops to the start (verified 2026-10-17)
-It goes `next` → `forest_flight_01` with the old back-history intact. Either
-continue the story or make it an ending (D18). (`flooded_town` is now an ending.)
+### P2 — The fight branch's victory has no way on (verified 2026-10-28)
+`beaver_battle_win` → `beaver_after_battle_win_01` … `_07` (being written by Sára), and
+`_07` → `_06` → `_07` loops forever (with autoread on it ping-pongs by itself). Until
+2026-10-28 it looped back to `forest_flight_01` instead. Needs story text, or an ending (D18).
 
 ### P3 — Engine UI is English, story is Czech
 `index.html` has `lang="en"` and title "Visual Novel Starter"; buttons "← Back",
@@ -62,14 +63,72 @@ At 640x360 and 844x390 the bottom `.mg-instructions` pill overlaps the lower par
 the beaver lane (`laneY` 0.84). Visual only. Could hide the pill after the first
 attack, or raise `laneY` on short screens.
 
+### P2 — Checkerboard between hair strands in the character sprites (verified 2026-10-28)
+The 18 character poses show grey checkerboard in enclosed gaps: between loose hair strands
+(clearest on Anna), around Emma's braids and Róza's ponytail, and in some arm gaps. The
+cleaner only erases checker connected to the image edge. The `--enclosed` pass planned for
+Róza's minigame art removes exactly these gaps on the characters (diff maps checked). It is
+not safe on the beaver sheets, where it also erases eye whites. Fix: re-clean the
+characters with `--enclosed` once that lands, then check faces.
+
+### P3 — `npm audit`: advisories in dev dependencies (found by review 2026-10-28)
+`npm audit` reports high advisories in the dev toolchain (vite 7.3.5's dev server and
+launch-editor, esbuild, postcss, nanoid, source-map-js) and in `@xmldom/xmldom` (pulled in by
+pixi.js, not in the browser bundle). Not caused by recent changes; `package.json` is untouched.
+Run `npm audit fix` and re-test some time.
+
+### P3 — HTML5 audio artefacts (2026-10-28)
+Each track has a ~70 ms gap where it loops (HTML5 audio loops aren't gapless), and
+Howler logs "HTML5 Audio pool exhausted" once at startup. Both come from streaming
+(D21). Gapless loops would need Web Audio (full download + decode).
+
 ### P3 — Music volume does nothing on iPhone (2026-10-28)
 Music streams as HTML5 audio (D21), and iOS ignores its volume, so neither the volume
 slider nor the fades work there. Fix if it matters: Web Audio (`html5: false`) for iOS
 only, at the cost of full download + decode.
 
+### P3 — A track switched away while it is starting isn't faded out (found by review 2026-10-28)
+If the scene changes while the new track's `play()` is still starting (Howler's play lock,
+usually well under 200 ms), its fade-out is queued behind the lock and Howler never runs it.
+It stays at volume 0 (its fade-in only starts on `play`, and not for a replaced track) and is
+unloaded by the timer ~400 ms later (D22), so nothing is heard, except on iPhone, which ignores
+the volume: there it can sound for up to ~400 ms. Check that it stays silent elsewhere:
+`music-race.mjs` "switch while starting".
+
 ## Fixed
 
-### P1 — Black backgrounds and stick figures after the first scene (user-reported 2026-10-28) — fixed 2026-10-28, verified locally
+### P1 — No music in Firefox on the menu (and village saves) (found by review 2026-10-28) — fixed 2026-10-28, verified locally, still live in `352cb30` until pushed
+Firefox let the menu track start at volume 0, then paused it once the fade-in raised the
+volume, and Howler never noticed. Reproduced in a real Firefox with the default autoplay
+policy (`C:\tmp\claude\mobile-check\ff-autoplay.mjs`). Fix: no track before the first input (D22).
+
+### P1 — Menu and resumed village track played at volume 0 (found by review 2026-10-28) — fixed 2026-10-28, verified locally
+The first fix for the entry above started the waiting track after the first input, but
+called `fade()` right after `play()`. On a track that is already loaded, Howler queues
+that fade behind its play lock and never runs it. Fix: fade in on Howler's `play` event
+(D22). The tests now check that the volume is above 0, not just `playing()`.
+
+### P2 — Music kept playing on a hidden page (found by review 2026-10-28) — fixed 2026-10-28, verified locally, still live in `352cb30` until pushed
+A locked tablet or a switched app kept the track looping, and a pause during a loading
+or starting track was lost (Howler queues it), leaving the scene silent on return or
+playing twice. Fix: mute + pause while hidden, resume only a stopped track (D22).
+Checks: `robustness.mjs` (hidden page, while loading, while starting, due while hidden).
+The first version of that fix muted Howler on hide, which left `<audio>` elements muted in
+Howler's pool after an unload while hidden, so later tracks played silently (found by
+review): every new track now re-applies the mute state. Check: `robustness.mjs` muted pool.
+Also fixed: a quick Back to a track still fading out started a second copy over it
+(`music-race.mjs` quick Back), and a dropped menu track could stream on unseen at volume 0
+(`robustness.mjs` dropped menu track). Last (found by review): a hide and show both inside a new
+track's play lock left it paused, because the hide's queued `pause()` ran after it started; it
+is now played again after its `play` event (`robustness.mjs` hide and show while starting).
+
+### P2 — Replaced track kept looping silently (found by review 2026-10-28) — fixed 2026-10-28, verified locally, still live in `352cb30` until pushed
+If the track changed while the new one's fade-in was still at 0, the old one never
+unloaded (Howler doesn't fire `fade` for 0 → 0). On iPhone, which ignores the volume,
+two tracks would be audible. It was introduced by the "Music change stopped the new
+track" fix below. Fix: unload on a timer (D22). Check: `music-race.mjs`.
+
+### P1 — Black backgrounds and stick figures after the first scene (user-reported 2026-10-28) — fixed 2026-10-28 in `352cb30`; the live check then only covered preloaded scenes, re-verify live after the next push
 Seen in Firefox on the dev server after `7bb96de`. Never reproduced with the server
 running in Chrome or Firefox. It was reproduced exactly by failing every image request
 after the page had loaded: the menu, the first background and the end card worked,
@@ -77,12 +136,16 @@ characters became placeholders, and backgrounds went black because a failed back
 made `render()` reject. The likely trigger was the dev server behind the open tab
 having stopped, since nothing was listening on 5173 right after the report. `7bb96de`
 made it more likely by no longer preloading at startup.
-Fix: generated-background fallback and the menu preload (D20).
+Fix: generated-background fallback and the menu preload (D20). The trigger (a stopped
+server) is inferred and was never confirmed on Sára's machine. If that's what it was,
+the same situation now shows the generated forest and placeholders instead of black;
+restarting `npm run dev` and reloading is the real cure.
 
 ### P2 — Music change stopped the new track (suspected, read from code) — fixed 2026-10-28
 `AudioManager.playMusic` stopped `this.currentTrack` when the old track's fade ended,
-by which time that was the new track; the old one looped on at volume 0. Never hit,
-because there is no music yet. Fix: stop the captured previous track.
+by which time that was the new track; the old one looped on at volume 0. Never hit:
+there was no music when it was fixed. Fix: stop the captured previous track. That fix still
+waited for Howler's `fade` event, which caused "Replaced track kept looping silently" above.
 
 ### P3 — Nastavení page was empty — fixed 2026-10-28
 Now has music volume and autoread (D19).

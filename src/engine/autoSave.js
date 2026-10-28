@@ -1,3 +1,5 @@
+// Every setting and its default. A saved value is kept only if it has the default's type
+// (see load()); a setting with a range also needs a clamp there, like musicVolume's.
 const DEFAULT_SETTINGS = { musicVolume: 0.75, autoRead: false };
 
 export class AutoSave {
@@ -48,21 +50,35 @@ export class AutoSave {
   }
 
   persist() {
-    localStorage.setItem(this.key, JSON.stringify(this.data));
+    // Blocked or full storage: keep playing; progress just isn't saved.
+    try {
+      localStorage.setItem(this.key, JSON.stringify(this.data));
+    } catch (error) {
+      console.warn('Could not save progress.', error);
+    }
   }
 
   load() {
     const empty = { currentSceneId: null, history: [], readSceneIds: [], settings: { ...DEFAULT_SETTINGS } };
-    const stored = localStorage.getItem(this.key);
-    if (!stored) return empty;
 
     try {
-      const parsed = JSON.parse(stored);
+      const parsed = JSON.parse(localStorage.getItem(this.key));
+      if (!parsed || typeof parsed !== 'object') return empty;
+      const saved = parsed.settings && typeof parsed.settings === 'object' ? parsed.settings : {};
+      const settings = {};
+      for (const [name, fallback] of Object.entries(DEFAULT_SETTINGS)) {
+        settings[name] = typeof saved[name] === typeof fallback ? saved[name] : fallback;
+      }
+      // A hand-edited or corrupt save must not leave the slider showing one volume while
+      // another plays (Howler ignores values outside 0–1).
+      settings.musicVolume = Number.isFinite(settings.musicVolume)
+        ? Math.min(1, Math.max(0, settings.musicVolume))
+        : DEFAULT_SETTINGS.musicVolume;
       return {
         currentSceneId: parsed.currentSceneId ?? null,
         history: Array.isArray(parsed.history) ? parsed.history : [],
         readSceneIds: Array.isArray(parsed.readSceneIds) ? parsed.readSceneIds : [],
-        settings: { ...DEFAULT_SETTINGS, ...(typeof parsed.settings === 'object' ? parsed.settings : {}) },
+        settings,
       };
     } catch {
       return empty;

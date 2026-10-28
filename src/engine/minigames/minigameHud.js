@@ -10,6 +10,8 @@
  * The HUD is intentionally framework-free (plain DOM) so it matches the rest of
  * the engine's UI layer, which is also plain DOM on top of the Pixi canvas.
  */
+import { storyText } from '../uiController.js';
+
 export class MinigameHud {
   /**
    * @param {HTMLElement} root The game root element to attach the overlay to.
@@ -34,39 +36,58 @@ export class MinigameHud {
       resultLose: 'Porážka',
       continue: 'Pokračovat',
       instructions: 'Klikni, klepni nebo zmáčkni klávesu pro útok!',
-      ...(options.labels ?? {}),
     };
+    // Labels from the story override the defaults only with text (a typo must not break the HUD).
+    for (const [name, value] of Object.entries(options.labels ?? {})) {
+      if (typeof value === 'string' && Object.hasOwn(labels, name)) labels[name] = value;
+    }
     this.labels = labels;
 
     const el = document.createElement('div');
     el.className = 'minigame-hud';
     el.innerHTML = `
       <div class="mg-topbar glass-panel">
-        <span class="mg-title">${options.title ?? ''}</span>
+        <span class="mg-title"></span>
         <span class="mg-stats">
-          <span class="mg-score">${labels.score}: 0</span>
+          <span class="mg-score"></span>
           <span class="mg-status"></span>
         </span>
-        ${options.allowSkip === false ? '' : `<button class="mg-skip-btn control-button" type="button">${labels.skip}</button>`}
+        ${options.allowSkip === false ? '' : '<button class="mg-skip-btn control-button" type="button"></button>'}
       </div>
 
       <div class="mg-skip-menu glass-panel hidden" role="dialog" aria-modal="true">
-        <p>${labels.skipPrompt}</p>
+        <p class="mg-skip-prompt"></p>
         <div class="mg-skip-actions">
-          <button class="mg-skip-win choice-button" type="button" data-outcome="victory">${labels.win}</button>
-          <button class="mg-skip-lose choice-button" type="button" data-outcome="failure">${labels.lose}</button>
-          <button class="mg-skip-cancel control-button" type="button">${labels.cancel}</button>
+          <button class="mg-skip-win choice-button" type="button" data-outcome="victory"></button>
+          <button class="mg-skip-lose choice-button" type="button" data-outcome="failure"></button>
+          <button class="mg-skip-cancel control-button" type="button"></button>
         </div>
       </div>
 
       <div class="mg-result glass-panel hidden" role="dialog" aria-modal="true">
         <h2 class="mg-result-title"></h2>
         <p class="mg-result-score"></p>
-        <button class="mg-result-continue choice-button" type="button">${labels.continue}</button>
+        <button class="mg-result-continue choice-button" type="button"></button>
       </div>
 
-      <p class="mg-instructions">${options.instructions ?? labels.instructions}</p>
+      <p class="mg-instructions"></p>
     `;
+    // Title, labels and instructions come from story.json: text, never markup.
+    const texts = {
+      '.mg-title': storyText(options.title),
+      '.mg-score': `${labels.score}: 0`,
+      '.mg-skip-btn': labels.skip,
+      '.mg-skip-prompt': labels.skipPrompt,
+      '.mg-skip-win': labels.win,
+      '.mg-skip-lose': labels.lose,
+      '.mg-skip-cancel': labels.cancel,
+      '.mg-result-continue': labels.continue,
+      '.mg-instructions': typeof options.instructions === 'string' ? options.instructions : labels.instructions,
+    };
+    for (const [selector, text] of Object.entries(texts)) {
+      const target = el.querySelector(selector);
+      if (target) target.textContent = text;
+    }
 
     this.el = el;
     this.scoreEl = el.querySelector('.mg-score');

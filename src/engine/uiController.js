@@ -1,3 +1,5 @@
+import { backgroundImage, resolveAssetPath } from './assetPath.js';
+
 export class UiController {
   constructor(elements) {
     this.elements = elements;
@@ -43,14 +45,24 @@ export class UiController {
     const list = this.elements.mainMenu.querySelector('#gallery-list');
     list.innerHTML = endScenes.length ? '' : '<li>Zatím žádný konec.</li>';
     for (const { background, end } of endScenes) {
+      // Story text goes in as text, never as markup.
       const item = document.createElement('li');
       item.innerHTML = `
-        ${background?.src ? `<img src="${background.src}" alt="" loading="lazy" />` : ''}
+        <img alt="" loading="lazy" />
         <div>
-          <strong>${end.title ?? ''}</strong>
-          <span class="end-kind ${end.good ? 'good' : ''}">${endLabel(end)}</span>
-          <p>${end.text ?? ''}</p>
+          <strong></strong>
+          <span class="end-kind"></span>
+          <p></p>
         </div>`;
+      const image = item.querySelector('img');
+      const imageSource = backgroundImage(background);
+      if (imageSource) image.src = resolveAssetPath(imageSource);
+      else image.remove();
+      item.querySelector('strong').textContent = storyText(end.title);
+      const kind = item.querySelector('.end-kind');
+      kind.textContent = endLabel(end);
+      kind.classList.toggle('good', Boolean(end.good));
+      item.querySelector('p').textContent = storyText(end.text);
       list.appendChild(item);
     }
   }
@@ -62,16 +74,17 @@ export class UiController {
     if (!end) return;
 
     const kind = card.querySelector('#end-kind');
-    kind.textContent = end.title ? `${endLabel(end)}: ${end.title}` : endLabel(end);
+    const title = storyText(end.title);
+    kind.textContent = title ? `${endLabel(end)}: ${title}` : endLabel(end);
     kind.classList.toggle('good', Boolean(end.good));
-    card.querySelector('#end-text').textContent = end.text ?? '';
+    card.querySelector('#end-text').textContent = storyText(end.text);
     card.querySelector('#end-home').focus();
   }
 
   showDialogue(scene, characters) {
     const character = characters[scene.speaker];
-    this.elements.speakerName.textContent = character?.displayName ?? scene.speaker ?? '';
-    this.elements.dialogueText.textContent = scene.text ?? '';
+    this.elements.speakerName.textContent = storyText(character?.displayName ?? scene.speaker);
+    this.elements.dialogueText.textContent = storyText(scene.text);
   }
 
   showChoices(choices, onChoice) {
@@ -83,7 +96,7 @@ export class UiController {
       const button = document.createElement('button');
       button.className = 'choice-button';
       button.type = 'button';
-      button.textContent = `${index + 1}. ${choice.text}`;
+      button.textContent = `${index + 1}. ${storyText(choice.text)}`;
       button.addEventListener('click', this.choiceHandlers[index]);
       this.elements.choicePanel.appendChild(button);
     });
@@ -106,6 +119,11 @@ export class UiController {
   showSaveStatus(message) {
     this.elements.saveStatus.textContent = message;
   }
+}
+
+/** Story text as text: anything that isn't a string (a typo in story.json) shows as nothing. */
+export function storyText(value) {
+  return typeof value === 'string' ? value : '';
 }
 
 function endLabel(end) {

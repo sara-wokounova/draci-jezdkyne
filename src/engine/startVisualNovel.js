@@ -45,8 +45,7 @@ export async function startVisualNovel(config) {
     ui.showEnd(null);
     ui.showDialogue(scene, story.characters);
     ui.showChoices(scene.choices ?? [], goToScene);
-    // Before the await: a slow render can't start an older scene's track after a newer one,
-    // and on Start the play() still runs inside the click (browsers' autoplay rule).
+    // Before the await: a slow render can't start an older scene's track after a newer one.
     audio.playMusic(scene.music);
     await visuals.render(scene);
 
@@ -133,7 +132,7 @@ export async function startVisualNovel(config) {
   async function openMenu() {
     menuOpen = true;
     ui.showMenu(true);
-    ui.showEnd(null);
+    ui.showEnd(null); // "Zpět na začátek" comes here straight from the end card, without a showScene
     audio.playMusic(story.menuMusic);
     await visuals.render(currentScene);
     preloadAhead(currentScene);

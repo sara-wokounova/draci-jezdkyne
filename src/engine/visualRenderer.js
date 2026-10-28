@@ -1,5 +1,6 @@
 import { Assets, Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import { AtmosphereEffects } from './effects/atmosphereEffects.js';
+import { backgroundImage, resolveAssetPath } from './assetPath.js';
 
 export class VisualRenderer {
   constructor(stage, story) {
@@ -45,9 +46,9 @@ export class VisualRenderer {
   async drawBackground(background, token) {
     const { width, height } = this.stage.app.screen;
 
-    const imageSource = background?.src ?? (background?.type === 'image' ? background?.preset : null);
+    const imageSource = backgroundImage(background);
 
-    if (background?.type === 'image' && imageSource) {
+    if (imageSource) {
       // A failed load (404, server gone, offline) gets a generated background like a missing
       // character gets a placeholder (D7), instead of rejecting and losing the whole scene.
       const texture = await Assets.load(resolveAssetPath(imageSource)).catch((error) => {
@@ -65,8 +66,16 @@ export class VisualRenderer {
       }
     }
 
-    const texture = createBackgroundTexture(width, height, background?.preset ?? 'sunset_forest');
-    const sprite = new Sprite(texture);
+    // One generated texture per screen size and preset, reused by every render at that size. Each is
+    // a screen-sized canvas; making a new one per render kept them all (D20 sends every failed
+    // background here). The previous one is destroyed: render() has already cleared its sprite.
+    const preset = background?.preset ?? 'sunset_forest';
+    const key = `${Math.round(width)}x${Math.round(height)}:${preset}`;
+    if (this.generated?.key !== key) {
+      this.generated?.texture.destroy(true);
+      this.generated = { key, texture: createBackgroundTexture(width, height, preset) };
+    }
+    const sprite = new Sprite(this.generated.texture);
 
     sprite.width = width;
     sprite.height = height;
@@ -150,8 +159,7 @@ function collectAssetPathsForScenes(story, scenes) {
   const paths = new Set();
 
   for (const scene of scenes) {
-    const background = scene?.background;
-    const imageSource = background?.src ?? (background?.type === 'image' ? background?.preset : null);
+    const imageSource = backgroundImage(scene?.background);
     if (imageSource) paths.add(resolveAssetPath(imageSource));
 
     for (const entry of scene?.characters ?? []) {
@@ -163,18 +171,6 @@ function collectAssetPathsForScenes(story, scenes) {
   }
 
   return [...paths];
-}
-
-function resolveAssetPath(path) {
-  if (/^(https?:)?\/\//.test(path)) {
-    return path;
-  }
-
-  const base = import.meta.env.BASE_URL ?? './';
-  const cleanBase = base.endsWith('/') ? base : `${base}/`;
-  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-
-  return `${cleanBase}${cleanPath}`;
 }
 
 function scaleCharacter(sprite, width, height, target) {
@@ -218,7 +214,7 @@ function createBackgroundTexture(width, height, preset) {
   drawForest(context, canvas);
   drawVignette(context, canvas);
 
-  return Texture.from(canvas);
+  return Texture.from(canvas, true); // skipCache: the renderer owns and destroys it
 }
 
 function drawSky(context, canvas) {

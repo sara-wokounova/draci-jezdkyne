@@ -26,7 +26,8 @@ forest_flight_01 → forest_flight_02 → first_choice
   │                             → dam_with_beavers_beaver → dam_with_beavers_choice
   │     ├─ persuade → dam_with_beavers_persuade → _01 → _02 → _03 → _04 → _05 ✗ MISSING
   │     └─ fight    → dam_with_beavers_fight → beaver_battle [minigame dragonAttack]
-  │                     ├─ victory → beaver_battle_win → forest_flight_01 (placeholder loop to start)
+  │                     ├─ victory → beaver_battle_win → beaver_after_battle_win_01 … _07
+  │                     │              (_07 → _06: loop, being written)
   │                     └─ failure → beaver_battle_lose
   │                                    ├─ retry    → beaver_battle
   │                                    └─ persuade → dam_with_beavers_persuade
@@ -47,5 +48,10 @@ forest_flight_01 → forest_flight_02 → first_choice
   drafted by Claude on 2026-10-28; rewrite if wanted.
 - Music (D21): `village_day` on the main menu and the village scenes (`village_home`,
   `lunch_in_town`, `flooded_town`); `dragon_flight` on the flying scenes
-  (`forest_flight_01`, `forest_flight_02`, `first_choice`). Dam scenes and the
-  minigame have none yet, so they are silent.
+  (`forest_flight_01`, `forest_flight_02`, `first_choice`); `forest_ground` (the girls on
+  the ground in the forest) on every `dam_02` scene except the minigame: the dam scenes
+  from `dam_with_beavers` on, persuade, fight, win, `beaver_after_battle_win_*`, lose.
+  `river_dam` and the minigame `beaver_battle` have none yet, so they are silent. Open
+  questions for Sára: is `river_dam` (right after "Poleťme se podívat blíž") still in
+  flight (→ `dragon_flight`) or on the ground (→ `forest_ground`)? Should the minigame,
+  with the dragons flying, get `dragon_flight`?

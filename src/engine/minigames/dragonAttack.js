@@ -1,4 +1,5 @@
 import { Assets, Container, Graphics, Rectangle, Sprite, Texture } from 'pixi.js';
+import { resolveAssetPath } from '../assetPath.js';
 
 /**
  * Dragon attack minigame.
@@ -898,17 +899,3 @@ function parseHexColor(value) {
   if (typeof value === 'number') return value;
   return Number.parseInt(String(value).replace('#', ''), 16);
 }
-
-function resolveAssetPath(path) {
-  if (/^(https?:)?\/\//.test(path)) return path;
-  const base = import.meta.env.BASE_URL ?? './';
-  const cleanBase = base.endsWith('/') ? base : `${base}/`;
-  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-  return `${cleanBase}${cleanPath}`;
-}
-
-
-
-
-
-

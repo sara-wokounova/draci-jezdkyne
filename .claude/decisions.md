@@ -242,3 +242,61 @@ Consequences: iOS ignores the volume of HTML5 audio, so the volume slider and th
 fades do nothing on iPhone (use the hardware buttons). A track that never started (still
 loading, or blocked) is dropped at once instead of faded. Going back to a scene whose
 track was switched away starts it from the beginning.
+
+## D22 — Music starts after the page's first input (2026-10-28) — Accepted
+Supersedes: D21's "the menu track waits for the first tap … using Howler's `unlock`",
+its claim that play() runs inside the Start click (Howler queues play() until the mp3 can
+play, so it never did), and (within a fade-out) its "going back to a scene whose track was
+switched away starts it from the beginning".
+Decision: `AudioManager` starts no track before the page has seen its first click, tap
+(touchend) or key that the browser counts as user activation. Tab, arrows, Escape or a
+touch that scrolls don't count: when `navigator.userActivation.hasBeenActive` is still
+false, it keeps waiting. The track waiting at that moment (usually the menu's) starts
+after that event has been fully handled, on a 0 ms timer. Every track fades in from
+Howler's `play` event, not right after `play()`. A track being replaced is unloaded on a
+timer (`FADE_OUT_MS + UNLOAD_MARGIN_MS`) after its fade-out starts, not on Howler's `fade` event. While
+the page is hidden (a locked tablet, another app) Howler is muted and the track paused;
+on return it unmutes and plays the track again unless it is still playing. Muting
+matters because Howler can't run a `pause()` while a `play()` is still loading or
+starting (it queues it), and resuming only a stopped track avoids a second copy. A track
+whose `play()` is still starting counts as playing, so when the page comes back inside that
+moment, the hide's queued `pause()` stops it only once it has started: it is played again
+after its `play` event if it is then stopped. Every new
+track re-applies the mute state (`Howler.mute(document.hidden)`): its `<audio>` element can
+come from Howler's pool still muted after an unload on a hidden page, and `Howler.mute(false)`
+only reaches tracks that existed when the page came back. A track due while hidden
+(autoread moving on in a background tab) waits for the page. A scene with the same key
+restarts a track that has stopped (a play() the browser refused) instead of leaving it
+silent. Going back to a track that is still fading out (within `FADE_OUT_MS + UNLOAD_MARGIN_MS`, also
+across several quick hops: every fading track is kept by key) fades that same track back
+in rather than starting a second copy from 0:00 over it. Hiding the page sets a track
+that has started to its target volume, so a fade-out after a hide in the middle of its
+fade-in fades instead of cutting (Howler's `pause()` finishes the sound's fade but not the
+track's own volume); a track that hasn't started stays at 0, so it still fades in. A start
+that waited for the first input is dropped when its track is replaced: Howler would still
+play the unloaded track, unseen, at volume 0. A music key must name a string path in `assets.music`;
+anything else (a typo, an inherited name like `toString`) is a warning and silence.
+Why: the disprover found that Firefox's default policy ("allowed-muted") lets a track at
+volume 0 start, then pauses it for good once the fade-in raises the volume. Howler never
+notices, so the menu, and a village save, stayed silent in Firefox until a scene changed
+the track. Waiting for the input avoids the browser rule instead of reacting to it.
+The 0 ms timer exists because Howler's own unlock is a listener on that same first event,
+and it reloads every audio element that hasn't played yet (not `_unlocked`), aborting a
+play() started just before it ("interrupted by a new load request"). On touch devices
+Howler already unlocks on touchstart, before our touchend; the timer is harmless there.
+`navigator.userActivation` is only used to
+reject non-activating inputs: automated Chrome reports `hasBeenActive` as true on a fresh
+load, so on its own it can't decide that sound is allowed. On an already loaded track,
+Howler queues a `fade()` called right after `play()` behind its play lock and never runs
+it, so the waiting menu track played at volume 0 (found by the review panel). Howler
+never fires `fade` for a 0 → 0 fade, so switching tracks while the fade-in was still at
+0 left the old track looping silently forever.
+Consequences: before the first input there is no sound at all, even where the browser
+would allow it. A tap made while the page is still loading (before `AudioManager`
+exists) isn't seen, so the menu music waits for one more tap. It isn't started at once
+when the browser reports earlier activation, because Howler's unlock would still run on
+the next input and reload a track that is still loading. Browsers without
+`navigator.userActivation` (Firefox before 120, Safari before 16.4) treat any first key as
+activation, so a first Tab there can leave the menu silent until a tap or a scene with
+another track; the same-key restart covers the next scene with that key. A Howler console
+warning ("HTML5 Audio pool exhausted") on startup is expected and harmless.
