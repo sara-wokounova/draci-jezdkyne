@@ -265,7 +265,8 @@ button {
 }
 
 .mg-skip-menu,
-.mg-result {
+.mg-result,
+#end-card {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -324,6 +325,166 @@ button {
   font-size: clamp(0.85rem, 1.6vw, 1.05rem);
   text-align: center;
   white-space: nowrap;
+}
+
+/* ================================================ End card and main menu === */
+
+#game-root.end-open #dialogue-panel,
+#game-root.menu-open #dialogue-panel,
+#game-root.menu-open #choice-panel,
+#game-root.menu-open #top-controls {
+  display: none !important;
+}
+
+#end-card,
+#main-menu {
+  display: none;
+}
+
+#game-root.end-open #end-card {
+  display: block;
+}
+
+#end-title {
+  margin: 0;
+  color: var(--gold);
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  letter-spacing: 0.12em;
+}
+
+#end-kind {
+  margin: 0.2rem 0 0.6rem;
+  font-size: clamp(1rem, 2vw, 1.3rem);
+}
+
+#end-text {
+  margin: 0 0 1.2rem;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  line-height: 1.4;
+}
+
+.end-kind {
+  color: #e08b8b;
+}
+
+.end-kind.good {
+  color: #8be08b;
+}
+
+#end-card .choice-button,
+#main-menu .choice-button {
+  text-align: center;
+}
+
+/* Drawn over the current scene (rendered behind it, dimmed). Below #rotate-hint. */
+#game-root.menu-open #main-menu {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(12, 15, 20, 0.55);
+}
+
+.menu-page {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: center;
+}
+
+.menu-page h1 {
+  margin: 0 0 0.5rem;
+  color: var(--gold);
+  font-size: clamp(2rem, 6vw, 4rem);
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.8);
+}
+
+.menu-page h2 {
+  margin: 0;
+  color: var(--gold);
+}
+
+.menu-page p {
+  margin: 0;
+}
+
+#menu-main .choice-button {
+  width: min(18rem, 80vw);
+  font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+}
+
+#menu-settings,
+#menu-gallery {
+  width: min(40rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  padding: 1.2rem 1.4rem;
+  border-radius: 1.1rem;
+}
+
+#menu-gallery {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.setting {
+  justify-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.75rem;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.setting input {
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+
+.setting input[type='range'] {
+  width: min(14rem, 45%);
+}
+
+.setting input[type='checkbox'] {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+#gallery-list {
+  justify-self: stretch;
+  display: grid;
+  align-content: start;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+
+#gallery-list li {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+#gallery-list img {
+  flex: none;
+  width: 9rem;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
+#gallery-list strong {
+  display: block;
+}
+
+#gallery-list li p {
+  margin-top: 0.25rem;
+  color: var(--text-muted);
 }
 
 /* ================================================== Phones (landscape) === */

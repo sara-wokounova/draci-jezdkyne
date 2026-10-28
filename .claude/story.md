@@ -30,13 +30,19 @@ forest_flight_01 → forest_flight_02 → first_choice
   │                     └─ failure → beaver_battle_lose
   │                                    ├─ retry    → beaver_battle
   │                                    └─ persuade → dam_with_beavers_persuade
-  └─ "Vrátit se domů na oběd." → village_home → lunch_in_town → flooded_town ✗ dead end (no next)
+  └─ "Vrátit se domů na oběd." → village_home → lunch_in_town → flooded_town ☠ END (bad) "Zaplavené město"
 ```
+
+## Endings
+
+| scene | good? | title |
+|---|---|---|
+| `flooded_town` | bad | Zaplavené město |
 
 ## Writing status
 
 - Persuade branch stops after the beaver explains the witch (`_05` not written).
 - Fight branch victory has no real continuation yet.
-- Lunch branch ends with the flooded town — implied consequence of ignoring the
-  dam; no ending screen or follow-up.
+- Lunch branch ends with the flooded town (bad ending). Its end-card text was
+  drafted by Claude on 2026-10-28; rewrite if wanted.
 - No music yet (`assets.music` is empty).

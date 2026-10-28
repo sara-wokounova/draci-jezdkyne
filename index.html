@@ -28,6 +28,39 @@
       </section>
 
       <section id="choice-panel" class="glass-panel hidden" aria-label="Choices"></section>
+
+      <section id="end-card" class="glass-panel" role="dialog" aria-labelledby="end-title">
+        <h2 id="end-title">KONEC</h2>
+        <p id="end-kind" class="end-kind"></p>
+        <p id="end-text"></p>
+        <button id="end-home" class="choice-button" type="button">Zpět na začátek</button>
+      </section>
+
+      <section id="main-menu" aria-label="Hlavní menu">
+        <div id="menu-main" class="menu-page">
+          <h1>Dračí jezdkyně</h1>
+          <button id="menu-start" class="choice-button" type="button">Start</button>
+          <button class="choice-button" type="button" data-page="settings">Nastavení</button>
+          <button class="choice-button" type="button" data-page="gallery">Galerie</button>
+        </div>
+        <div id="menu-settings" class="menu-page glass-panel hidden">
+          <h2>Nastavení</h2>
+          <label class="setting">
+            Hlasitost hudby
+            <input id="setting-music" type="range" min="0" max="100" step="5" />
+          </label>
+          <label class="setting">
+            Automaticky pokračovat
+            <input id="setting-autoread" type="checkbox" />
+          </label>
+          <button class="control-button" type="button" data-page="main">Zpět</button>
+        </div>
+        <div id="menu-gallery" class="menu-page glass-panel hidden">
+          <h2>Galerie</h2>
+          <ul id="gallery-list"></ul>
+          <button class="control-button" type="button" data-page="main">Zpět</button>
+        </div>
+      </section>
     </main>
 
     <div id="rotate-hint">

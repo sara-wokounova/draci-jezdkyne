@@ -4,9 +4,68 @@ export class UiController {
     this.choiceHandlers = [];
   }
 
-  bindNavigation({ onBack, onRestart }) {
+  bindNavigation({ onBack, onRestart, onEndHome }) {
     this.elements.backButton?.addEventListener('click', onBack);
     this.elements.restartButton?.addEventListener('click', onRestart);
+    this.elements.endCard.querySelector('#end-home').addEventListener('click', onEndHome);
+  }
+
+  /** Main menu: Start, plus the Nastavení and Galerie pages (buttons with data-page). */
+  bindMenu({ onStart, getEndScenes }) {
+    const menu = this.elements.mainMenu;
+    menu.querySelector('#menu-start').addEventListener('click', onStart);
+    menu.querySelectorAll('[data-page]').forEach((button) => {
+      button.addEventListener('click', () => {
+        if (button.dataset.page === 'gallery') this.showGallery(getEndScenes());
+        menu.querySelectorAll('.menu-page').forEach((page) => {
+          page.classList.toggle('hidden', page.id !== `menu-${button.dataset.page}`);
+        });
+      });
+    });
+  }
+
+  /** Nastavení page controls; onChange gets only the changed setting. */
+  bindSettings(settings, onChange) {
+    const music = this.elements.mainMenu.querySelector('#setting-music');
+    const autoRead = this.elements.mainMenu.querySelector('#setting-autoread');
+    music.value = Math.round(settings.musicVolume * 100);
+    autoRead.checked = settings.autoRead;
+    music.addEventListener('input', () => onChange({ musicVolume: music.value / 100 }));
+    autoRead.addEventListener('change', () => onChange({ autoRead: autoRead.checked }));
+  }
+
+  showMenu(open) {
+    this.elements.root.classList.toggle('menu-open', open);
+    if (open) this.elements.mainMenu.querySelector('#menu-start').focus();
+  }
+
+  showGallery(endScenes) {
+    const list = this.elements.mainMenu.querySelector('#gallery-list');
+    list.innerHTML = endScenes.length ? '' : '<li>Zatím žádný konec.</li>';
+    for (const { background, end } of endScenes) {
+      const item = document.createElement('li');
+      item.innerHTML = `
+        ${background?.src ? `<img src="${background.src}" alt="" loading="lazy" />` : ''}
+        <div>
+          <strong>${end.title ?? ''}</strong>
+          <span class="end-kind ${end.good ? 'good' : ''}">${endLabel(end)}</span>
+          <p>${end.text ?? ''}</p>
+        </div>`;
+      list.appendChild(item);
+    }
+  }
+
+  /** End card over an end scene (KONEC, good/bad, explanation). Pass null to hide it. */
+  showEnd(end) {
+    const card = this.elements.endCard;
+    this.elements.root.classList.toggle('end-open', Boolean(end));
+    if (!end) return;
+
+    const kind = card.querySelector('#end-kind');
+    kind.textContent = end.title ? `${endLabel(end)}: ${end.title}` : endLabel(end);
+    kind.classList.toggle('good', Boolean(end.good));
+    card.querySelector('#end-text').textContent = end.text ?? '';
+    card.querySelector('#end-home').focus();
   }
 
   showDialogue(scene, characters) {
@@ -47,4 +106,8 @@ export class UiController {
   showSaveStatus(message) {
     this.elements.saveStatus.textContent = message;
   }
+}
+
+function endLabel(end) {
+  return end.good ? 'Dobrý konec' : 'Špatný konec';
 }

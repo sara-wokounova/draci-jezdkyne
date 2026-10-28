@@ -1,3 +1,5 @@
+const DEFAULT_SETTINGS = { musicVolume: 0.75, autoRead: false };
+
 export class AutoSave {
   constructor(storyId) {
     this.key = `vn:${storyId}:autosave`;
@@ -10,6 +12,21 @@ export class AutoSave {
 
   get history() {
     return this.data.history ?? [];
+  }
+
+  /** Every scene ever shown; survives restarts. The gallery reads reached endings from it. */
+  get readSceneIds() {
+    return this.data.readSceneIds;
+  }
+
+  /** Nastavení: { musicVolume 0–1, autoRead }. Kept across restarts. */
+  get settings() {
+    return this.data.settings;
+  }
+
+  saveSettings(change) {
+    this.data.settings = { ...this.data.settings, ...change };
+    this.persist();
   }
 
   recordScene(sceneId) {
@@ -35,7 +52,7 @@ export class AutoSave {
   }
 
   load() {
-    const empty = { currentSceneId: null, history: [], readSceneIds: [] };
+    const empty = { currentSceneId: null, history: [], readSceneIds: [], settings: { ...DEFAULT_SETTINGS } };
     const stored = localStorage.getItem(this.key);
     if (!stored) return empty;
 
@@ -45,6 +62,7 @@ export class AutoSave {
         currentSceneId: parsed.currentSceneId ?? null,
         history: Array.isArray(parsed.history) ? parsed.history : [],
         readSceneIds: Array.isArray(parsed.readSceneIds) ? parsed.readSceneIds : [],
+        settings: { ...DEFAULT_SETTINGS, ...(typeof parsed.settings === 'object' ? parsed.settings : {}) },
       };
     } catch {
       return empty;

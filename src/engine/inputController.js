@@ -26,6 +26,9 @@ export class InputController {
     }
 
     window.addEventListener('keydown', (event) => {
+      // Let Space/Enter press the focused menu or end-card button.
+      if (event.target.closest?.('#main-menu, #end-card')) return;
+
       if (event.key === ' ' || event.key === 'Enter') {
         event.preventDefault();
         this.onAdvance();

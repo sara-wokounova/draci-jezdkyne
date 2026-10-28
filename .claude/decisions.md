@@ -171,3 +171,39 @@ still loading sprites, and both added a character (a ghost offset by ~50px). The
 token is the smallest fix where every caller (advance, Back, resize) routes through.
 Consequences: a superseded render may leave its layers partly drawn until the latest
 render finishes. That is fine, because the latest one cleared them first.
+
+## D18 — Endings, main menu and gallery (2026-10-28) — Accepted
+Decision: a scene becomes an ending by adding `"end": { "good", "title", "text" }`.
+It shows like any scene; the next tap opens a centred `#end-card` (KONEC, "Dobrý/Špatný
+konec: title", text, "Zpět na začátek") and hides the dialogue. The button resets the
+progress to `start` (like Restart) and opens the main menu. The game opens on
+`#main-menu` (Start, Nastavení, Galerie) drawn over the saved scene; Start continues
+from the autosave, which after an ending is the story start. Galerie lists the `end`
+scenes found in the autosave's `readSceneIds`, with the background as a thumbnail.
+Nastavení is an empty page for now.
+Why: asked for by Sára. Reusing `readSceneIds` (D6) needs no new save data and it
+already survives Restart. Showing the end card one tap after the scene keeps the
+scene's last line readable on phones, where a centred card and the bottom strip
+overlap. The menu only draws the saved scene, because `showScene` would start a
+saved minigame behind it.
+Consequences: an ending counts as found as soon as its scene is shown, even if the
+player goes Back before the card. Renaming the story `id` also empties the gallery.
+Gallery thumbnails are the full ~3.3 MB backgrounds (lazy-loaded). While the menu is
+open, `menuOpen` blocks story input the same way `minigameActive` does; Space/Enter
+inside the menu or end card are left to the focused button.
+
+## D19 — Nastavení: music volume and autoread (2026-10-28) — Accepted
+Supersedes: the "Nastavení is an empty page" part of D18.
+Decision: Nastavení has a "Hlasitost hudby" range (0–100, step 5, default 75) that sets
+the Howler master volume, and an "Automaticky pokračovat" checkbox (autoread, default
+off). Both are stored in the autosave as `settings` and survive restarts. With
+autoread on, a scene advances by itself `2000 + 70 ms × text length` after it has
+rendered (constants at the top of `startVisualNovel.js`). It goes through `advance()`,
+so it stops at choices, never runs during the menu or a minigame, and on an `end`
+scene it opens the end card. Any scene change cancels the pending timer.
+Why: asked for by Sára. "Autoread" is taken as the usual VN auto-advance, not
+reading the text aloud. One fixed speed instead of a speed slider: nobody has tried
+it with kids yet. Native `<input type="range">` / checkbox, styled with `accent-color`.
+Consequences: there is no music yet, so the volume is verified only through
+`Howler.volume()`. The label says "Automaticky pokračovat" because "Automatické čtení"
+reads like text-to-speech.

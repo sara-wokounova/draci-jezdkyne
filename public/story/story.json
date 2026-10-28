@@ -421,7 +421,12 @@
       "effects": [
         "wind"
       ],
-      "text": "Zatímco dračí jezdkyně jedly kaši, na město se přiřítila povodeň a zaplavila ho."
+      "text": "Zatímco dračí jezdkyně jedly kaši, na město se přiřítila povodeň a zaplavila ho.",
+      "end": {
+        "good": false,
+        "title": "Zaplavené město",
+        "text": "Jezdkyně se nešly podívat, co se v lese leskne. Obří bobří přehrada se protrhla a voda zaplavila město. Příště to zkus prozkoumat!"
+      }
     }
   ]
 }

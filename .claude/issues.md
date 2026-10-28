@@ -22,10 +22,9 @@ DEFAULTS in `dragonAttack.js` point to `background.png`, `dragon_{roza,emma,anna
 `flame_roza.png`, `flash_emma.png`, `arrow_anna.png` — none exist. Each 404s and
 falls back to a vector placeholder. Add the art or set those defaults to `null`.
 
-### P2 — Story dead ends (verified 2026-10-17)
-`flooded_town` has no `next`/`choices`: the story just stops, and the "continue"
-hint is still shown. `beaver_battle_win` loops to `forest_flight_01` with the
-old back-history intact.
+### P2 — `beaver_battle_win` loops to the start (verified 2026-10-17)
+It goes `next` → `forest_flight_01` with the old back-history intact. Either
+continue the story or make it an ending (D18). (`flooded_town` is now an ending.)
 
 ### P3 — Engine UI is English, story is Czech
 `index.html` has `lang="en"` and title "Visual Novel Starter"; buttons "← Back",
@@ -48,6 +47,7 @@ Beaver lines show a dragon rider's sprite instead.
 ### P3 — Continue hint shown when there's nothing to continue to
 Choice scenes and dead-end scenes still say "Click, tap, Space, or Enter to continue".
 On phones (D14 layout) it is hidden on choice scenes. Desktop and dead ends still show it.
+(On `end` scenes the hint is right: the tap opens the end card.)
 
 ### P3 — No `webkitRequestFullscreen` fallback (2026-10-17)
 D16 uses the unprefixed API only. Old iPads (before iPadOS 16.4) never go fullscreen.
@@ -63,6 +63,14 @@ the beaver lane (`laneY` 0.84). Visual only. Could hide the pill after the first
 attack, or raise `laneY` on short screens.
 
 ## Fixed
+
+### P2 — Music change stopped the new track (suspected, read from code) — fixed 2026-10-28
+`AudioManager.playMusic` stopped `this.currentTrack` when the old track's fade ended,
+by which time that was the new track; the old one looped on at volume 0. Never hit,
+because there is no music yet. Fix: stop the captured previous track.
+
+### P3 — Nastavení page was empty — fixed 2026-10-28
+Now has music volume and autoread (D19).
 
 ### P1 — Not playable on phones (user-reported 2026-10-17) — fixed 2026-10-17 in `8de3d9f`, verified live
 `mobile.mjs live` passes on all five viewports (D11). Chrome emulation only, never

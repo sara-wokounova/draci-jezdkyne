@@ -1,18 +1,25 @@
 import { Howl, Howler } from 'howler';
 
 export class AudioManager {
-  constructor(musicAssets) {
+  constructor(musicAssets, volume) {
     this.musicAssets = musicAssets;
     this.currentTrack = null;
     this.currentKey = null;
-    Howler.volume(0.75);
+    this.setVolume(volume);
+  }
+
+  /** Master volume 0–1 (Nastavení → Hlasitost hudby). */
+  setVolume(volume) {
+    Howler.volume(volume);
   }
 
   playMusic(key) {
     if (!key || key === this.currentKey) return;
 
-    this.currentTrack?.fade(0.75, 0, 350);
-    this.currentTrack?.once('fade', () => this.currentTrack?.stop());
+    // Stop the old track, not whatever this.currentTrack is when the fade ends.
+    const previous = this.currentTrack;
+    previous?.fade(0.75, 0, 350);
+    previous?.once('fade', () => previous.stop());
 
     const src = this.musicAssets[key];
     if (!src) {

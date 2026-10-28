@@ -40,14 +40,15 @@ browser, including a phone-sized viewport.
 ## Architecture
 
 ```
-index.html                 DOM shell: #pixi-host canvas, #top-controls, #dialogue-panel, #choice-panel;
+index.html                 DOM shell: #pixi-host canvas, #top-controls, #dialogue-panel, #choice-panel,
+                           #end-card, #main-menu (Start / Nastavení / Galerie pages);
                            #rotate-hint (portrait phones, outside #game-root); links public/manifest.webmanifest
 src/main.js                wires DOM elements → startVisualNovel()
 src/engine/
   startVisualNovel.js      game loop: showScene / advance / goBack / restart / runMinigame
   storyRepository.js       fetch + minimal validation of story.json, scene lookup
-  autoSave.js              localStorage: current scene, back-history, readSceneIds
-  uiController.js          DOM dialogue text, speaker name, choice buttons
+  autoSave.js              localStorage: current scene, back-history, readSceneIds, settings (volume, autoRead)
+  uiController.js          DOM dialogue text, speaker name, choice buttons, end card, main menu + gallery
   inputController.js       click/tap anywhere = advance; keys: Space/Enter, 1-9, Backspace/←, R
   visualRenderer.js        Pixi: background (contain-fit), character sprites, placeholders, preload
   pixiStage.js             Pixi Application + layers: background, characters, effects, minigame, overlay
@@ -64,6 +65,9 @@ scripts/removeCheckerboard.mjs   flood-fills light-gray checkerboard to alpha
 .github/workflows/deploy.yml     push to main → npm ci → build → GitHub Pages
 ```
 
+Startup draws the saved scene (visuals only) behind `#main-menu`; Start calls `showScene`.
+While the menu is open (`menuOpen`) all story input is ignored, like during a minigame.
+With autoread on (Nastavení), `showScene` ends by scheduling `advance()` (D19).
 Flow: `showScene(scene)` → save to localStorage → DOM text/choices → `visuals.render(scene)`
 (clears layers, draws background, characters, effects) → music → if `scene.minigame`,
 run it and jump to `onVictory`/`onFailure`; else preload the next 3 reachable scenes.
@@ -96,14 +100,18 @@ on top with CSS. Layout bugs are almost always in `main.css`; scene-fit bugs in
     "next": "other_scene",      // OR
     "choices": [{ "text": "…", "next": "id" }],   // OR
     "minigame": { "type": "dragonAttack", "title": "…", "allowSkip": true,
-                  "onVictory": "id", "onFailure": "id", "config": {} }
+                  "onVictory": "id", "onFailure": "id", "config": {} },
+    "end": { "good": false, "title": "…", "text": "…" }   // ending, see below
   }]
 }
 ```
 
 Rules: asset paths are relative (`assets/...`, never `/assets/...`) — required for
 the GitHub Pages sub-path. A scene with neither `next`, `choices` nor `minigame`
-is a dead end. The minigame scene is kept out of back-history.
+is a dead end unless it has `end`. An `end` scene shows normally; the next tap opens
+the end card (KONEC, "Dobrý/Špatný konec: title", `text`, "Zpět na začátek" → reset
+to `start` + main menu). Galerie lists every `end` scene the player has ever reached
+(from `readSceneIds`), with the scene's background as thumbnail. The minigame scene is kept out of back-history.
 
 ## Assets
 
