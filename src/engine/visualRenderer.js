@@ -48,14 +48,21 @@ export class VisualRenderer {
     const imageSource = background?.src ?? (background?.type === 'image' ? background?.preset : null);
 
     if (background?.type === 'image' && imageSource) {
-      const texture = await Assets.load(resolveAssetPath(imageSource));
+      // A failed load (404, server gone, offline) gets a generated background like a missing
+      // character gets a placeholder (D7), instead of rejecting and losing the whole scene.
+      const texture = await Assets.load(resolveAssetPath(imageSource)).catch((error) => {
+        console.warn(`Could not load background "${imageSource}". Falling back to a generated one.`, error);
+      });
       if (token !== this.renderToken) return;
-      const sprite = new Sprite(texture);
 
-      contain(sprite, width, height);
+      if (texture) {
+        const sprite = new Sprite(texture);
 
-      this.stage.layers.background.addChild(sprite);
-      return;
+        contain(sprite, width, height);
+
+        this.stage.layers.background.addChild(sprite);
+        return;
+      }
     }
 
     const texture = createBackgroundTexture(width, height, background?.preset ?? 'sunset_forest');

@@ -207,3 +207,38 @@ it with kids yet. Native `<input type="range">` / checkbox, styled with `accent-
 Consequences: there is no music yet, so the volume is verified only through
 `Howler.volume()`. The label says "Automaticky pokračovat" because "Automatické čtení"
 reads like text-to-speech.
+
+## D20 — A failed background never blanks the scene; the menu preloads (2026-10-28) — Accepted
+Decision: when a background image fails to load, `drawBackground` draws the generated
+background (the D7 fallback that characters already had) and the scene's characters
+still draw. The main menu preloads the next 3 scenes from the saved one (D8), as the
+startup did before D18.
+Why: user-reported "black screen after the first scene, stick figures instead of
+sprites" (2026-10-28). Reproduced by making every image request fail after the page
+had loaded, as when the dev server behind an open tab stops. A failed background made
+`render()` reject, which blanked the scene and skipped its characters. D18's menu had
+dropped the startup preload, so more of the first scenes hit the failure.
+Consequences: a missing or unreachable background shows the generated sunset forest,
+not black. Nothing can show art the server doesn't deliver: a reload with the server
+running is still the fix for that case.
+
+## D21 — Background music per scene (2026-10-28) — Accepted
+Decision: `story.assets.music` maps keys to mp3 files, a scene's `music` names a key, and
+the top-level `menuMusic` plays on the main menu. The same key on the next scene (or on
+the menu) keeps the track playing from where it is. A different key fades the old track
+out (350 ms) and starts the new one. A scene without `music` is silent. Tracks stream
+as HTML5 audio (`html5: true`). Music starts before the scene's images load. The menu
+track waits for the first tap or key (browser autoplay rules), using Howler's `unlock`.
+"Zpět na začátek" resets to the start without showing the start scene.
+Why: asked for by Sára. Village scenes use village_day and the flying scenes use
+dragon_flight. Silence without `music` makes Back into a non-village scene stop the
+village track. Streaming: each mp3 is ~3.7 MB, and Web Audio would download and decode
+all of it (about 40 MB of memory) before a note plays. Starting before the render
+means a slow, superseded render can't start the old scene's track after the new one,
+and on Start, play() still runs inside the click. Skipping the start scene on the way
+to the menu keeps the ending's village_day playing into the menu, instead of cutting
+to dragon_flight and restarting village_day.
+Consequences: iOS ignores the volume of HTML5 audio, so the volume slider and the
+fades do nothing on iPhone (use the hardware buttons). A track that never started (still
+loading, or blocked) is dropped at once instead of faded. Going back to a scene whose
+track was switched away starts it from the beginning.

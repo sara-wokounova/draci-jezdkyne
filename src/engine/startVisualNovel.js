@@ -45,19 +45,17 @@ export async function startVisualNovel(config) {
     ui.showEnd(null);
     ui.showDialogue(scene, story.characters);
     ui.showChoices(scene.choices ?? [], goToScene);
-    await visuals.render(scene);
+    // Before the await: a slow render can't start an older scene's track after a newer one,
+    // and on Start the play() still runs inside the click (browsers' autoplay rule).
     audio.playMusic(scene.music);
+    await visuals.render(scene);
 
     if (scene.minigame) {
       await runMinigame(scene);
       return;
     }
 
-    // Warm only the next few reachable scenes so advancing feels instant
-    // without loading the whole story up front. Runs in the background.
-    visuals.preloadFrom(scene, 3).catch((error) => {
-      console.warn('Could not preload upcoming scenes.', error);
-    });
+    preloadAhead(scene);
 
     // advance() itself ignores choice scenes, an open menu and minigames.
     if (save.settings.autoRead && scene === currentScene) {
@@ -65,6 +63,14 @@ export async function startVisualNovel(config) {
       autoReadTimer = setTimeout(advance,
         AUTO_READ_BASE_MS + (scene.text?.length ?? 0) * AUTO_READ_MS_PER_CHAR);
     }
+  }
+
+  // Warm only the next few reachable scenes so advancing feels instant
+  // without loading the whole story up front. Runs in the background.
+  function preloadAhead(scene) {
+    visuals.preloadFrom(scene, 3).catch((error) => {
+      console.warn('Could not preload upcoming scenes.', error);
+    });
   }
 
   /**
@@ -111,17 +117,26 @@ export async function startVisualNovel(config) {
     showScene(story.getScene(previousSceneId), { addToHistory: false });
   }
 
-  function restart() {
-    if (minigameActive || menuOpen) return;
+  function resetToStart() {
     history = [];
     save.restartAt(story.start);
-    showScene(story.getScene(story.start), { addToHistory: false });
+    currentScene = story.getScene(story.start);
+  }
+
+  function restart() {
+    if (minigameActive || menuOpen) return;
+    resetToStart();
+    showScene(currentScene, { addToHistory: false });
   }
 
   // The scene behind the menu is only drawn; showScene (which may start a minigame) waits for Start.
-  function openMenu() {
+  async function openMenu() {
     menuOpen = true;
     ui.showMenu(true);
+    ui.showEnd(null);
+    audio.playMusic(story.menuMusic);
+    await visuals.render(currentScene);
+    preloadAhead(currentScene);
   }
 
   function startGame() {
@@ -131,8 +146,9 @@ export async function startVisualNovel(config) {
   }
 
   // End card button: progress resets to the story start, the gallery keeps the ending.
+  // No showScene here, so the start scene's track never cuts in between ending and menu.
   function backToStart() {
-    restart();
+    resetToStart();
     openMenu();
   }
 
@@ -168,6 +184,5 @@ export async function startVisualNovel(config) {
   // Read-only hook for tests/mobile.mjs (runs against the live site too, see D11).
   window.__vn = { stage, minigames, get sceneId() { return currentScene?.id; } };
 
-  openMenu();
-  await visuals.render(currentScene);
+  await openMenu(); // preloads the next scenes while the player is on the menu, as the old startup did
 }

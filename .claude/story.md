@@ -45,4 +45,7 @@ forest_flight_01 → forest_flight_02 → first_choice
 - Fight branch victory has no real continuation yet.
 - Lunch branch ends with the flooded town (bad ending). Its end-card text was
   drafted by Claude on 2026-10-28; rewrite if wanted.
-- No music yet (`assets.music` is empty).
+- Music (D21): `village_day` on the main menu and the village scenes (`village_home`,
+  `lunch_in_town`, `flooded_town`); `dragon_flight` on the flying scenes
+  (`forest_flight_01`, `forest_flight_02`, `first_choice`). Dam scenes and the
+  minigame have none yet, so they are silent.

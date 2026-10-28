@@ -62,7 +62,22 @@ At 640x360 and 844x390 the bottom `.mg-instructions` pill overlaps the lower par
 the beaver lane (`laneY` 0.84). Visual only. Could hide the pill after the first
 attack, or raise `laneY` on short screens.
 
+### P3 — Music volume does nothing on iPhone (2026-10-28)
+Music streams as HTML5 audio (D21), and iOS ignores its volume, so neither the volume
+slider nor the fades work there. Fix if it matters: Web Audio (`html5: false`) for iOS
+only, at the cost of full download + decode.
+
 ## Fixed
+
+### P1 — Black backgrounds and stick figures after the first scene (user-reported 2026-10-28) — fixed 2026-10-28, verified locally
+Seen in Firefox on the dev server after `7bb96de`. Never reproduced with the server
+running in Chrome or Firefox. It was reproduced exactly by failing every image request
+after the page had loaded: the menu, the first background and the end card worked,
+characters became placeholders, and backgrounds went black because a failed background
+made `render()` reject. The likely trigger was the dev server behind the open tab
+having stopped, since nothing was listening on 5173 right after the report. `7bb96de`
+made it more likely by no longer preloading at startup.
+Fix: generated-background fallback and the menu preload (D20).
 
 ### P2 — Music change stopped the new track (suspected, read from code) — fixed 2026-10-28
 `AudioManager.playMusic` stopped `this.currentTrack` when the old track's fade ended,

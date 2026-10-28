@@ -12,6 +12,8 @@ More docs in this directory (keep them current):
 - @story.md — characters, scene graph, writing status
 - @decisions.md — decision log (why things are the way they are)
 - @issues.md — known issues / backlog
+- @workflow.md — **required process for every new feature**: plan → disprover loop →
+  Sára confirms → implement with tests → review panel loop
 
 ## Working rules
 
@@ -34,8 +36,9 @@ npm run preview        # serve dist/
 npm run clean-sprites  # strip baked checkerboard from character PNGs (overwrites files!)
 ```
 
-No tests and no linter. Verify changes by running the game (`npm run dev`) in a
-browser, including a phone-sized viewport.
+No unit tests and no linter. The Playwright check scripts live outside the repo
+(see the Tests section of workflow.md). Also verify changes by running the game
+(`npm run dev`) in a browser, including a phone-sized viewport.
 
 ## Architecture
 
@@ -52,7 +55,7 @@ src/engine/
   inputController.js       click/tap anywhere = advance; keys: Space/Enter, 1-9, Backspace/←, R
   visualRenderer.js        Pixi: background (contain-fit), character sprites, placeholders, preload
   pixiStage.js             Pixi Application + layers: background, characters, effects, minigame, overlay
-  audioManager.js          Howler music per scene (no music assets yet)
+  audioManager.js          Howler music per scene + menu (HTML5 streaming; same key continues, none = silence)
   effects/atmosphereEffects.js   sunsetGlow, wind, snow
   minigames/
     minigameManager.js     registry; run(spec) → 'victory' | 'failure'
@@ -83,7 +86,8 @@ on top with CSS. Layout bugs are almost always in `main.css`; scene-fit bugs in
 {
   "id": "draci-jezdkyne-z-vlpu",          // also the localStorage key: vn:<id>:autosave
   "start": "forest_flight_01",
-  "assets": { "music": { "key": "assets/music/x.mp3" } },
+  "menuMusic": "village_day",             // music key for the main menu
+  "assets": { "music": { "village_day": "assets/music/village_day.mp3" } },
   "characters": {
     "roza": { "displayName": "Róza", "color": "#d6462f", "hair": "#eac470",
               "sprites": { "neutral": "...", "happy": "...", "excited": "...",
@@ -96,7 +100,7 @@ on top with CSS. Layout bugs are almost always in `main.css`; scene-fit bugs in
     "characters": [{ "id": "roza", "position": "left|center|right", "pose": "talking", "alpha": 1 }],
     "speaker": "roza",          // character id, or a literal name like "Velký bobr"
     "text": "…",
-    "music": "key",
+    "music": "village_day",     // same key as the previous scene = keeps playing; omitted = silence
     "next": "other_scene",      // OR
     "choices": [{ "text": "…", "next": "id" }],   // OR
     "minigame": { "type": "dragonAttack", "title": "…", "allowSkip": true,

@@ -2,6 +2,7 @@ export class StoryRepository {
   constructor(data) {
     this.id = data.id ?? 'visual-novel';
     this.start = data.start;
+    this.menuMusic = data.menuMusic ?? null;
     this.assets = data.assets ?? {};
     this.characters = data.characters ?? {};
     this.scenes = new Map(data.scenes.map((scene) => [scene.id, scene]));
