@@ -33,11 +33,11 @@ npm install
 npm run dev            # Vite dev server
 npm run build          # production build into dist/ (CI runs this)
 npm run preview        # serve dist/
-npm run clean-sprites  # strip baked checkerboard from character PNGs (overwrites files!)
+npm run clean-sprites  # strip baked checkerboard from character PNGs (in place; skips already-transparent files)
 ```
 
-No unit tests in the repo and no linter. The Playwright check scripts (and one node check
-for `AutoSave`) live outside the repo (see the Tests section of workflow.md). Also verify changes by running the game
+No unit tests in the repo and no linter. The Playwright check scripts (and node checks
+for `AutoSave` and the sprite scripts) live outside the repo (see the Tests section of workflow.md). Also verify changes by running the game
 (`npm run dev`) in a browser, including a phone-sized viewport.
 
 ## Architecture
@@ -60,14 +60,17 @@ src/engine/
                            nothing starts before the page's first click/tap/key, D22)
   effects/atmosphereEffects.js   sunsetGlow, wind, snow
   minigames/
-    minigameManager.js     registry; run(spec) → 'victory' | 'failure'
+    minigameManager.js     registry; run(spec) → 'victory' | 'failure' (a throwing game → 'failure', D24)
     minigameHud.js         DOM overlay: title, score, skip menu, result dialog (Czech labels)
-    dragonAttack.js        the "Dračí nálet na bobry" minigame (all numbers in DEFAULTS)
+    dragonAttack.js        the "Dračí nálet na bobry" minigame (all tunables in DEFAULTS, safety caps beside it, D24): Róza animated
+                           from strips, firing rules per dragon (maxShots, refireAfter), D23
 src/styles/main.css        all styling (DOM UI is absolutely positioned over the canvas)
 public/story/story.json    the whole story (fetched at runtime, not bundled)
 public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, minigames/dragon-attack/,
                            music/ (mp3, ~3.6–4.2 MB each, streamed)
-scripts/removeCheckerboard.mjs   flood-fills light-gray checkerboard to alpha
+scripts/removeCheckerboard.mjs   flood-fills light-gray checkerboard to alpha (--enclosed, --glow, --force)
+scripts/packFrames.mjs           scattered sheet frames → one-row strip, anchored (eye / white-hot core)
+art/                             source art kept in git but not deployed (originals of packed strips)
 .github/workflows/deploy.yml     push to main → npm ci → build → GitHub Pages
 ```
 
@@ -132,9 +135,28 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
 - Music: `public/assets/music/*.mp3` (~3.6–4.2 MB each, streamed as HTML5 audio), referenced
   by key from `story.assets.music`; scenes pick a track with `music`, the menu with
   `menuMusic` (D21, D22).
+- Róza's minigame strips (`public/assets/minigames/dragon-attack/roza_{fly,attack,fireball}.png`)
+  are generated from the originals in `art/minigames/dragon-attack/` (D23), one file at a time:
+  ```
+  cp art/minigames/dragon-attack/roza_move.png <tmp>/ && node scripts/removeCheckerboard.mjs <tmp>/roza_move.png --enclosed
+  node scripts/packFrames.mjs <tmp>/roza_move.png public/assets/minigames/dragon-attack/roza_fly.png art/minigames/dragon-attack/roza_move.anchors.json
+  cp art/minigames/dragon-attack/roze_attack.png <tmp>/ && node scripts/removeCheckerboard.mjs <tmp>/roze_attack.png --enclosed
+  node scripts/packFrames.mjs <tmp>/roze_attack.png public/assets/minigames/dragon-attack/roza_attack.png art/minigames/dragon-attack/roze_attack.anchors.json
+  cp art/minigames/dragon-attack/beska_projektil.png <tmp>/ && node scripts/removeCheckerboard.mjs <tmp>/beska_projektil.png --glow
+  node scripts/packFrames.mjs <tmp>/beska_projektil.png public/assets/minigames/dragon-attack/roza_fireball.png bright
+  ```
+  Both scripts refuse to write into `art/` (the originals and the hand-measured anchors stay untouched).
+  `packFrames.mjs` prints the frame count, size and anchor that go into the dragon's `animation` config,
+  and each frame's box around the anchor. All config px are strip px (the source downscaled by the
+  packer's `factor`, default 2): `bodyWidth` = the `medianWidth` it prints for the fly strip; `mouth` = the
+  mouth on the fire frame (attack frame 3), measured from the eye in the source ÷ factor.
 - Source art arrives with a light-gray checkerboard baked in instead of
-  transparency; run `scripts/removeCheckerboard.mjs <dir>` on it. It overwrites
-  files in place — make sure they're committed first.
+  transparency; run `scripts/removeCheckerboard.mjs <file.png|dir>` on a copy of it. It
+  overwrites files in place and skips any PNG that already has transparency (a packed strip
+  would turn into an opaque box; a cleaned sprite would just be rewritten), unless `--force`. `--enclosed`
+  also erases checker showing through enclosed gaps (hair strands, wing gaps) but can take
+  neutral grey-white art such as eye whites, so check eyes and teeth after it; `--glow` is
+  for fire and light painted over the checker.
 - Missing sprites never crash: the engine draws vector placeholders, and a background that
   fails to load gets a generated one (D20).
 

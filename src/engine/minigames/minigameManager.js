@@ -14,6 +14,8 @@ import { DragonAttackMinigame } from './dragonAttack.js';
  *      {@link DragonAttackMinigame} for the contract).
  *   2. Register it: `manager.register('myGame', (ctx) => new MyGame(ctx));`
  *   3. Reference it from a scene in story.json (see {@link MinigameManager#run}).
+ *   A throw in its constructor or start() already ends in 'failure'; its own ticker
+ *   listener must catch errors itself and end the round (D24), as DragonAttackMinigame#tick does.
  */
 export class MinigameManager {
   /**
@@ -86,26 +88,30 @@ export class MinigameManager {
         resolve(result);
       };
 
-      const game = factory({
-        app: this.stage.app,
-        layer: this.stage.layers.minigame,
-        config: spec.config ?? {},
-        hud,
-        // The game reports its natural end here; we show the result screen and
-        // only settle once the player presses continue.
-        onComplete: (result, details) => {
-          hud.showResult(result, details, () => settle(result));
-        },
-      });
-
       // Skipping resolves immediately with the chosen outcome.
       hud.onSkip((result) => settle(result));
 
-      this.activeGame = game;
-      Promise.resolve(game.start()).catch((error) => {
-        console.error('Minigame failed to start — defaulting to failure.', error);
-        settle('failure');
-      });
+      // One chain, so a constructor that throws (a malformed config) and a start() that throws or
+      // rejects all end in 'failure' instead of leaving the player stuck in the HUD.
+      Promise.resolve()
+        .then(() => {
+          this.activeGame = factory({
+            app: this.stage.app,
+            layer: this.stage.layers.minigame,
+            config: spec.config ?? {},
+            hud,
+            // The game reports its natural end here; we show the result screen and
+            // only settle once the player presses continue.
+            onComplete: (result, details) => {
+              hud.showResult(result, details, () => settle(result));
+            },
+          });
+          return this.activeGame.start();
+        })
+        .catch((error) => {
+          console.error('Minigame failed to start — defaulting to failure.', error);
+          settle('failure');
+        });
     });
 
     this.activeGame?.destroy();

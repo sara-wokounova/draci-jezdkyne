@@ -6,21 +6,24 @@ Severity: **P0** broken for everyone · **P1** blocks play on some setups · **P
 ## Open
 
 ### P2 — Minigame starts seconds after its HUD appears (verified 2026-10-17)
-Scene preload (D8) only covers backgrounds and characters, and `spawnBeavers()`
-then loads the 7 beaver sheets (~12 MB) one after another. On the live site the
-HUD shows over an empty lane for ~2–4 s on a fast connection; on phone data it
-will be much longer, and taps do nothing until then. Not a regression. Fix: load
-the sheets with `Promise.all`, preload them from the scenes before `beaver_battle`,
-and/or shrink them (see "Heavy assets").
+Scene preload (D8) only covers backgrounds and characters, so the minigame loads the 7
+beaver sheets (~12 MB) after its HUD shows. On the live site the HUD showed over an empty
+lane for ~2–4 s on a fast connection; on phone data it will be much longer, and taps do
+nothing until then. Not a regression. Since D23 everything loads in parallel (`Promise.all`)
+instead of one sheet after another, which cuts the wait on a fast connection but not on one
+limited by bandwidth (same bytes). Rest of the fix: preload the sheets from the scenes before
+`beaver_battle`, and/or shrink them (see "Heavy assets").
 
 ### P1 — Persuade branch crashes at `dam_with_beavers_persuade_04` (verified 2026-10-17)
 `next: "dam_with_beavers_persuade_05"` doesn't exist. Tapping throws
 "Unknown scene id" and the player is stuck (Back still works). Needs story text.
 
-### P2 — Minigame art missing → 404s (verified 2026-10-17)
-DEFAULTS in `dragonAttack.js` point to `background.png`, `dragon_{roza,emma,anna}.png`,
-`flame_roza.png`, `flash_emma.png`, `arrow_anna.png` — none exist. Each 404s and
-falls back to a vector placeholder. Add the art or set those defaults to `null`.
+### P2 — Minigame art missing → 404s (verified 2026-10-17; partly fixed 2026-10-28)
+DEFAULTS in `dragonAttack.js` pointed to `background.png`, `dragon_{roza,emma,anna}.png`,
+`flame_roza.png`, `flash_emma.png`, `arrow_anna.png` — none exist. Since D23 Róza has her
+animated art, and the dragon/shot sprite paths are `null` (Emma and Anna stay vector
+placeholders, no requests). Still open: `background.png` 404s on every minigame start (the
+scene's dam background stays behind the game). Add the art or set it to `null`.
 
 ### P2 — The fight branch's victory has no way on (verified 2026-10-28)
 `beaver_battle_win` → `beaver_after_battle_win_01` … `_07` (being written by Sára), and
@@ -58,6 +61,12 @@ On browsers without `:has()` (before Chrome 105, Safari 15.4 or Firefox 121) the
 choice panel overlaps the right half of the dialogue on phones. Fallback: toggle a
 class on `#game-root` in `UiController.showChoices`.
 
+### P3 — Fast shots can pass through a beaver at very low frame rates (found by review 2026-10-28)
+The hit test runs once per tick. At Pixi's capped 100 ms tick (about 10 fps, or a tab coming
+back) Róza's fireball moves 70–80 px per tick, more than the 60 px hit reach (22 + 38), so it
+can skip over a beaver. Not a regression; matters only on very slow devices. Fix if needed:
+test the segment travelled in the tick, or sub-step fast shots.
+
 ### P3 — Minigame instructions pill covers the beavers' feet on short screens (verified 2026-10-17)
 At 640x360 and 844x390 the bottom `.mg-instructions` pill overlaps the lower part of
 the beaver lane (`laneY` 0.84). Visual only. Could hide the pill after the first
@@ -66,10 +75,11 @@ attack, or raise `laneY` on short screens.
 ### P2 — Checkerboard between hair strands in the character sprites (verified 2026-10-28)
 The 18 character poses show grey checkerboard in enclosed gaps: between loose hair strands
 (clearest on Anna), around Emma's braids and Róza's ponytail, and in some arm gaps. The
-cleaner only erases checker connected to the image edge. The `--enclosed` pass planned for
-Róza's minigame art removes exactly these gaps on the characters (diff maps checked). It is
+cleaner only erases checker connected to the image edge. The `--enclosed` pass (D23, made for
+Róza's minigame art) removes exactly these gaps on the characters (diff maps checked). It is
 not safe on the beaver sheets, where it also erases eye whites. Fix: re-clean the
-characters with `--enclosed` once that lands, then check faces.
+characters from their committed versions with `--force --enclosed` (they already have
+transparency, so the cleaner skips them without `--force`), then check faces.
 
 ### P3 — `npm audit`: advisories in dev dependencies (found by review 2026-10-28)
 `npm audit` reports high advisories in the dev toolchain (vite 7.3.5's dev server and
@@ -97,18 +107,28 @@ the volume: there it can sound for up to ~400 ms. Check that it stays silent els
 
 ## Fixed
 
-### P1 — No music in Firefox on the menu (and village saves) (found by review 2026-10-28) — fixed 2026-10-28, verified locally, still live in `352cb30` until pushed
+### P2 — Minigame: beavers in the top-left corner, Róza a red stick (user-reported 2026-10-28, Firefox) — fixed 2026-10-28, verified locally
+Was: while the beaver sheets loaded (seconds, longer in Firefox) each beaver sprite sat at
+(0, 0) until the game's first tick; Róza's dragon was the vector placeholder (no art yet).
+Fix (D23): one parallel load before anything is added, beavers placed in their lane when
+created; Róza animated from her art. Also: firing rules per dragon (Róza and Emma again as
+soon as their shot is gone, Anna up to 3 arrows), a skip during loading no longer carries on
+and re-adds input listeners, and the round end removes every shot, impact and half-played
+attack (a throw there used to stop the ticker). Checks: `minigame-roza.mjs`,
+`ff/ff-minigame.mjs`, `as-test/sprites.test.mjs`.
+
+### P1 — No music in Firefox on the menu (and village saves) (found by review 2026-10-28) — fixed 2026-10-28 in `757f054`, verified live
 Firefox let the menu track start at volume 0, then paused it once the fade-in raised the
 volume, and Howler never noticed. Reproduced in a real Firefox with the default autoplay
 policy (`C:\tmp\claude\mobile-check\ff-autoplay.mjs`). Fix: no track before the first input (D22).
 
-### P1 — Menu and resumed village track played at volume 0 (found by review 2026-10-28) — fixed 2026-10-28, verified locally
+### P1 — Menu and resumed village track played at volume 0 (found by review 2026-10-28) — fixed 2026-10-28 in `757f054`, verified live
 The first fix for the entry above started the waiting track after the first input, but
 called `fade()` right after `play()`. On a track that is already loaded, Howler queues
 that fade behind its play lock and never runs it. Fix: fade in on Howler's `play` event
 (D22). The tests now check that the volume is above 0, not just `playing()`.
 
-### P2 — Music kept playing on a hidden page (found by review 2026-10-28) — fixed 2026-10-28, verified locally, still live in `352cb30` until pushed
+### P2 — Music kept playing on a hidden page (found by review 2026-10-28) — fixed 2026-10-28 in `757f054`, verified live
 A locked tablet or a switched app kept the track looping, and a pause during a loading
 or starting track was lost (Howler queues it), leaving the scene silent on return or
 playing twice. Fix: mute + pause while hidden, resume only a stopped track (D22).
@@ -122,13 +142,13 @@ Also fixed: a quick Back to a track still fading out started a second copy over 
 track's play lock left it paused, because the hide's queued `pause()` ran after it started; it
 is now played again after its `play` event (`robustness.mjs` hide and show while starting).
 
-### P2 — Replaced track kept looping silently (found by review 2026-10-28) — fixed 2026-10-28, verified locally, still live in `352cb30` until pushed
+### P2 — Replaced track kept looping silently (found by review 2026-10-28) — fixed 2026-10-28 in `757f054`, verified live
 If the track changed while the new one's fade-in was still at 0, the old one never
 unloaded (Howler doesn't fire `fade` for 0 → 0). On iPhone, which ignores the volume,
 two tracks would be audible. It was introduced by the "Music change stopped the new
 track" fix below. Fix: unload on a timer (D22). Check: `music-race.mjs`.
 
-### P1 — Black backgrounds and stick figures after the first scene (user-reported 2026-10-28) — fixed 2026-10-28 in `352cb30`; the live check then only covered preloaded scenes, re-verify live after the next push
+### P1 — Black backgrounds and stick figures after the first scene (user-reported 2026-10-28) — fixed 2026-10-28 in `352cb30`, verified live with `757f054` (failed loads incl. the non-preloaded `lunch_in_town`)
 Seen in Firefox on the dev server after `7bb96de`. Never reproduced with the server
 running in Chrome or Firefox. It was reproduced exactly by failing every image request
 after the page had loaded: the menu, the first background and the end card worked,

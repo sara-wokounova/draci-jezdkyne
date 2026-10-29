@@ -300,3 +300,96 @@ the next input and reload a track that is still loading. Browsers without
 activation, so a first Tab there can leave the menu silent until a tap or a scene with
 another track; the same-key restart covers the next scene with that key. A Howler console
 warning ("HTML5 Audio pool exhausted") on startup is expected and harmless.
+
+## D23 — Róza's minigame art, firing rules and a clean round end (2026-10-28) — Accepted
+Supersedes: D15's "never higher than the bottom of the HUD top bar" measured with `height / 2`
+(now the art's real extent above its eye, see below).
+Decision: Róza's dragon, attack and fireball come from three hand-painted sheets kept in
+`art/minigames/dragon-attack/` (in git, not deployed). They are cleaned with
+`removeCheckerboard.mjs --enclosed` (dragon) or `--glow` (fireball) and packed by
+`scripts/packFrames.mjs` into one-row strips with equal frames, every frame aligned on an
+anchor: the dragon's eye (hand-measured per frame, `*.anchors.json`) or the fireball's
+white-hot core. The config takes the strip's frame count and anchor. `showFrame()` is the
+only place that changes a frame, and it sets the anchor too. The dragon flaps
+`[0, 3, 1, 2, 4, 2, 1, 3]` at 12 fps, ~200 game px wide. A tap plays attack frames 1–5 at
+24 fps, and the shot leaves from the mouth on frame 3 (fire). Then the dragon flaps again
+from the top of the stroke. The fireball keeps the pre-D23 path (Sára: keep the angle). It
+shows frames 0→3, then holds, rotated along its velocity. A hit shows the dissipating flame
+at the contact point. A shot is removed only when all of it is off-screen. Each strip falls
+back on its own. Without the fly strip, the vector dragon also ignores the attack strip,
+since it has no anchor.
+The flight-height clamp uses the art's real extent above the eye (both strips) instead of
+`height / 2`.
+Firing rules per dragon: `attack.maxShots` own shots in the air (Róza and Emma 1, Anna 3),
+and after a launch `attack.refireAfter` × that shot's on-screen time (Anna ⅓). That time is
+computed at launch by stepping the same motion code. The firing state lives on the game per
+round (`this.fire`), never on the config. A round is lost only when the flights are over,
+no shot is in the air, and beavers remain. A dragon attacks only while its shot would start on
+the screen (Róza's mouth, a vector dragon's head, Anna's tail), judged where that will be when
+the shot actually leaves (Róza's fire frame, 83 ms after the tap): a shot fired from off-screen
+fell unseen and, with `maxShots` 1, blocked the next taps for its whole airtime, and a breath
+with no fireball looked broken. So a tap either fires a visible shot or does nothing. (A shot
+whose start has still left the screen by the fire frame, e.g. after a resize, is lost.) A new
+shot is first drawn where it leaves: the tick that launches it doesn't move it. Shots only hit
+beavers that are on the screen. A zigzag shot is judged off-screen by its column widened by its
+swing, not by where the weave has it.
+`start()` loads everything with one `Promise.all` (background, strips, all 7 beaver sheets)
+and touches the scene only after that single await. It stops there if a skip already
+destroyed the game. Beavers get their lane position when created. `complete()` removes
+shots, impacts and a half-played attack. `tick()` stops as soon as the round has ended.
+Errors and odd config values are handled as D24 says.
+Emma's and Anna's sprite paths are `null`, since those files never existed.
+`removeCheckerboard.mjs` takes a file or a folder. It skips PNGs that already have
+transparency, unless `--force`. It rejects unknown flags. Neither script writes into `art/`:
+both compare real paths (links, junctions and short names resolved; case-insensitive on
+Windows), the cleaner for every file it would touch, so a folder run or a junction can't get
+in, and both refuse to write a file that has other names (a hard link into `art/`). `art/` holds the only copies of the originals and the hand-measured anchors.
+Why: asked for by Sára ("use roze_attack.png, roza_move.png and beska_projektil.png as
+sprites for the first dragon attack", plus her firing rules). The source sheets have a
+baked checkerboard, overlapping and unregistered frames. Slicing them in a grid made the
+dragon jump and leaked a neighbour's flame into a frame. The eye anchor keeps the head
+still across the two sheets. Without the anchor in `showFrame` the dragon would jump
+~36 game px on every attack, because Pixi 8's texture setter ignores the texture's own
+anchor. A shot leaving on the fire frame lines up with the breath. The Firefox report
+("sprite in the top-left corner, then the red stick") was the beavers at (0, 0) while their
+sheets loaded one after another, plus Róza's art not existing yet. Firing state on the
+config would have leaked into a retry, because `mergeConfig` returns `DEFAULTS.dragons`
+itself. The skip guard and the tick/complete guards fix throws: a throw in a ticker listener
+stops that ticker for good (D24). Re-running the cleaner on a packed strip turned it into an
+opaque box (its transparent pixels are RGB 0, so the edge fill never starts), hence the skip.
+Consequences: more shots per flight make the round easier (intended). Tune with
+`maxShots` / `refireAfter`. Near the left edge Anna's backward arrows leave in under a
+second, so the ⅓ rule rarely lets a third one out there. To change Róza's art, edit the
+originals in `art/` and regenerate (CLAUDE.md → Assets). `--enclosed` can erase neutral
+grey-white art (eye whites), so it is opt-in. The minigame `background.png` still 404s
+(issue P2). Code that changes a strip sprite's frame must set the anchor with it, as
+`showFrame()` in `dragonAttack.js` does.
+
+## D24 — Minigames fail safe on errors and odd config (2026-10-29) — Accepted
+Decision: no error and no config typo may leave the player stuck in a minigame or freeze it.
+`MinigameManager.run()` runs the game's constructor and `start()` in one promise chain: if
+either throws or rejects (a malformed `minigame.config`, a start-up that breaks), it logs
+"Minigame failed to start" and goes to `onFailure`. Inside `dragonAttack`, `tick()` catches any
+error, logs "Minigame error" and ends the round as lost. No shot stays in the air longer than
+`MAX_SHOT_SECONDS` (10, the same cap as the airtime calculation), and no flight lasts longer than
+`MAX_FLIGHT_SECONDS` (30: a dragon `speed` typo would never reach the edge). Config values are normalised
+where they enter: strip anchors (two finite fractions, else the centre), frame indices
+(integers only), frame counts (at most one per pixel of width), `beavers.count` (at most
+`MAX_BEAVERS`, 50), `flightsPerDragon` (at most `MAX_FLIGHTS_PER_DRAGON`, 100), `refireAfter`
+(not a number → 0), `flightGapMs` (not a number ≥ 0 → 450), `designHeight` (not a positive
+number → 600), `maxShots` (a whole number ≥ 1, else 1), the strip fps, `impactMs` and
+`bodyWidth` (not a positive number → the default: 24 / 12 / 14 fps, 300 ms, the strip's frame width) and the beaver animation fps (≤ 0 never spins: a looping
+animation stands still, a one-shot one counts as done; any fps advances by whole frames at
+once).
+Why: found by the review panels while D23 was built. A throw in a Pixi ticker listener stops
+that ticker for good, so the game froze under the HUD; with `allowSkip: false` there was no
+way out, and a constructor that threw before the skip button was wired locked the HUD the
+same way. A NaN position kept a shot in the air for ever, and the round only ends once every
+shot has resolved. A negative fps or a huge flight count hung the page in a loop the error
+backstop can't catch, because nothing throws. The story file is written by its author, so
+these are typos, not attacks, but a child can't get out of a stuck minigame.
+Consequences: a bug picks the failure branch instead of freezing (the lesser evil; the log
+says so). A custom `dragons` list must still give every field a dragon uses (README): the
+normalisation covers the optional fields and the loop-prone numbers, not e.g. `color` (a
+missing one fails the start, which then goes to `onFailure`). A new minigame gets the
+manager's half for free; its own ticker listener needs the same backstop.

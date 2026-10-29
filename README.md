@@ -164,21 +164,35 @@ with `start()` and `destroy()` methods and register it in `minigameManager.js`:
 manager.register('myGame', (context) => new MyGame(context));
 ```
 
+A throw in its constructor or `start()` ends the minigame as a failure. Its own
+ticker listener must catch errors and end the round itself (see
+`DragonAttackMinigame#tick`), or one error freezes the game.
+
 ### Dragon attack minigame (`type: "dragonAttack"`)
 
-Three dragons fly, one after another, above a line of moving beavers. Each
-flight you get exactly **one** attack (key press, mouse click, or screen touch).
-Each dragon has its own attack angle/speed/gravity and a configurable number of
-flights. **Win** when every beaver is hit; **lose** when the flights run out.
+Three dragons fly, one after another, above a line of moving beavers. A key
+press, mouse click or screen touch makes the dragon in flight attack. Each
+dragon has its own attack angle/speed/gravity, may have `attack.maxShots` of
+its own shots in the air at once (Róza and Emma 1, Anna 3), and after a launch
+waits `attack.refireAfter` × that shot's on-screen time (Anna ⅓) before the
+next. A dragon attacks only while its shot would start on the screen. Each dragon flies a
+configurable number of flights. **Win** when every
+beaver is hit; **lose** when the flights run out, no shot is in the air, and
+beavers remain.
 
-Every number is configurable through `config`. Sprites are optional — vector
-placeholders are drawn until you supply art. Sprite slots:
+Every number is configurable through `config`. Art is optional — vector
+placeholders are drawn until you supply it. Art slots:
 
 - `config.background.sprite` — optional dedicated minigame background.
 - `config.beavers.sheetPattern` — per-beaver sprite **sheets** (`beaver1.png` …
   `beaver7.png`); `{n}` is replaced with `1..count`.
-- `config.dragons[i].sprite` — each dragon (the default list has three).
-- `config.dragons[i].attack.sprite` — each dragon's projectile.
+- `config.dragons[i].animation` — animated dragon art: `fly` and `attack`
+  strips made by `scripts/packFrames.mjs` (one row of equal frames, the art
+  facing right, `anchor` = the dragon's eye), the frame orders and rates, and
+  `mouth` (where the shot leaves, in strip px from the eye). Róza has it.
+- `config.dragons[i].sprite` — a single image instead (the default list has none).
+- `config.dragons[i].attack.animation` — an animated shot strip (Róza's fireball);
+  `config.dragons[i].attack.sprite` — a single image instead.
 
 Each beaver sheet is a 6×2 grid (`config.beavers.sheet`). By default the frames
 are: top row (0–5) = walk cycle, then bottom row 6–7 = hit reaction, 8 = a log
@@ -198,11 +212,12 @@ defaults):
     "dragons": [
       {
         "name": "Róza",
-        "sprite": "assets/minigame/dragon_roza.png",
+        "color": "#d6462f",
         "flightY": 0.16,
         "speed": 320,
         "entryFrom": "left",
-        "attack": { "speed": 620, "angleDeg": 18, "gravity": 320, "sprite": "assets/minigame/fire_roza.png" }
+        "attack": { "speed": 620, "angleDeg": 18, "gravity": 320, "radius": 22, "color": "#ff7b3d",
+                    "maxShots": 1, "refireAfter": 0 }
       }
     ],
     "flightsPerDragon": 5,
@@ -213,7 +228,10 @@ defaults):
 ```
 
 Providing a custom `dragons` array fully replaces the three defaults, so include
-every dragon you want.
+every dragon you want, each with every field it uses: `name`, `color`, `flightY`,
+`speed`, `entryFrom` and an `attack` with `speed`, `angleDeg` (or `pattern: "zigzag"`),
+`gravity`, `radius` and `color` (a Róza without her `animation` is the vector
+placeholder again). The example above is a complete one-dragon list.
 
 ## Navigation controls
 

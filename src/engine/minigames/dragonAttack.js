@@ -4,18 +4,21 @@ import { resolveAssetPath } from '../assetPath.js';
 /**
  * Dragon attack minigame.
  *
- * Three dragons fly, one after another, above a line of moving beavers. Each
- * flight the player gets exactly one attack, triggered by a key press, mouse
- * click or screen touch. Each dragon has its own attack (launch angle, speed
- * and gravity), and each dragon flies a configurable number of flights.
+ * Three dragons fly, one after another, above a line of moving beavers. A key
+ * press, mouse click or screen touch makes the dragon in flight attack. Each
+ * dragon has its own attack (launch angle, speed and gravity) and may have
+ * `maxShots` of its own shots in the air at once; after a launch it waits
+ * `refireAfter` × that shot's on-screen time before the next one; it attacks
+ * only while its shot would start on the screen. Each dragon flies a
+ * configurable number of flights.
  *
  * Win: every beaver has been hit.
- * Lose: all flights are used up and beavers remain.
+ * Lose: all flights are used up, no shot is in the air, and beavers remain.
  *
  * Every number is configurable via the `config` object (see {@link DEFAULTS}).
- * Anything you omit falls back to the default. Sprites are optional: if a
- * sprite path is missing the entity is drawn with a simple vector placeholder,
- * so the minigame is fully playable before the art is dropped in.
+ * Anything you omit falls back to the default. Art is optional: if a sprite or
+ * animation strip is missing the entity is drawn with a simple vector
+ * placeholder, so the minigame is fully playable before the art is dropped in.
  */
 const DEFAULTS = {
   // Screens shorter than this scale the whole game down uniformly, so every px
@@ -76,36 +79,72 @@ const DEFAULTS = {
   //   pattern: 'ballistic' (angle + speed + gravity) or 'zigzag' (descends
   //            straight while weaving sideways).
   //   launchFrom: 'center' | 'head' | 'tail' — where the shot spawns relative
-  //            to the dragon's travel direction.
+  //            to the dragon's travel direction (launchOffset px from the
+  //            centre). A dragon with `animation.mouth` and its fly strip
+  //            launches from the mouth instead.
   //   angleDeg: 0 = straight down; positive bends toward travel direction;
   //            values > 90 launch upward first (for arcing shots).
+  //   maxShots: own shots in the air at once (default 1).
+  //   refireAfter: after a launch, wait this fraction of that shot's on-screen
+  //            time before the next one (default 0: as soon as maxShots allows).
+  //
+  // A dragon's `animation` (optional) uses strips made by scripts/packFrames.mjs:
+  // one row of equal frames, the art facing right, `anchor` = the dragon's eye
+  // as fractions of a frame. Sizes are in strip px; `mouth` is relative to the anchor.
+  // DEFAULTS is the source of truth for every value. A custom `dragons` list replaces it
+  // wholesale and must give every field a dragon uses (README); the `?? n` fallbacks in the code
+  // only cover the optional ones (art, firing rules, sizes), not e.g. `color` or `speed`.
   dragons: [
     {
       // Róza: a fast, direct flame that travels slightly ahead of her and dips.
       name: 'Róza',
       color: '#d6462f',
-      sprite: 'assets/minigames/dragon-attack/dragon_roza.png',
-      width: 150,
-      height: 96,
+      sprite: null, // a single image instead of `animation`
+      width: 200, // on screen; with `animation` the scale is width / animation.bodyWidth
+      height: 96, // only for the fallbacks (vector, or a single-image sprite)
       flightY: 0.16, // fraction of screen height
       speed: 320, // horizontal flight speed in px/second
       entryFrom: 'left', // 'left' or 'right'
+      animation: {
+        fly: { src: 'assets/minigames/dragon-attack/roza_fly.png', frames: 6, anchor: [0.866, 0.608] },
+        attack: { src: 'assets/minigames/dragon-attack/roza_attack.png', frames: 6, anchor: [0.725, 0.564] },
+        bodyWidth: 290, // dragon width in strip px (median of the fly frames)
+        flyFrames: [0, 3, 1, 2, 4, 2, 1, 3], // wings up → down → up
+        flyFps: 12,
+        attackFrames: [1, 2, 3, 4, 5], // mouth opens, fire breath
+        attackFps: 24,
+        launchFrame: 3, // strip frame (one of attackFrames) on which the shot leaves: the fire
+        mouth: [5, 14], // where the shot leaves (source ≈ [1250, 623] on roze_attack.png's fire frame, eye [1240, 595])
+      },
       attack: {
         pattern: 'ballistic',
-        launchFrom: 'head',
+        launchFrom: 'head', // only without the fly strip (the vector fallback)
         speed: 720, // launch speed in px/second
         angleDeg: 16, // slightly ahead, mostly forward and a touch down
         gravity: 140, // gentle dip
         radius: 22,
         color: '#ff7b3d',
-        sprite: 'assets/minigames/dragon-attack/flame_roza.png',
+        maxShots: 1,
+        refireAfter: 0,
+        sprite: null,
+        animation: {
+          src: 'assets/minigames/dragon-attack/roza_fireball.png',
+          frames: 5,
+          anchor: [0.672, 0.644], // the white-hot head
+          scale: 0.6,
+          fps: 14,
+          flightFrames: [0, 1, 2, 3], // burst → ball → comet, then held
+          impactFrame: 4, // dissipating flame at the contact point
+          impactMs: 300,
+          artAngleDeg: 35, // direction the comet points in the art
+        },
       },
     },
     {
       // Emma: a flash that drops straight down while zig-zagging side to side.
       name: 'Emma',
       color: '#e0a33a',
-      sprite: 'assets/minigames/dragon-attack/dragon_emma.png',
+      sprite: null,
       width: 150,
       height: 96,
       flightY: 0.26,
@@ -120,14 +159,16 @@ const DEFAULTS = {
         zigzagFrequency: 9, // weave speed (radians/second)
         radius: 24,
         color: '#ffe27a',
-        sprite: 'assets/minigames/dragon-attack/flash_emma.png',
+        maxShots: 1,
+        refireAfter: 0,
+        sprite: null,
       },
     },
     {
       // Anna: fires an arrow from her tail that arcs up-and-back, then down.
       name: 'Anna',
       color: '#3aa0e0',
-      sprite: 'assets/minigames/dragon-attack/dragon_anna.png',
+      sprite: null,
       width: 150,
       height: 96,
       flightY: 0.21,
@@ -141,7 +182,9 @@ const DEFAULTS = {
         gravity: 760, // heavy pull for a pronounced arc
         radius: 16,
         color: '#5ad0ff',
-        sprite: 'assets/minigames/dragon-attack/arrow_anna.png',
+        maxShots: 3,
+        refireAfter: 1 / 3, // up to three arrows in the air
+        sprite: null,
       },
     },
   ],
@@ -166,6 +209,11 @@ const DEFAULTS = {
     status: 'Bobři: {alive}/{total} · Nálet: {flight}/{flights} · {dragon}',
   },
 };
+
+const MAX_SHOT_SECONDS = 10; // no shot stays longer, whatever its path
+const MAX_BEAVERS = 50; // a typo in beavers.count must not start thousands of sheet loads at once
+const MAX_FLIGHTS_PER_DRAGON = 100; // nor may flightsPerDragon build a queue of billions
+const MAX_FLIGHT_SECONDS = 30; // a flight ends by then even if the dragon never reaches the edge
 
 export class DragonAttackMinigame {
   /**
@@ -193,7 +241,11 @@ export class DragonAttackMinigame {
     this.flightQueue = [];
     this.queueIndex = 0;
     this.currentDragon = null;
-    this.projectile = { active: false };
+    this.projectiles = [];
+    this.impacts = [];
+    // Firing state per dragon for this round. Never on the dragon's config: for `config: {}`
+    // that is DEFAULTS.dragons itself and would carry into the next round (a retry).
+    this.fire = this.config.dragons.map(() => ({ lastLaunchAt: -Infinity, lastAirtime: 0 }));
     this.score = 0;
     this.time = 0;
     this.elapsedSinceFlight = 0;
@@ -210,9 +262,25 @@ export class DragonAttackMinigame {
     this.layer.addChild(this.root);
     this.root.addChild(this.logLayer, this.beaverLayer, this.dragonLayer, this.projectileLayer);
 
-    await this.loadBackground();
-    await this.loadDragonTextures();
-    await this.spawnBeavers();
+    // Everything loads at once (the beaver sheets too), and nothing touches the scene before
+    // this single await.
+    const cfg = this.config;
+    const [background, beaverTexture, beaverFrames, dragonArt] = await Promise.all([
+      tryLoadTexture(cfg.background?.sprite),
+      tryLoadTexture(cfg.beavers.sprite),
+      Promise.all(Array.from({ length: Math.min(cfg.beavers.count, MAX_BEAVERS) }, (_, index) => this.loadBeaverFrames(cfg.beavers, index))),
+      Promise.all(cfg.dragons.map(loadDragonArt)),
+    ]);
+    // Skipped while loading: destroy() has already run.
+    if (this.finished) return;
+
+    if (background) {
+      this.background = new Sprite(background);
+      this.background.anchor.set(0.5);
+      this.root.addChildAt(this.background, 0);
+    }
+    this.dragonArt = dragonArt;
+    this.spawnBeavers(beaverFrames, beaverTexture);
     this.buildFlightQueue();
     this.bindInput();
     this.updateHud();
@@ -227,7 +295,7 @@ export class DragonAttackMinigame {
    *  Called every tick, so resizes and rotations need no extra handling. */
   layout() {
     const { width, height } = this.app.screen;
-    const scale = Math.min(1, height / this.config.designHeight);
+    const scale = Math.min(1, height / positive(this.config.designHeight, 600));
     const size = { width: width / scale, height: height / scale, top: this.hud.coveredTop() / scale };
     this.root.scale.set(scale);
     if (this.background) {
@@ -238,39 +306,11 @@ export class DragonAttackMinigame {
     return size;
   }
 
-  async loadBackground() {
-    const src = this.config.background?.sprite;
-    if (!src) return;
-
-    try {
-      const texture = await Assets.load(resolveAssetPath(src));
-      const sprite = new Sprite(texture);
-      sprite.anchor.set(0.5);
-      this.background = sprite;
-      this.root.addChildAt(sprite, 0);
-      this.layout();
-    } catch (error) {
-      console.warn('Minigame background failed to load — skipping.', error);
-    }
-  }
-
-  async loadDragonTextures() {
-    this.dragonTextures = await Promise.all(
-      this.config.dragons.map((dragon) => tryLoadTexture(dragon.sprite)),
-    );
-    this.attackTextures = await Promise.all(
-      this.config.dragons.map((dragon) => tryLoadTexture(dragon.attack?.sprite)),
-    );
-  }
-
-  async spawnBeavers() {
+  spawnBeavers(beaverFrames, singleTexture) {
     const cfg = this.config.beavers;
-    const { width } = this.layout();
-    const singleTexture = await tryLoadTexture(cfg.sprite);
+    const { width, height } = this.layout();
 
-    for (let index = 0; index < cfg.count; index += 1) {
-      const frames = await this.loadBeaverFrames(cfg, index);
-
+    beaverFrames.forEach((frames, index) => {
       let view;
       if (frames) {
         view = new Sprite(frames.walk[0] ?? Texture.WHITE);
@@ -293,10 +333,12 @@ export class DragonAttackMinigame {
         phase: Math.random() * Math.PI * 2,
         x: width * cfg.startXRatio + index * cfg.spacingPx,
       };
+      // In its lane from the start, never at (0, 0) until the first tick.
+      view.position.set(beaver.x, height * cfg.laneY);
 
       this.beaverLayer.addChild(view);
       this.beavers.push(beaver);
-    }
+    });
   }
 
   /**
@@ -340,7 +382,7 @@ export class DragonAttackMinigame {
 
   buildFlightQueue() {
     const dragonCount = this.config.dragons.length;
-    const perDragon = this.config.flightsPerDragon;
+    const perDragon = Math.min(this.config.flightsPerDragon, MAX_FLIGHTS_PER_DRAGON);
     const queue = [];
 
     if (this.config.flightOrder === 'sequential') {
@@ -387,28 +429,67 @@ export class DragonAttackMinigame {
 
   // ----------------------------------------------------------- game logic ---
 
+  /** The dragon in flight attacks if its firing rules allow (see DEFAULTS.dragons). */
   attack() {
     if (this.finished) return;
     if (this.state !== 'flying' || !this.currentDragon) return;
-    if (this.currentDragon.hasAttacked) return;
-    if (this.projectile.active) return; // a previous shot is still in flight
+    const dragon = this.currentDragon;
+    if (!this.canFire(dragon)) return;
 
-    this.currentDragon.hasAttacked = true;
-    this.launchProjectile(this.currentDragon);
+    if (dragon.art.breath) {
+      // The attack animation launches the shot on its fire frame (animateDragon).
+      dragon.attackTime = 0;
+      dragon.launched = false;
+      showFrame(dragon.view, dragon.art.breath, dragon.config.animation.attackFrames?.[0] ?? 0);
+    } else {
+      this.launchProjectile(dragon);
+    }
+  }
+
+  canFire(dragon) {
+    const attack = dragon.config.attack;
+    const fire = this.fire[dragon.index];
+    const inAir = this.projectiles.filter((shot) => shot.dragonIndex === dragon.index).length;
+    if (inAir >= Math.max(1, Math.floor(positive(attack.maxShots, 1)))) return false;
+    if (dragon.attackTime !== null && !dragon.launched) return false; // its shot hasn't left yet
+    // Not while the shot would start off the screen (the dragon entering or leaving, Anna's tail),
+    // judged where it will be on the fire frame: it would fall unseen and, with maxShots 1, block
+    // the next taps for its whole airtime; or the breath would play with no shot.
+    if (!this.launchOrigin(dragon, dragon.art.breath ? secondsToFire(dragon) : 0).onScreen) return false;
+    // Counted from the last launch, not from that shot's age: a shot that left early (a
+    // resize) must not lock the dragon out.
+    return this.time - fire.lastLaunchAt >= refireAfter(attack) * fire.lastAirtime;
+  }
+
+  /** Where the dragon's shot starts now, or `ahead` seconds of flight from now. */
+  launchOrigin(dragon, ahead = 0) {
+    const attack = dragon.config.attack;
+    const dir = dragon.direction;
+    const mouth = dragon.config.animation?.mouth;
+    let x = dragon.view.x + dragon.config.speed * dir * ahead;
+    let y = dragon.view.y;
+    if (dragon.art.fly && mouth) {
+      // From the mouth in the art (strip px from the eye, mirrored with the direction).
+      x += mouth[0] * dragon.scale * dir;
+      y += mouth[1] * dragon.scale;
+    } else {
+      // Spawn point: head is ahead of travel, tail is behind it.
+      const dragonWidth = dragon.config.width ?? 150;
+      const offset = attack.launchOffset ?? dragonWidth * 0.4;
+      if (attack.launchFrom === 'head') x += dir * offset;
+      else if (attack.launchFrom === 'tail') x -= dir * offset;
+    }
+    return { x, y, onScreen: x >= 0 && x <= this.layout().width };
   }
 
   launchProjectile(dragon) {
     const attack = dragon.config.attack;
     const dir = dragon.direction;
     const pattern = attack.pattern ?? 'ballistic';
-
-    // Spawn point: head is ahead of travel, tail is behind it.
-    const dragonWidth = dragon.config.width ?? 150;
-    const offset = attack.launchOffset ?? dragonWidth * 0.4;
-    let originX = dragon.view.x;
-    if (attack.launchFrom === 'head') originX += dir * offset;
-    else if (attack.launchFrom === 'tail') originX -= dir * offset;
-    const originY = dragon.view.y;
+    const { x: originX, y: originY, onScreen } = this.launchOrigin(dragon);
+    // A shot that would start off the screen (the mouth moved past the edge while the attack
+    // played) is lost, like one whose dragon left before the fire frame.
+    if (!onScreen) return;
 
     let vx;
     let vy;
@@ -423,16 +504,27 @@ export class DragonAttackMinigame {
       vy = Math.cos(angle) * attack.speed;
     }
 
-    const view = dragon.attackTexture
-      ? makeTexturedSprite(dragon.attackTexture, attack.radius * 2)
-      : createProjectileGraphic(attack.radius, attack.color);
+    const strip = dragon.art.shot;
+    let view;
+    if (strip) {
+      view = new Sprite();
+      const scale = attack.animation.scale ?? 1;
+      view.scale.set(scale * dir, scale); // flying left mirrors the art
+    } else if (dragon.art.shotTexture) {
+      view = makeTexturedSprite(dragon.art.shotTexture, attack.radius * 2);
+    } else {
+      view = createProjectileGraphic(attack.radius, attack.color);
+    }
     view.x = originX;
     view.y = originY;
     this.projectileLayer.addChild(view);
 
-    this.projectile = {
-      active: true,
+    const shot = {
+      dragonIndex: dragon.index,
       view,
+      strip, // the shot's animation strip (Róza's fireball), or null
+      animation: attack.animation,
+      dir,
       radius: attack.radius,
       x: originX,
       y: originY,
@@ -442,9 +534,32 @@ export class DragonAttackMinigame {
       gravity: attack.gravity ?? 0,
       pattern,
       age: 0,
+      fresh: true, // launched this tick: not moved until the next one
       zigzagAmplitude: attack.zigzagAmplitude ?? 50,
       zigzagFrequency: attack.zigzagFrequency ?? 8,
     };
+    shot.airtime = this.airtime(shot);
+    if (strip) orientStrip(shot);
+    this.projectiles.push(shot);
+
+    const fire = this.fire[dragon.index];
+    fire.lastLaunchAt = this.time;
+    fire.lastAirtime = shot.airtime;
+  }
+
+  /** Seconds the shot needs to leave the screen if it hits nothing: the same motion as
+   *  updateProjectile, stepped at 60 fps (so it fits every pattern and screen size). */
+  airtime(shot) {
+    const { width, height } = this.layout();
+    const probe = { ...shot };
+    const dt = 1 / 60;
+    let time = 0;
+    while (time < MAX_SHOT_SECONDS && !isOffScreen(probe, width, height)) {
+      probe.age += dt;
+      moveShot(probe, dt);
+      time += dt;
+    }
+    return time;
   }
 
   startNextFlight() {
@@ -463,31 +578,54 @@ export class DragonAttackMinigame {
     const direction = fromLeft ? 1 : -1;
     const margin = (config.width ?? 150) * 0.75;
 
-    const texture = this.dragonTextures?.[dragonIndex];
-    const view = texture
-      ? makeTexturedSprite(texture, config.width ?? 150, config.height ?? 96)
-      : createDragonGraphic(config.width ?? 150, config.height ?? 96, config.color, direction);
-
-    view.x = fromLeft ? -margin : size.width + margin;
-    view.y = flightY(config, size);
-
-    this.dragonLayer.addChild(view);
+    const art = this.dragonArt[dragonIndex];
+    let view;
+    let scale = 1;
+    if (art.fly) {
+      view = new Sprite();
+      showFrame(view, art.fly, config.animation.flyFrames?.[0] ?? 0);
+      scale = (config.width ?? 150) / positive(config.animation.bodyWidth, art.fly.width);
+      view.scale.set(scale * direction, scale); // the art faces right
+    } else if (art.texture) {
+      view = makeTexturedSprite(art.texture, config.width ?? 150, config.height ?? 96);
+    } else {
+      view = createDragonGraphic(config.width ?? 150, config.height ?? 96, config.color, direction);
+    }
 
     this.currentDragon = {
       config,
       index: dragonIndex,
       view,
       direction,
-      hasAttacked: false,
-      attackTexture: this.attackTextures?.[dragonIndex] ?? null,
+      art,
+      scale,
+      age: 0, // seconds since the flight began
+      flyTime: 0,
+      attackTime: null, // seconds into the attack animation while it plays
+      launched: false,
     };
+
+    view.x = fromLeft ? -margin : size.width + margin;
+    view.y = flightY(this.currentDragon, size);
+    this.dragonLayer.addChild(view);
 
     this.state = 'flying';
     this.elapsedSinceFlight = 0;
     this.updateHud();
   }
 
+  /** The ticker listener. A throw here would stop the ticker for good and freeze the game under
+   *  the HUD (with `allowSkip: false` for good): an unexpected error ends the round as lost. */
   tick(ticker) {
+    try {
+      this.update(ticker);
+    } catch (error) {
+      console.error('Minigame error — ending the round.', error);
+      this.fail();
+    }
+  }
+
+  update(ticker) {
     // Paused while #rotate-hint covers the game (portrait phone, D13), so no flights
     // are lost. Reads app.screen, which Pixi updates a frame after a rotation, so no
     // tick ever runs on a stale portrait-sized screen.
@@ -500,17 +638,32 @@ export class DragonAttackMinigame {
     this.time += dt;
 
     this.updateBeavers(dt, width, height);
+    // The round can end in the middle of a tick (the last beaver ran off, a winning hit).
+    // complete() has removed the shots and impacts then: touching them would throw, and a
+    // throw in a ticker listener stops the ticker for good.
+    if (this.finished) return;
 
     if (this.state === 'flying') {
       this.updateDragon(dt, size);
     } else if (this.state === 'gap') {
       this.elapsedSinceFlight += dt;
-      if (this.elapsedSinceFlight * 1000 >= this.config.flightGapMs) {
+      if (this.elapsedSinceFlight * 1000 >= nonNegative(this.config.flightGapMs, 450)) {
         this.startNextFlight();
       }
     }
 
-    if (this.projectile.active) this.updateProjectile(dt, width, height);
+    for (const shot of this.projectiles.slice()) {
+      this.updateProjectile(shot, dt, width, height);
+      if (this.finished) return;
+    }
+    for (const impact of this.impacts.slice()) {
+      impact.age += dt;
+      impact.view.alpha = Math.max(0, 1 - impact.age / impact.duration);
+      if (impact.age >= impact.duration) {
+        impact.view.destroy();
+        this.impacts.splice(this.impacts.indexOf(impact), 1);
+      }
+    }
   }
 
   updateBeavers(dt, width, height) {
@@ -570,23 +723,23 @@ export class DragonAttackMinigame {
    */
   stepAnimation(beaver, frames, fps, loop, dt) {
     if (!frames || frames.length === 0) return false;
+    // fps <= 0 (a typo) would never advance: a one-shot animation (the hit) counts as done at once, so
+    // the beaver still runs off and the round can end.
+    if (!(fps > 0)) return !loop;
 
     beaver.frameTimer += dt;
     const frameDuration = 1 / fps;
+    // Every whole frame due this tick at once: a huge fps (a typo) must not spin a loop.
+    const steps = Math.floor(beaver.frameTimer / frameDuration);
+    beaver.frameTimer -= steps * frameDuration;
     let completed = false;
-
-    while (beaver.frameTimer >= frameDuration) {
-      beaver.frameTimer -= frameDuration;
-      beaver.frameIndex += 1;
-      if (beaver.frameIndex >= frames.length) {
-        if (loop) {
-          beaver.frameIndex = 0;
-        } else {
-          beaver.frameIndex = frames.length - 1;
-          completed = true;
-          break;
-        }
-      }
+    if (loop) {
+      beaver.frameIndex = (beaver.frameIndex + steps) % frames.length;
+    } else if (beaver.frameIndex + steps >= frames.length) {
+      beaver.frameIndex = frames.length - 1;
+      completed = true;
+    } else {
+      beaver.frameIndex += steps;
     }
 
     beaver.view.texture = frames[beaver.frameIndex];
@@ -641,12 +794,16 @@ export class DragonAttackMinigame {
 
   updateDragon(dt, size) {
     const dragon = this.currentDragon;
+    dragon.age += dt;
     dragon.view.x += dragon.config.speed * dragon.direction * dt;
-    dragon.view.y = flightY(dragon.config, size);
+    dragon.view.y = flightY(dragon, size);
+    this.animateDragon(dragon, dt);
 
+    // Leaving before the attack's fire frame loses that shot.
     const margin = (dragon.config.width ?? 150);
-    const exited =
-      dragon.direction > 0 ? dragon.view.x > size.width + margin : dragon.view.x < -margin;
+    // Or after MAX_FLIGHT_SECONDS: a speed typo (0, negative, text) would never reach the edge.
+    const exited = dragon.age >= MAX_FLIGHT_SECONDS
+      || (dragon.direction > 0 ? dragon.view.x > size.width + margin : dragon.view.x < -margin);
 
     if (exited) {
       dragon.view.destroy();
@@ -656,39 +813,85 @@ export class DragonAttackMinigame {
     }
   }
 
-  updateProjectile(dt, width, height) {
-    const p = this.projectile;
-    p.age += dt;
-    p.vy += p.gravity * dt;
+  /** Flaps the wings, or plays the attack and launches its shot on the fire frame. Time only
+   *  moves in tick(), so the portrait pause also pauses an attack. */
+  animateDragon(dragon, dt) {
+    const { fly, breath } = dragon.art;
+    if (!fly) return;
+    const animation = dragon.config.animation;
 
-    if (p.pattern === 'zigzag') {
-      p.baseX += p.vx * dt; // vx is 0 by default, so the column stays put
-      p.y += p.vy * dt;
-      p.x = p.baseX + Math.sin(p.age * p.zigzagFrequency) * p.zigzagAmplitude;
-    } else {
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
+    if (dragon.attackTime !== null) {
+      dragon.attackTime += dt;
+      const frames = animation.attackFrames ?? [];
+      const step = Math.floor(dragon.attackTime * positive(animation.attackFps, 24));
+      if (step < frames.length) {
+        showFrame(dragon.view, breath, frames[step]);
+        // >= : a long tick can skip the fire frame.
+        if (!dragon.launched && step >= Math.max(0, frames.indexOf(animation.launchFrame))) {
+          dragon.launched = true;
+          this.launchProjectile(dragon);
+        }
+        return;
+      }
+      if (!dragon.launched) {
+        dragon.launched = true;
+        this.launchProjectile(dragon);
+      }
+      endAttack(dragon);
+      return;
     }
+    dragon.flyTime += dt;
+    const frames = animation.flyFrames ?? [0];
+    showFrame(dragon.view, fly, frames[Math.floor(dragon.flyTime * positive(animation.flyFps, 12)) % frames.length]);
+  }
 
-    p.view.x = p.x;
-    p.view.y = p.y;
+  updateProjectile(shot, dt, width, height) {
+    if (shot.fresh) { // first drawn at the mouth, not a tick's flight past it
+      shot.fresh = false;
+      return;
+    }
+    shot.age += dt;
+    moveShot(shot, dt);
+    shot.view.x = shot.x;
+    shot.view.y = shot.y;
+    if (shot.strip) orientStrip(shot);
 
-    // Collision against living beavers.
+    // Collision against living beavers, but only ones on the screen (a beaver past the edge,
+    // waiting to walk back in, can't be hit unseen).
+    const cfg = this.config.beavers;
+    const half = (cfg.spriteWidth ?? cfg.radius * 2.4) / 2;
     for (const beaver of this.beavers) {
-      if (!beaver.alive) continue;
-      const dx = beaver.x - p.x;
-      const dy = beaver.view.y - p.y;
-      const reach = p.radius + this.config.beavers.radius;
+      if (!beaver.alive || beaver.x < -half || beaver.x > width + half) continue;
+      const dx = beaver.x - shot.x;
+      const dy = beaver.view.y - shot.y;
+      const reach = shot.radius + cfg.radius;
       if (dx * dx + dy * dy <= reach * reach) {
+        // Before the hit is scored: a winning hit ends the round, and complete() must find it.
+        this.addImpact(shot, beaver);
         this.eliminateBeaver(beaver);
-        this.deactivateProjectile();
+        this.removeShot(shot);
         return;
       }
     }
 
-    // Off-screen -> the shot is spent.
-    const off = p.x < -50 || p.x > width + 50 || p.y > height + 50;
-    if (off) this.deactivateProjectile();
+    // Off-screen -> the shot is spent. So is one flying longer than any real shot could (a config
+    // typo can make its position NaN, and the round only ends once every shot has resolved).
+    if (isOffScreen(shot, width, height) || shot.age >= MAX_SHOT_SECONDS) this.removeShot(shot);
+  }
+
+  /** The shot strip's impact frame (Róza's dissipating flame) where it touched the beaver; fades out in tick(). */
+  addImpact(shot, beaver) {
+    const animation = shot.animation;
+    if (!shot.strip || animation.impactFrame == null) return;
+
+    const view = new Sprite();
+    showFrame(view, shot.strip, animation.impactFrame);
+    view.scale.copyFrom(shot.view.scale);
+    // On the line between the centres, at the edge of the shot's collision circle.
+    const share = shot.radius / (shot.radius + this.config.beavers.radius);
+    view.position.set(shot.x + (beaver.x - shot.x) * share, shot.y + (beaver.view.y - shot.y) * share);
+    this.projectileLayer.addChild(view);
+    this.impacts.push({ view, age: 0, duration: positive(animation.impactMs, 300) / 1000 });
   }
 
   eliminateBeaver(beaver) {
@@ -712,9 +915,11 @@ export class DragonAttackMinigame {
     this.maybeFinish();
   }
 
-  deactivateProjectile() {
-    this.projectile.view?.destroy();
-    this.projectile = { active: false };
+  removeShot(shot) {
+    const index = this.projectiles.indexOf(shot);
+    if (index === -1) return; // already cleared by complete()
+    this.projectiles.splice(index, 1);
+    shot.view.destroy();
     this.maybeFinish();
   }
 
@@ -722,7 +927,7 @@ export class DragonAttackMinigame {
    * Settles the round once it is decided:
    *  - Victory only after every struck beaver has fully scurried off-screen, so
    *    the flee animation always plays out before the result screen.
-   *  - Failure once the flights run out, the last shot has resolved, and at
+   *  - Failure once the flights run out, every shot has resolved, and at
    *    least one beaver was never hit.
    */
   maybeFinish() {
@@ -734,7 +939,7 @@ export class DragonAttackMinigame {
     }
 
     const allHit = this.beavers.every((b) => !b.alive);
-    if (this.state === 'done' && !this.projectile.active && !allHit) {
+    if (this.state === 'done' && this.projectiles.length === 0 && !allHit) {
       this.fail();
     }
   }
@@ -759,6 +964,12 @@ export class DragonAttackMinigame {
     this.finished = true;
     this.app.ticker.remove(this.tick);
     this.unbindInput();
+    // Nothing may hang frozen under the result dialog: shots, impacts, a half-played attack.
+    // tick()'s loops run over copies of these arrays, so they stop on `finished`, not on emptiness.
+    for (const item of [...this.projectiles, ...this.impacts]) item.view.destroy();
+    this.projectiles = [];
+    this.impacts = [];
+    if (this.currentDragon && this.currentDragon.attackTime !== null) endAttack(this.currentDragon);
     this.onComplete(outcome, { score: this.score });
   }
 
@@ -810,9 +1021,123 @@ function mergeConfig(defaults, override) {
   return override === undefined ? defaults : override;
 }
 
-/** Dragon y in game px: `flightY` of the height, but never behind the HUD top bar (D15). */
+/** Dragon y in game px: `flightY` of the height, but never behind the HUD top bar (D15).
+ *  Animated art keeps its real extent above the eye (the attack strip's included) below it. */
 function flightY(dragon, size) {
-  return Math.max(size.height * dragon.flightY, size.top + (dragon.height ?? 96) / 2);
+  const { fly, breath } = dragon.art;
+  const above = fly
+    ? Math.max(...[fly, breath].filter(Boolean).map((strip) => strip.anchor[1] * strip.height * dragon.scale))
+    : (dragon.config.height ?? 96) / 2;
+  return Math.max(size.height * dragon.config.flightY, size.top + above);
+}
+
+/** A dragon's art: a single image, animation strips, its shot's image or strip. Each piece is
+ *  optional and falls back on its own; the attack strip needs the fly strip (its anchor). */
+async function loadDragonArt(dragon) {
+  const [texture, shotTexture, fly, breath, shot] = await Promise.all([
+    tryLoadTexture(dragon.sprite),
+    tryLoadTexture(dragon.attack?.sprite),
+    loadStrip(dragon.animation?.fly),
+    loadStrip(dragon.animation?.attack), // `breath` below: `attack` alone means the shot elsewhere
+    loadStrip(dragon.attack?.animation),
+  ]);
+  return { texture, shotTexture, fly, breath: fly ? breath : null, shot };
+}
+
+/** A one-row strip of `frames` equal frames, or null. */
+async function loadStrip(spec) {
+  const base = await tryLoadTexture(spec?.src);
+  if (!base) return null;
+  // At least 1 px per frame, so a typo (2e6) can't allocate millions of textures.
+  const count = Math.min(base.width, Math.max(1, Math.floor(spec.frames) || 1));
+  const width = base.width / count;
+  return {
+    frames: Array.from({ length: count }, (_, index) => new Texture({
+      source: base.source,
+      frame: new Rectangle(index * width, 0, width, base.height),
+    })),
+    // Two finite fractions, or the centre (a typo would make every position NaN).
+    anchor: Array.isArray(spec.anchor) && spec.anchor.length === 2 && spec.anchor.every(Number.isFinite)
+      ? spec.anchor
+      : [0.5, 0.5],
+    width,
+    height: base.height,
+  };
+}
+
+/** Shows a strip's frame. Sets the anchor too: Pixi's texture setter ignores the texture's
+ *  own anchor, and the strips' anchors differ, so the eye would jump on every switch. */
+function showFrame(view, strip, index) {
+  // Integers only: a config typo like "length" must not reach the texture setter (it would throw
+  // in the ticker and freeze the game).
+  view.texture = (Number.isInteger(index) && strip.frames[index]) || strip.frames[0];
+  view.anchor.set(strip.anchor[0], strip.anchor[1]);
+}
+
+/** A positive number from the config, or the fallback (a typo like 0, -5 or "three" would stop an
+ *  animation or a cap for good). */
+function positive(value, fallback) {
+  return Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
+function nonNegative(value, fallback) {
+  return Number.isFinite(value) && value >= 0 ? value : fallback;
+}
+
+/** Seconds from a tap to the fire frame of the dragon's attack animation. */
+function secondsToFire(dragon) {
+  const animation = dragon.config.animation;
+  return Math.max(0, (animation.attackFrames ?? []).indexOf(animation.launchFrame)) / positive(animation.attackFps, 24);
+}
+
+/** The fraction of the last shot's airtime to wait before the next one; not a number ("1/3" typed as
+ *  text) counts as 0. */
+function refireAfter(attack) {
+  return Number.isFinite(attack.refireAfter) ? attack.refireAfter : 0;
+}
+
+/** Back to flapping from the top of the stroke (wings up, like the attack frames). */
+function endAttack(dragon) {
+  dragon.attackTime = null;
+  dragon.flyTime = 0;
+  showFrame(dragon.view, dragon.art.fly, dragon.config.animation.flyFrames?.[0] ?? 0);
+}
+
+function moveShot(shot, dt) {
+  shot.vy += shot.gravity * dt;
+  if (shot.pattern === 'zigzag') {
+    shot.baseX += shot.vx * dt; // vx is 0 by default, so the column stays put
+    shot.y += shot.vy * dt;
+    shot.x = shot.baseX + Math.sin(shot.age * shot.zigzagFrequency) * shot.zigzagAmplitude;
+  } else {
+    shot.x += shot.vx * dt;
+    shot.y += shot.vy * dt;
+  }
+}
+
+/** Gone only once all of it has left the screen (a strip shot's whole tail, in any rotation). */
+function isOffScreen(shot, width, height) {
+  let reach = 50;
+  if (shot.strip) {
+    const [ax, ay] = shot.strip.anchor;
+    reach = Math.hypot(Math.max(ax, 1 - ax) * shot.strip.width, Math.max(ay, 1 - ay) * shot.strip.height)
+      * Math.abs(shot.view.scale.y);
+  }
+  // A zigzag shot swings back: judge its column, widened by the swing, not where the weave has it now.
+  const zigzag = shot.pattern === 'zigzag';
+  const x = zigzag ? shot.baseX : shot.x;
+  const side = reach + (zigzag ? shot.zigzagAmplitude : 0);
+  return x < -side || x > width + side || shot.y > height + reach;
+}
+
+/** A strip shot's frame for its age (held on the last flight frame) and its rotation along its path. */
+function orientStrip(shot) {
+  const animation = shot.animation;
+  const frames = animation.flightFrames ?? [0];
+  showFrame(shot.view, shot.strip, frames[Math.min(Math.floor(shot.age * positive(animation.fps, 14)), frames.length - 1)]);
+  const art = ((animation.artAngleDeg ?? 0) * Math.PI) / 180;
+  // Mirrored (flying left), the art points the other way: 180° − its angle.
+  shot.view.rotation = Math.atan2(shot.vy, shot.vx) - (shot.dir > 0 ? art : Math.PI - art);
 }
 
 function isPlainObject(value) {
