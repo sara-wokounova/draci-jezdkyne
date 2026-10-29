@@ -125,7 +125,7 @@ button {
   transition: transform 130ms ease, background 130ms ease, border-color 130ms ease;
 }
 
-.choice-button:hover,
+.choice-button:hover:not(:disabled),
 .choice-button:focus-visible {
   transform: translateY(-1px);
   border-color: rgba(242, 201, 120, 0.78);
@@ -409,9 +409,28 @@ button {
   margin: 0;
 }
 
-#menu-main .choice-button {
+#menu-main .choice-button,
+#menu-confirm .choice-button {
   width: min(18rem, 80vw);
   font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+}
+
+/* Pokračovat with no game to continue (D27). */
+#main-menu .choice-button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+/* Ano while it would ignore a tap (D27). */
+#menu-confirm-yes.waiting {
+  opacity: 0.45;
+}
+
+#menu-settings,
+#menu-gallery,
+#menu-confirm {
+  padding: 1.2rem 1.4rem;
+  border-radius: 1.1rem;
 }
 
 #menu-settings,
@@ -419,8 +438,6 @@ button {
   width: min(40rem, calc(100vw - 2rem));
   max-height: calc(100vh - 2rem);
   max-height: calc(100dvh - 2rem);
-  padding: 1.2rem 1.4rem;
-  border-radius: 1.1rem;
 }
 
 #menu-gallery {

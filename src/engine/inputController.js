@@ -1,10 +1,10 @@
 export class InputController {
-  constructor({ root, onAdvance, onChoiceNumber, onBack, onRestart }) {
+  constructor({ root, onAdvance, onChoiceNumber, onBack, onEscape }) {
     this.root = root;
     this.onAdvance = onAdvance;
     this.onChoiceNumber = onChoiceNumber;
     this.onBack = onBack;
-    this.onRestart = onRestart;
+    this.onEscape = onEscape;
   }
 
   connect() {
@@ -26,10 +26,24 @@ export class InputController {
     }
 
     window.addEventListener('keydown', (event) => {
-      // Let Space/Enter press the focused menu or end-card button.
-      if (event.target.closest?.('#main-menu, #end-card')) return;
+      // Esc opens and closes the menu, also over the end card. Held down, it would toggle on every repeat.
+      if (event.key === 'Escape') {
+        if (!event.repeat) this.onEscape();
+        return;
+      }
 
-      if (event.key === ' ' || event.key === 'Enter') {
+      // A held key presses a focused button once: its repeats would open the menu and close it again
+      // (Enter on Menu, then on the focused Pokračovat), then go on into the story.
+      if (event.repeat && event.target.closest?.('button')) {
+        event.preventDefault();
+        return;
+      }
+
+      // Let Space/Enter press the focused menu, end-card or top-bar button.
+      if (event.target.closest?.('#main-menu, #end-card')) return;
+      const onTopButton = Boolean(event.target.closest?.('#top-controls button'));
+
+      if ((event.key === ' ' || event.key === 'Enter') && !onTopButton) {
         event.preventDefault();
         this.onAdvance();
       }
@@ -37,11 +51,6 @@ export class InputController {
       if (event.key === 'Backspace' || event.key === 'ArrowLeft') {
         event.preventDefault();
         this.onBack();
-      }
-
-      if (event.key.toLowerCase() === 'r') {
-        event.preventDefault();
-        this.onRestart();
       }
 
       if (/^[1-9]$/.test(event.key)) {

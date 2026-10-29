@@ -43,24 +43,29 @@ for `AutoSave`, the sprite scripts and the battle music) live outside the repo (
 ## Architecture
 
 ```
-index.html                 DOM shell: #pixi-host canvas, #top-controls, #dialogue-panel, #choice-panel,
-                           #end-card, #main-menu (Start / Nastavení / Galerie pages);
+index.html                 DOM shell: #pixi-host canvas, #top-controls (← Back, Menu), #dialogue-panel, #choice-panel,
+                           #end-card, #main-menu (main page: Pokračovat / Nová hra / Nastavení / Galerie; pages:
+                           Nová hra confirmation, Nastavení, Galerie);
                            #rotate-hint (portrait phones, outside #game-root); links public/manifest.webmanifest
 src/main.js                wires DOM elements → startVisualNovel()
 src/engine/
-  startVisualNovel.js      game loop: showScene / advance / goBack / restart / runMinigame
+  startVisualNovel.js      game loop: showScene / advance / goBack / runMinigame; the menu (Pokračovat, Nová hra,
+                           Menu, Esc; the session rule and the 500 ms tap guard after it closes, D27)
   storyRepository.js       fetch + minimal validation of story.json, scene lookup
   autoSave.js              localStorage: current scene, back-history, readSceneIds, settings (volume, autoRead)
-  uiController.js          DOM dialogue text, speaker name, choice buttons, end card, main menu + gallery
-  inputController.js       click/tap anywhere = advance; keys: Space/Enter, 1-9, Backspace/←, R
+  uiController.js          DOM dialogue text, speaker name, choice buttons, end card, main menu (pages, focus,
+                           Ano's tap guard, TAP_GUARD_MS) + gallery
+  inputController.js       click/tap anywhere = advance; keys: Space/Enter, 1-9, Backspace/←, Esc (menu)
   visualRenderer.js        Pixi: background (contain-fit), character sprites, placeholders, preload
   assetPath.js             resolveAssetPath (story paths → base URL) and backgroundImage (which backgrounds are files)
   pixiStage.js             Pixi Application + layers: background, characters, effects, minigame, overlay
   audioManager.js          Howler music per scene + menu (HTML5 streaming; same key continues, none = silence;
-                           nothing starts before the page's first click/tap/key, D22)
+                           nothing starts before the page's first click/tap/key, D22; keys in resumeMusic
+                           continue where they were left, D26)
   effects/atmosphereEffects.js   sunsetGlow, wind, snow
   minigames/
-    minigameManager.js     registry; run(spec) → 'victory' | 'failure' (a throwing game → 'failure', D24)
+    minigameManager.js     registry; run(spec) → 'victory' | 'failure' (a throwing game → 'failure', D24;
+                           a throwing clean-up can't leave the HUD up, D27)
     minigameHud.js         DOM overlay: title, score, skip menu, result dialog (Czech labels)
     dragonAttack.js        the "Dračí nálet na bobry" minigame (all tunables in DEFAULTS, safety caps beside it, D24): Róza animated
                            from strips, firing rules per dragon (maxShots, refireAfter), D23
@@ -76,14 +81,18 @@ art/                             source art kept in git but not deployed (origin
 
 Startup opens `#main-menu` (`openMenu`): queues `menuMusic` (it starts on the page's first
 click, tap or key, D22), draws the saved scene behind
-the menu (visuals only, no minigame) and preloads ahead of it (D20). Start calls `showScene`.
-While the menu is open (`menuOpen`) all story input is ignored, like during a minigame.
+the menu (visuals only, no minigame) and preloads ahead of it (D20). Pokračovat (enabled when there is a
+game to continue) and Nová hra call `showScene` (D27); the Menu button and Esc open the menu from the game.
+While the menu is open (`menuOpen`) all story input is ignored, like during a minigame, and for 500 ms
+after it closes.
 With autoread on (Nastavení), `showScene` ends by scheduling `advance()` (D19).
 Flow: `showScene(scene)` → save to localStorage → DOM text/choices → music (deliberately
-before the render's await, D21) → `visuals.render(scene)`
-(clears layers, draws background, characters, effects) → if `scene.minigame`,
-run it and jump to `onVictory`/`onFailure`; else preload the next 3 reachable scenes.
+before the render's await, D21) → if `scene.minigame`, run it at once (its render goes on behind it,
+unawaited, D27) and jump to `onVictory`/`onFailure`; else await `visuals.render(scene)` (clears layers,
+draws background, characters, effects) and preload the next 3 reachable scenes.
 Window resize re-renders the current scene.
+`window.__vn` (stage, minigames, audio, sceneId) is the check scripts' test hook and ships to the live
+site (D11 runs the checks there). It hands out live objects: put nothing on it you wouldn't show in the console.
 
 The UI is two stacked systems: Pixi canvas fills the screen; DOM panels float
 on top with CSS. Layout bugs are almost always in `main.css`; scene-fit bugs in
@@ -96,6 +105,7 @@ on top with CSS. Layout bugs are almost always in `main.css`; scene-fit bugs in
   "id": "draci-jezdkyne-z-vlpu",          // also the localStorage key: vn:<id>:autosave
   "start": "forest_flight_01",
   "menuMusic": "village_day",             // music key for the main menu
+  "resumeMusic": ["battle"],              // music keys that continue where they were left (D26)
   "assets": { "music": { "village_day": "assets/music/village_day.mp3" } },
   "characters": {
     "roza": { "displayName": "Róza", "color": "#d6462f", "hair": "#eac470",

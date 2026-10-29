@@ -15,7 +15,7 @@
 
       <nav id="top-controls" aria-label="Story controls">
         <button id="back-button" class="control-button" type="button" disabled>← Back</button>
-        <button id="restart-button" class="control-button" type="button">Restart</button>
+        <button id="menu-button" class="control-button" type="button">Menu</button>
       </nav>
 
       <section id="dialogue-panel" class="glass-panel" aria-live="polite">
@@ -39,9 +39,16 @@
       <section id="main-menu" aria-label="Hlavní menu">
         <div id="menu-main" class="menu-page">
           <h1>Dračí jezdkyně</h1>
-          <button id="menu-start" class="choice-button" type="button">Start</button>
+          <button id="menu-start" class="choice-button" type="button">Pokračovat</button>
+          <button id="menu-new" class="choice-button" type="button">Nová hra</button>
           <button class="choice-button" type="button" data-page="settings">Nastavení</button>
           <button class="choice-button" type="button" data-page="gallery">Galerie</button>
+        </div>
+        <div id="menu-confirm" class="menu-page glass-panel hidden">
+          <h2>Nová hra</h2>
+          <p>Začít novou hru? Rozehraná hra se ztratí.</p>
+          <button class="choice-button" type="button" data-page="main">Ne</button>
+          <button id="menu-confirm-yes" class="choice-button" type="button">Ano</button>
         </div>
         <div id="menu-settings" class="menu-page glass-panel hidden">
           <h2>Nastavení</h2>

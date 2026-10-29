@@ -2,6 +2,7 @@
   "id": "draci-jezdkyne-z-vlpu",
   "start": "forest_flight_01",
   "menuMusic": "village_day",
+  "resumeMusic": ["battle"],
   "assets": {
     "music": {
       "village_day": "assets/music/village_day.mp3",

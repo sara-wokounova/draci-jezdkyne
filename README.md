@@ -11,7 +11,7 @@ Barebone fullscreen cinematic visual novel starter using plain JavaScript, JSON 
 - Simple atmosphere effects: sunset glow, wind, snow
 - JSON-driven story scenes and choices
 - Mouse, touch, Space/Enter, and number-key choice controls
-- Back and Restart controls
+- Back and Menu controls; a main menu with Pokračovat (continue), Nová hra (new game), settings and a gallery
 - Autosave using `localStorage`
 - GitHub Pages workflow
 
@@ -164,7 +164,8 @@ with `start()` and `destroy()` methods and register it in `minigameManager.js`:
 manager.register('myGame', (context) => new MyGame(context));
 ```
 
-A throw in its constructor or `start()` ends the minigame as a failure. Its own
+A throw in its constructor or `start()` ends the minigame as a failure; a throw in its
+`destroy()` is logged, and the HUD and the game's sprites are removed anyway. Its own
 ticker listener must catch errors and end the round itself (see
 `DragonAttackMinigame#tick`), or one error freezes the game.
 
@@ -238,7 +239,8 @@ placeholder again). The example above is a complete one-dragon list.
 - Click/tap, Space, or Enter: advance
 - Number keys: choose a decision option
 - Back button, Backspace, or Left Arrow: go one scene back
-- Restart button or `R`: restart from the first scene
+- Menu button or Esc: the main menu over the game (Esc again, or Pokračovat, goes back)
+- Nová hra in the menu: start again from the first scene (asks first when there is progress to lose)
 
 Back history is stored in autosave, so refreshing the browser should preserve the current scene and the previous-scene stack.
 

@@ -13,7 +13,8 @@ nothing until then. Not a regression. Since D23 everything loads in parallel (`P
 instead of one sheet after another, which cuts the wait on a fast connection but not on one
 limited by bandwidth (same bytes). Since D25 battle.mp3 also downloads at that moment (music
 starts before the render, D21): ~3 MiB in Chrome (it buffers that far ahead), the whole 4.8 MB
-in Firefox, about +25–40 % to the first flight on a slow link. Rest of the fix: preload the
+in Firefox, about +25–40 % to the first flight on a slow link. A resumed battle (D26) buffers at
+its position first (a range request): in Chrome on a slow link ~3–4 s instead of ~1 s. Rest of the fix: preload the
 sheets from the scenes before `beaver_battle`, and/or shrink them (see "Heavy assets").
 
 ### P1 — Persuade branch crashes at `dam_with_beavers_persuade_04` (verified 2026-10-17)
@@ -33,8 +34,8 @@ scene's dam background stays behind the game). Add the art or set it to `null`.
 2026-10-28 it looped back to `forest_flight_01` instead. Needs story text, or an ending (D18).
 
 ### P3 — Engine UI is English, story is Czech
-`index.html` has `lang="en"` and title "Visual Novel Starter"; buttons "← Back",
-"Restart"; hint "Click, tap, Space, or Enter to continue"; save status shows
+`index.html` has `lang="en"` and title "Visual Novel Starter"; the "← Back" button
+(the menu, Menu and Nová hra are Czech since D27); hint "Click, tap, Space, or Enter to continue"; save status shows
 internal scene ids ("Autosaved • river_dam"). Minigame HUD is already Czech.
 
 ### P3 — Czech typos in `story.json`
@@ -96,10 +97,31 @@ tracks; once per loop, so once per 5 min for battle.mp3), and
 Howler logs "HTML5 Audio pool exhausted" once at startup. Both come from streaming
 (D21). Gapless loops would need Web Audio (full download + decode).
 
-### P3 — Battle music starts over on every attempt (2026-10-29)
-A round lasts ~80 s, battle.mp3 299 s (D25), so battle_02 (from 2:26) is practically never heard.
-Sára wants a retry to resume where the last attempt stopped: planned
-(`C:\tmp\claude\plans\music-resume.md`), waiting for her confirmation.
+### P3 — A resumed battle start on iPhone is unverified (2026-10-29)
+D26 seeks the battle track before its first `play()`. Whether iOS Safari fires the second
+`canplaythrough` on a paused element after such a seek is not checked on a real device: if not,
+a resumed battle could stay silent there until the next scene.
+
+### P3 — A battle left while its resumed start buffers leaves a Howler listener on the element (found by review 2026-10-29)
+When the stored position is past what Chrome first buffered (above ~190 s), the resumed `play()`
+waits for `canplaythrough` with its own listener. Leaving the minigame in that window (3–4 s on a
+slow link) unloads the track, but Howler keeps that listener, and its pool hands the same `<audio>`
+element to the next track (forest_ground): the listener seeks it to ~175 s and plays it at volume 0
+before forest_ground's own start from 0:00. The end state is right (forest_ground alone, from the
+start); two extra range requests. On iPhone, which ignores the volume, a short blip is possible
+(unverified). A fix would reach into Howler internals (`node._unlocked = false` before unloading a
+track still `loading`, so the element isn't pooled).
+
+### P3 — Music resume: three rare rough edges (found by review 2026-10-29)
+All in D26's Consequences, none silent: a resume in the last ~0.65 s of battle.mp3 (~0.2 % of retries)
+jumps in volume at the loop point; a switch during Howler's own loop restart keeps the older position; a
+listed track revived inside its fade-out right after a new game keeps the old game's position (no story
+path is that fast). Fixes would reach into Howler internals.
+
+### P3 — A save left on an ending shows that ending behind the menu (D27, 2026-10-29)
+The startup menu draws the saved scene behind it. On an ending save (tab closed before the end card)
+Pokračovat is disabled, yet the ending's picture is behind the menu, and Nová hra starts somewhere else.
+Cosmetic. Fix if it matters: draw the story's start behind the menu when the save is on an ending.
 
 ### P3 — Music volume does nothing on iPhone (2026-10-28)
 Music streams as HTML5 audio (D21), and iOS ignores its volume, so neither the volume
@@ -115,6 +137,17 @@ the volume: there it can sound for up to ~400 ms. Check that it stays silent els
 `music-race.mjs` "switch while starting".
 
 ## Fixed
+
+### P2 — Back or Restart during a minigame scene's render ran the minigame over another scene (found by review 2026-10-29) — fixed 2026-10-29, verified locally
+Pressed while `beaver_battle` was still drawing (its background slow to load), they left the scene, but the
+stale `showScene` still started the minigame once its render resolved: the HUD ran over the start scene (R) or
+`dam_with_beavers_fight` (Back), and its result jumped back into the dam branch. Since minigames (D9).
+Fix: a minigame scene starts its minigame without awaiting its render (D27), and R is gone. Check: `menu.mjs`
+"minigame: starts at once".
+
+### P3 — Battle music started over on every attempt (2026-10-29) — fixed 2026-10-29, verified locally
+A round lasts ~80 s, battle.mp3 299 s (D25), so battle_02 (from 2:26) was practically never heard.
+Fix: a retry continues where the last attempt stopped (D26). Checks: `robustness.mjs` resume.
 
 ### P2 — Minigame: beavers in the top-left corner, Róza a red stick (user-reported 2026-10-28, Firefox) — fixed 2026-10-28 in `d54e35a`, verified live 2026-10-29
 Was: while the beaver sheets loaded (seconds, longer in Firefox) each beaver sprite sat at

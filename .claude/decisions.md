@@ -412,3 +412,80 @@ attempt stopped (2026-10-29): planned separately, not built yet (issues.md). Cha
 either song means re-running the command. The joined file loses the originals' C2PA provenance
 metadata (it is bound to the original audio; the originals keep it); the SynthID watermark is in
 the audio itself (whether it survives the re-encode is not checked). Firefox's loop gap is ~0.4–0.6 s, as for every track there (issue P3).
+
+## D26 — Listed music tracks resume where they were left (2026-10-29) — Accepted
+Supersedes: D21's "going back to a scene whose track was switched away starts it from the
+beginning", for the keys listed in `resumeMusic`; D25's "every attempt starts at 0:00".
+Decision: the story's top-level `"resumeMusic": ["battle"]` lists music keys whose position is
+remembered. When such a track is switched away while playing, `AudioManager` stores its
+position (`seek()`, the moment the switch starts, before the fade-out); the next time the key
+starts afresh, the new track is sought there before its first `play()`. A track that never
+started (still loading, or waiting for the first input) doesn't overwrite the stored position.
+Positions live in memory only: a reload starts every track over, and a new game (Nová hra,
+"Zpět na začátek", `resetToStart()`) calls `forgetPositions()`. That also covers a listed track still
+playing at that moment: the new game's first scene switches away from it, and that switch stores nothing
+(unless the new game keeps the same track playing). A revive inside the fade-out (D22) keeps the same
+track, as before. Every `play()` goes through `playTrack()`, with the id of the track's one sound: a bare
+`play()` while a resumed start buffers (Howler's play lock held, the sound still paused) starts a second
+copy, and a bare `play()` of an ended sound gives it a new id. `resumeMusic` must be an array
+(anything else counts as empty); an item that isn't a key of `assets.music` logs a warning.
+Why: Sára chose "resume where it stopped" for the battle music: a round lasts ~80 s, battle.mp3
+299 s (D25), so starting each attempt at 0:00 would never reach battle_02. A list of keys keeps
+every other track as it was (a return to the village still starts village_day over); a flag
+inside `assets.music` would have turned its string values into objects (D22's key check).
+Consequences: a resumed start buffers at the new position first: in Chrome on a slow link ~3–4 s
+instead of ~1 s. The new-game rule for a track still playing has no story path while only `battle` is
+listed (no menu during a minigame, D27); it stays as the rule for any listed key that plays outside one. iOS behaviour after the seek is unverified (issue P3). A switch in the few
+milliseconds while Howler restarts the loop at 0:00 (it may buffer there too) stores nothing, so the
+next visit resumes at the older position; theoretical, once per 299 s of play. A position in the last
+~0.65 s of the file (about 0.2 % of retries) loops back to 0:00 during the fade-in: Howler ends that
+fade for the sound but not for the track's own volume, so the music jumps up at the loop point and the
+next switch starts its fade-out lower (rough, never silent). A new game marks only the track playing then:
+a listed track still fading out from an earlier switch, if revived within its fade-out (D22), would bring
+the old game's position along (theoretical: no story path reaches a listed key that fast after a reset).
+
+## D27 — Main menu: Pokračovat / Nová hra; a Menu button in the game (2026-10-29) — Accepted
+Supersedes: D18's "Start continues from the autosave" and its Restart (and the R key) as the way to a new
+game: now Nová hra.
+Decision: the main menu has Pokračovat (the old Start, still `#menu-start`: the saved scene with its Back
+history), Nová hra, Nastavení, Galerie. Pokračovat is disabled unless there is an active game session: the game
+was started in this page visit (and not reset by "Zpět na začátek" since), or the save holds progress — its
+resolved scene is not an ending and either isn't the story's start or has Back history. Nová hra resets progress
+as Restart did (settings and the gallery stay; music positions are forgotten, D26); with progress to lose it
+first opens a confirmation page ("Začít novou hru? Rozehraná hra se ztratí.", Ne first and focused, then Ano).
+Ano takes a tap or click only after 500 ms (`TAP_GUARD_MS`) without any tap, counted from the page opening and
+from every pointerdown while it shows; keyboard clicks always count; a click without a press of its own
+(assistive technology) is judged by its own time; Ano is dimmed while it would ignore a tap, and while a press
+that won't count is held. The top bar's Restart (and R) is replaced by "Menu", which opens the menu over the
+game; so does Esc, on the end card too. In the menu, Esc on a sub-page goes back to the main page, and on the
+main page of a menu opened from the game back to the game; the startup menu ignores it; a held Esc doesn't
+repeat. The menu always opens on its main page with the first enabled button focused; a sub-page focuses its
+first button, and going back refocuses the button that opened it. The in-game menu keeps the scene's music and
+Pokračovat continues it; the startup menu and "Zpět na začátek" play the menu music. No menu during a minigame
+(its skip button is the way out). Story input (taps, choices, number keys, Back) waits 500 ms after the menu
+closes. Enter/Space on a focused top-bar button press it, and a mouse press doesn't focus those buttons. A
+minigame scene starts its minigame without awaiting its render (the render goes on behind it; a rejection logs
+"Scene render failed"); `MinigameManager.run()` removes the HUD, `minigame-active` and the minigame layer's
+sprites even when the game's `destroy()` throws; Back is enabled again as soon as the minigame ends. A held key presses a focused button only once
+(its repeats are dropped), and Ano also stops being dimmed when the browser cancels a press.
+Why: asked for by Sára ("split Start in menu into Nová hra and Pokračovat. Disable Pokračovat when there is no
+active game session. Add escape to main menu into game screen - at the top where is restart - name the option
+"Menu""), with her answers: Nová hra asks first, Menu replaces Restart and R, the in-game menu keeps the scene's
+music, an ending is no progress. The confirmation replaces the main page at once with Ano right below where Nová
+hra was (0.5 px on desktop; on Android the first tap's fullscreen resize moves the page ~28 px), so a double tap
+or a child mashing the button would otherwise wipe the save: no layout keeps Ano away. The guard after the menu
+closes stops the second tap of a double tap on Pokračovat from skipping a line or picking the choice under the
+button. Not awaiting a minigame scene's render leaves no moment in which Back, Menu or Esc can reach that scene
+before the HUD (Back or R during a slow render used to start the minigame over another scene), and a stalled
+render can't freeze the start. A throwing clean-up left the HUD up and the top bar hidden: on a phone, with no
+Esc, stuck. R with no confirmation would have stayed an invisible, instant progress wipe. A mouse press that
+focused Back made Chrome treat the next key as keyboard focus, so Space pressed Back again.
+Consequences: a save left on an ending opens with Pokračovat disabled (Back from the ending into the other
+branch is gone for it), while that ending is drawn behind the menu. A mouse click on the disabled Pokračovat is
+no first input (D22: no click event), but a tap on it is (touch events), so on a phone it starts the menu music.
+Menu on the end card, then Pokračovat, shows the end scene with the card closed; the next tap reopens it. With a
+stalled render the battle plays over a black backdrop until the picture arrives (the minigame has no background
+of its own yet, issue P2). On a minigame scene left by a story typo in `onVictory`/`onFailure`, Pokračovat runs
+the minigame again, as on a saved minigame scene; Back and Nová hra are the ways on. A clean-up that throws
+part-way may leave that game's own listeners live (theoretical). In fullscreen (phones) the browser takes Esc to
+leave fullscreen; the Menu button is the way there.

@@ -52,4 +52,5 @@ forest_flight_01 → forest_flight_02 → first_choice
   the ground in the forest) on `river_dam` (Sára, 2026-10-28) and on every `dam_02` scene except
   the minigame: the dam scenes from `dam_with_beavers` on, persuade, fight, win,
   `beaver_after_battle_win_*`, lose. The minigame `beaver_battle` plays `battle`: battle_01 then
-  battle_02, looped as one file (D25).
+  battle_02, looped as one file (D25); a retry continues it where the last attempt stopped, a new
+  game starts it over (D26).

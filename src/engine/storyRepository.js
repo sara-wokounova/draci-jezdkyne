@@ -3,6 +3,8 @@ export class StoryRepository {
     this.id = data.id ?? 'visual-novel';
     this.start = data.start;
     this.menuMusic = data.menuMusic ?? null;
+    // Music keys that continue where they were left (D26).
+    this.resumeMusic = Array.isArray(data.resumeMusic) ? data.resumeMusic : [];
     this.assets = data.assets ?? {};
     this.characters = data.characters ?? {};
     this.scenes = new Map(data.scenes.map((scene) => [scene.id, scene]));

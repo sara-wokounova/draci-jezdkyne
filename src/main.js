@@ -10,7 +10,7 @@ startVisualNovel({
     choicePanel: document.querySelector('#choice-panel'),
     saveStatus: document.querySelector('#save-status'),
     backButton: document.querySelector('#back-button'),
-    restartButton: document.querySelector('#restart-button'),
+    menuButton: document.querySelector('#menu-button'),
     endCard: document.querySelector('#end-card'),
     mainMenu: document.querySelector('#main-menu'),
     root: document.querySelector('#game-root'),

@@ -114,7 +114,13 @@ export class MinigameManager {
         });
     });
 
-    this.activeGame?.destroy();
+    // A clean-up that throws must not leave the HUD up and the top bar hidden: a phone has no Esc (D27).
+    try {
+      this.activeGame?.destroy();
+    } catch (error) {
+      console.error('Minigame cleanup failed.', error);
+      this.stage.layers.minigame.removeChildren(); // its sprites would stay above every later scene
+    }
     this.activeGame = null;
     hud.destroy();
     this.root.classList.remove('minigame-active');

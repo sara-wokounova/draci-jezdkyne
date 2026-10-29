@@ -9,8 +9,16 @@ const FADE_OUT_MS = 350;
 const UNLOAD_MARGIN_MS = 50; // a replaced track is unloaded this long after its fade-out ends
 
 export class AudioManager {
-  constructor(musicAssets, volume) {
+  constructor(musicAssets, volume, resumeMusic) {
     this.musicAssets = musicAssets;
+    // Keys whose position is remembered when they are switched away, and continued on the next visit
+    // (D26). In memory only: a reload starts them over, and so does a new game (forgetPositions).
+    this.resumable = new Set(resumeMusic);
+    this.positions = new Map(); // key → seconds
+    this.forgottenTrack = null; // the track playing when a new game began (forgetPositions)
+    for (const key of this.resumable) {
+      if (this.musicPath(key) === null) console.warn('resumeMusic names no music asset:', key);
+    }
     this.currentTrack = null;
     this.currentKey = null;
     this.setVolume(volume);
@@ -23,6 +31,7 @@ export class AudioManager {
     this.startWhenActive = null;
     this.resumeOnShow = false;
     this.fading = new Map(); // key → { track, timer } of tracks fading out after a switch
+    this.soundIds = new WeakMap(); // track → the id of its sound (see playTrack)
     const firstInput = new AbortController();
     const activate = () => {
       // Tab, arrows, Escape or a touch that scrolls don't unlock sound: keep waiting.
@@ -59,14 +68,38 @@ export class AudioManager {
       } else if (this.resumeOnShow) {
         this.resumeOnShow = false;
         // Not if it is still (or again) playing: a second play() would start a second copy.
-        if (track && !track.playing()) track.play();
+        if (track && !track.playing()) this.playTrack(track);
         // "Playing" can also mean its first play() is still starting, with the hide's pause()
         // queued behind it: once it has started, start it again if that pause stopped it.
         else track?.once('play', () => setTimeout(() => {
-          if (this.currentTrack === track && !document.hidden && !track.playing()) track.play();
+          if (this.currentTrack === track && !document.hidden && !track.playing()) this.playTrack(track);
         }));
       }
     });
+  }
+
+  /** Every resumable track starts from the beginning again (a new game, D26). */
+  forgetPositions() {
+    this.positions.clear();
+    // Also the one still playing: the new game's first scene switches away from it after this.
+    this.forgottenTrack = this.currentTrack;
+  }
+
+  // Every play() goes through here, on the track's own sound by its id: a bare play() while Howler holds
+  // its play lock with the sound still paused (a resumed start buffering at its position, D26) starts a
+  // second copy, and a bare play() of an ended sound re-ids it. The first call keeps the id Howler gives
+  // the sound; later calls pass it, so it doesn't change.
+  playTrack(track) {
+    const id = track.play(this.soundIds.get(track));
+    if (typeof id === 'number') this.soundIds.set(track, id); // Howler can return null or undefined
+  }
+
+  // A music key's mp3 path, or null. Paths only: a typo like "toString" or "__proto__" finds a function or
+  // an object, never a string, and must not reach the path code and break the scene. The string test comes
+  // first: an odd JSON object may not even convert to a property name.
+  musicPath(key) {
+    const src = typeof key === 'string' ? this.musicAssets[key] : null;
+    return typeof src === 'string' ? src : null;
   }
 
   /** Master volume 0–1 (Nastavení → Hlasitost hudby). */
@@ -83,8 +116,9 @@ export class AudioManager {
       // Same track: keep it going. One that stopped (a play() the browser refused) starts
       // again here, inside the player's tap, instead of staying silent for every scene.
       const track = this.currentTrack;
+      this.forgottenTrack = null; // it goes on in the new game: its position counts again
       if (track && this.userActive && !document.hidden && track.state() === 'loaded' && !track.playing()) {
-        track.play();
+        this.playTrack(track);
       }
       return;
     }
@@ -102,6 +136,10 @@ export class AudioManager {
     const previous = this.currentTrack;
     const previousKey = this.currentKey;
     if (previous?.playing()) {
+      // Only a track that played has a position worth keeping (one still loading would store 0).
+      if (this.resumable.has(previousKey) && previous !== this.forgottenTrack) {
+        this.positions.set(previousKey, previous.seek());
+      }
       previous.fade(previous.volume(), 0, FADE_OUT_MS);
       // A timer, not Howler's 'fade' event: that never fires for a 0 → 0 fade (switched while
       // the fade-in was still at 0), which left the old track looping silently forever.
@@ -115,6 +153,7 @@ export class AudioManager {
     } else {
       previous?.unload();
     }
+    this.forgottenTrack = null; // switched away from: a revive of it later counts as a normal track
 
     this.currentKey = key;
     this.currentTrack = null;
@@ -130,10 +169,8 @@ export class AudioManager {
       return;
     }
 
-    // Paths only: a typo like "toString" or "__proto__" finds a function or an object, never a
-    // string, and must not reach the path code and break the scene.
-    const src = typeof key === 'string' ? this.musicAssets[key] : null;
-    if (typeof src !== 'string') {
+    const src = this.musicPath(key);
+    if (src === null) {
       console.warn('Missing music asset:', key); // not in a template: an odd key may not convert to text
       return;
     }
@@ -141,6 +178,9 @@ export class AudioManager {
     // html5: streams the multi-MB mp3 instead of downloading and decoding it all first.
     // ponytail: iOS ignores HTML5 audio volume, so the volume slider and fades do nothing on iPhone.
     const track = new Howl({ src: [resolveAssetPath(src)], loop: true, volume: 0, html5: true });
+    // Back where the last visit left it: Howler queues the seek until the track has loaded, and runs it
+    // before the queued play() (Chrome then buffers at that position before the 'play' event).
+    if (this.positions.has(key)) track.seek(this.positions.get(key));
     // Its <audio> element may come from Howler's pool still muted (unloaded while the page was
     // hidden); Howler.mute(false) on show only reaches tracks that existed then.
     Howler.mute(document.hidden);
@@ -154,7 +194,7 @@ export class AudioManager {
       });
       // Autoread can move on in a background tab: that scene's track waits for the page.
       if (document.hidden) this.resumeOnShow = true;
-      else track.play();
+      else this.playTrack(track);
     };
     if (this.userActive) start();
     else this.startWhenActive = start;
