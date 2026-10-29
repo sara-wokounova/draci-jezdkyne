@@ -393,3 +393,22 @@ says so). A custom `dragons` list must still give every field a dragon uses (REA
 normalisation covers the optional fields and the loop-prone numbers, not e.g. `color` (a
 missing one fails the start, which then goes to `onFailure`). A new minigame gets the
 manager's half for free; its own ticker listener needs the same backstop.
+
+## D25 — Battle music: two songs joined into one looping file (2026-10-29) — Accepted
+Decision: the minigame scene `beaver_battle` plays `battle` (`assets/music/battle.mp3`): Sára's
+battle_01 (146.3 s) followed by battle_02 (152.6 s), joined and encoded once at 128 kbps CBR
+(298.9 s, 4.8 MB) with the ffmpeg command in CLAUDE.md, and looped like any track (D21, D22).
+The originals live in `art/music/` (kept in git, not deployed). `river_dam` plays forest_ground.
+Why: Sára asked for battle_01 and battle_02 "one after another … for as long as the minigame
+runs". A playlist engine in `AudioManager` (an item chain on Howler's `end` event) was planned
+through five disprover rounds and dropped for its moving parts: the next song would start outside
+a tap (a phone may refuse it), a gap while it loads, revive and retry corner cases, a dozen tests.
+One file needs no code at all. 128 kbps (Sára's choice over 192): Firefox downloads a whole HTML5
+track at once, next to the minigame's ~12 MB of beaver sheets (Chrome buffers ~3 MiB either way);
+plenty for game music on a phone. `-fflags +bitexact` keeps the ffmpeg version out of the file.
+Consequences: a round lasts ~80 s and every attempt starts at 0:00, so battle_02 (from 2:26) is
+practically never heard in one attempt. Sára asked for the music to resume where the last
+attempt stopped (2026-10-29): planned separately, not built yet (issues.md). Changing
+either song means re-running the command. The joined file loses the originals' C2PA provenance
+metadata (it is bound to the original audio; the originals keep it); the SynthID watermark is in
+the audio itself (whether it survives the re-encode is not checked). Firefox's loop gap is ~0.4–0.6 s, as for every track there (issue P3).

@@ -49,9 +49,7 @@ forest_flight_01 → forest_flight_02 → first_choice
 - Music (D21): `village_day` on the main menu and the village scenes (`village_home`,
   `lunch_in_town`, `flooded_town`); `dragon_flight` on the flying scenes
   (`forest_flight_01`, `forest_flight_02`, `first_choice`); `forest_ground` (the girls on
-  the ground in the forest) on every `dam_02` scene except the minigame: the dam scenes
-  from `dam_with_beavers` on, persuade, fight, win, `beaver_after_battle_win_*`, lose.
-  `river_dam` and the minigame `beaver_battle` have none yet, so they are silent. Open
-  questions for Sára: is `river_dam` (right after "Poleťme se podívat blíž") still in
-  flight (→ `dragon_flight`) or on the ground (→ `forest_ground`)? Should the minigame,
-  with the dragons flying, get `dragon_flight`?
+  the ground in the forest) on `river_dam` (Sára, 2026-10-28) and on every `dam_02` scene except
+  the minigame: the dam scenes from `dam_with_beavers` on, persuade, fight, win,
+  `beaver_after_battle_win_*`, lose. The minigame `beaver_battle` plays `battle`: battle_01 then
+  battle_02, looped as one file (D25).

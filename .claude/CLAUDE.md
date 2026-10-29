@@ -37,7 +37,7 @@ npm run clean-sprites  # strip baked checkerboard from character PNGs (in place;
 ```
 
 No unit tests in the repo and no linter. The Playwright check scripts (and node checks
-for `AutoSave` and the sprite scripts) live outside the repo (see the Tests section of workflow.md). Also verify changes by running the game
+for `AutoSave`, the sprite scripts and the battle music) live outside the repo (see the Tests section of workflow.md). Also verify changes by running the game
 (`npm run dev`) in a browser, including a phone-sized viewport.
 
 ## Architecture
@@ -67,10 +67,10 @@ src/engine/
 src/styles/main.css        all styling (DOM UI is absolutely positioned over the canvas)
 public/story/story.json    the whole story (fetched at runtime, not bundled)
 public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, minigames/dragon-attack/,
-                           music/ (mp3, ~3.6–4.2 MB each, streamed)
+                           music/ (mp3, ~3.6–4.8 MB each, streamed)
 scripts/removeCheckerboard.mjs   flood-fills light-gray checkerboard to alpha (--enclosed, --glow, --force)
 scripts/packFrames.mjs           scattered sheet frames → one-row strip, anchored (eye / white-hot core)
-art/                             source art kept in git but not deployed (originals of packed strips)
+art/                             source art kept in git but not deployed (originals of the packed strips and of battle.mp3)
 .github/workflows/deploy.yml     push to main → npm ci → build → GitHub Pages
 ```
 
@@ -132,9 +132,16 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
 - Backgrounds: 1672×941 PNG (~16:9, ~3.3 MB each). Displayed contain-fit (letterboxed).
 - Characters: 1024×1536 RGBA PNG (~2 MB each), 6 poses per character.
 - Beaver sheets: `beaver1..7.png`, 1448×1086, 6×2 grid (walk 0–5, hit 6–7, log 8, scurry 9–11).
-- Music: `public/assets/music/*.mp3` (~3.6–4.2 MB each, streamed as HTML5 audio), referenced
+- Music: `public/assets/music/*.mp3` (~3.6–4.8 MB each, streamed as HTML5 audio), referenced
   by key from `story.assets.music`; scenes pick a track with `music`, the menu with
-  `menuMusic` (D21, D22).
+  `menuMusic` (D21, D22). `battle.mp3` (the minigame) is the two songs in `art/music/` joined and
+  re-encoded at 128 kbps (D25), from the repo root (the committed file was made with ffmpeg 8.1;
+  another build makes the same audio but not the same bytes):
+  ```
+  ffmpeg -y -i art/music/battle_01.mp3 -i art/music/battle_02.mp3 -filter_complex "[0:a][1:a]concat=n=2:v=0:a=1" -vn -map_metadata -1 -c:a libmp3lame -b:a 128k -fflags +bitexact public/assets/music/battle.mp3
+  ```
+  The originals keep their C2PA provenance metadata (AI-generated content); the joined file loses it, and
+  `-vn -map_metadata -1` keep a future song's cover art and text tags out of the deployed file.
 - Róza's minigame strips (`public/assets/minigames/dragon-attack/roza_{fly,attack,fireball}.png`)
   are generated from the originals in `art/minigames/dragon-attack/` (D23), one file at a time:
   ```

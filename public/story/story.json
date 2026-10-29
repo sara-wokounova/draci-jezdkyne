@@ -6,7 +6,8 @@
     "music": {
       "village_day": "assets/music/village_day.mp3",
       "dragon_flight": "assets/music/dragon_flight_above_the_green_sea.mp3",
-      "forest_ground": "assets/music/forest_ground_whispering_trees.mp3"
+      "forest_ground": "assets/music/forest_ground_whispering_trees.mp3",
+      "battle": "assets/music/battle.mp3"
     }
   },
   "characters": {
@@ -135,7 +136,8 @@
       ],
       "speaker": "roza",
       "text": "Co to je? Na bobří přehradu je to obří. To je fakt divné.",
-      "next": "dam_with_beavers"
+      "next": "dam_with_beavers",
+      "music": "forest_ground"
     },
     {
       "id": "dam_with_beavers",
@@ -350,7 +352,8 @@
         "onVictory": "beaver_battle_win",
         "onFailure": "beaver_battle_lose",
         "config": {}
-      }
+      },
+      "music": "battle"
     },
     {
       "id": "beaver_battle_win",
@@ -500,8 +503,8 @@
         }
       ],
       "speaker": "Velký bobr",
-      "text": "Měla zrzavé vlasy, hodně bledou pleť a hodně pih. Taky hodně vysoká a vysportovaná, ale měla šarlatové šaty šlechtičny. Kam se poděla těžko říct, ale je nepřehlédnutelná, můžete se zkusit poptat.",
-      "next": "beaver_after_battle_win_06",
+      "text": "Měla zrzavé vlasy, hodně bledou pleť a hodně pih. Taky byla hodně vysoká a vysportovaná, ale měla šarlatové šaty šlechtičny. Kam se poděla těžko říct, ale je nepřehlédnutelná, můžete se zkusit poptat.",
+      "next": "beaver_after_battle_win_07",
       "music": "forest_ground"
     },
     {

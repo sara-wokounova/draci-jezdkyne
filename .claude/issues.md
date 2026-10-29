@@ -11,8 +11,10 @@ beaver sheets (~12 MB) after its HUD shows. On the live site the HUD showed over
 lane for ~2–4 s on a fast connection; on phone data it will be much longer, and taps do
 nothing until then. Not a regression. Since D23 everything loads in parallel (`Promise.all`)
 instead of one sheet after another, which cuts the wait on a fast connection but not on one
-limited by bandwidth (same bytes). Rest of the fix: preload the sheets from the scenes before
-`beaver_battle`, and/or shrink them (see "Heavy assets").
+limited by bandwidth (same bytes). Since D25 battle.mp3 also downloads at that moment (music
+starts before the render, D21): ~3 MiB in Chrome (it buffers that far ahead), the whole 4.8 MB
+in Firefox, about +25–40 % to the first flight on a slow link. Rest of the fix: preload the
+sheets from the scenes before `beaver_battle`, and/or shrink them (see "Heavy assets").
 
 ### P1 — Persuade branch crashes at `dam_with_beavers_persuade_04` (verified 2026-10-17)
 `next: "dam_with_beavers_persuade_05"` doesn't exist. Tapping throws
@@ -88,9 +90,16 @@ pixi.js, not in the browser bundle). Not caused by recent changes; `package.json
 Run `npm audit fix` and re-test some time.
 
 ### P3 — HTML5 audio artefacts (2026-10-28)
-Each track has a ~70 ms gap where it loops (HTML5 audio loops aren't gapless), and
+Each track has a gap where it loops (HTML5 audio loops aren't gapless): ~60–90 ms in Chrome,
+~0.4–0.6 s in Firefox, which restarts slowly after Howler's loop seek (measured 2026-10-29, all
+tracks; once per loop, so once per 5 min for battle.mp3), and
 Howler logs "HTML5 Audio pool exhausted" once at startup. Both come from streaming
 (D21). Gapless loops would need Web Audio (full download + decode).
+
+### P3 — Battle music starts over on every attempt (2026-10-29)
+A round lasts ~80 s, battle.mp3 299 s (D25), so battle_02 (from 2:26) is practically never heard.
+Sára wants a retry to resume where the last attempt stopped: planned
+(`C:\tmp\claude\plans\music-resume.md`), waiting for her confirmation.
 
 ### P3 — Music volume does nothing on iPhone (2026-10-28)
 Music streams as HTML5 audio (D21), and iOS ignores its volume, so neither the volume
@@ -107,7 +116,7 @@ the volume: there it can sound for up to ~400 ms. Check that it stays silent els
 
 ## Fixed
 
-### P2 — Minigame: beavers in the top-left corner, Róza a red stick (user-reported 2026-10-28, Firefox) — fixed 2026-10-28, verified locally
+### P2 — Minigame: beavers in the top-left corner, Róza a red stick (user-reported 2026-10-28, Firefox) — fixed 2026-10-28 in `d54e35a`, verified live 2026-10-29
 Was: while the beaver sheets loaded (seconds, longer in Firefox) each beaver sprite sat at
 (0, 0) until the game's first tick; Róza's dragon was the vector placeholder (no art yet).
 Fix (D23): one parallel load before anything is added, beavers placed in their lane when
