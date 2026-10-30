@@ -3,37 +3,52 @@ import { join, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
 
-//   node scripts/removeCheckerboard.mjs <file.png | folder> [--enclosed] [--glow] [--force]
+//   node scripts/removeCheckerboard.mjs <file.png | folder> [--enclosed] [--glow] [--black] [--force]
 // Overwrites the files in place. A PNG that already has fully transparent pixels has been
 // cleaned (or packed) before and is skipped, unless --force.
 const args = process.argv.slice(2);
 const paths = args.filter((arg) => !arg.startsWith('--'));
 if (paths.length !== 1) {
-  console.error('usage: node scripts/removeCheckerboard.mjs <file.png | folder> [--enclosed] [--glow] [--force]');
+  console.error('usage: node scripts/removeCheckerboard.mjs <file.png | folder> [--enclosed] [--glow] [--black] [--force]');
   process.exit(1);
 }
 const ROOT = paths[0];
 // art/ holds the untouched originals (D23): clean a copy of them, never the files themselves.
 // Checked on every file's real path (links and short names resolved; case-insensitive on Windows),
-// so neither a folder run nor a junction gets into art/.
+// so neither a folder run nor a junction gets into art/. A UNC path (\\localhost\C$\…) can name
+// a file in art/ without starting with its path: refused too, unless the repo itself is on a share.
 const real = (p) => {
   const path = realpathSync.native(p);
   return process.platform === 'win32' ? path.toLowerCase() : path;
 };
 const ART = real(fileURLToPath(new URL('../art/', import.meta.url))) + sep;
-const insideArt = (p) => (real(p) + sep).startsWith(ART);
+const unc = (path) => process.platform === 'win32' && path.startsWith('\\\\') && !ART.startsWith('\\\\');
+const insideArt = (p) => {
+  const path = real(p) + sep;
+  return path.startsWith(ART) || unc(path);
+};
 if (insideArt(ROOT)) {
-  console.error('removeCheckerboard: refusing to overwrite art/ (copy the file elsewhere first)');
+  console.error('removeCheckerboard: refusing to overwrite art/ (or a UNC path; copy the file elsewhere first)');
   process.exit(1);
 }
 // --enclosed: also erase checkerboard in enclosed gaps (step 2). --glow: for fire and light
-// effects painted over the checkerboard (step 3).
+// effects painted over the checkerboard (step 3). --black: a sheet painted on pure black instead
+// of the checkerboard (keyBlack).
 const ENCLOSED = args.includes('--enclosed');
 const GLOW = args.includes('--glow');
+const BLACK = args.includes('--black');
 const FORCE = args.includes('--force');
-const unknown = args.filter((arg) => arg.startsWith('--') && !['--enclosed', '--glow', '--force'].includes(arg));
+const unknown = args.filter((arg) => arg.startsWith('--') && !['--enclosed', '--glow', '--black', '--force'].includes(arg));
 if (unknown.length) {
-  console.error(`Unknown option ${unknown.join(', ')} (known: --enclosed, --glow, --force)`);
+  console.error(`Unknown option ${unknown.join(', ')} (known: --enclosed, --glow, --black, --force)`);
+  process.exit(1);
+}
+if (BLACK && (ENCLOSED || GLOW)) {
+  console.error('--black is not for --enclosed or --glow (those are checkerboard modes)');
+  process.exit(1);
+}
+if (BLACK && statSync(ROOT).isDirectory()) {
+  console.error('--black takes one file (in a folder it would key the dark edges of every opaque PNG)');
   process.exit(1);
 }
 
@@ -84,6 +99,36 @@ function processFile(file) {
     return out;
   };
 
+  // Every pixel connected to `start` (4-neighbours) for which `accept` holds; `mark` claims each
+  // one as it is added, so no pixel is visited twice.
+  const region = (start, accept, mark) => {
+    const members = [start];
+    mark(start);
+    for (let head = 0; head < members.length; head += 1) {
+      for (const np of neighbours(members[head])) {
+        if (accept(np)) {
+          mark(np);
+          members.push(np);
+        }
+      }
+    }
+    return members;
+  };
+
+  if (BLACK) {
+    // Painted on black means no alpha yet: a sheet with some (keyed before, or soft-edged art) would lose it, also
+    // with --force.
+    for (let p = 0; p < n; p += 1) {
+      if (data[p * 4 + 3] < 255) {
+        console.error(`  ${file} — refused: --black needs an opaque sheet (this one has transparency)`);
+        process.exitCode = 1;
+        return;
+      }
+    }
+    save(file, png, keyBlack(data, width, neighbours, region));
+    return;
+  }
+
   // 1) Flood fill the background from every edge pixel that looks like the
   //    checkerboard. Connected-only so interior light pixels stay opaque.
   const bg = new Uint8Array(n); // 1 = background to erase
@@ -118,22 +163,6 @@ function processFile(file) {
     }
   };
   grow();
-
-  // Every pixel connected to `start` (4-neighbours) for which `accept` holds; `mark` claims each
-  // one as it is added, so no pixel is visited twice.
-  const region = (start, accept, mark) => {
-    const members = [start];
-    mark(start);
-    for (let head = 0; head < members.length; head += 1) {
-      for (const np of neighbours(members[head])) {
-        if (accept(np)) {
-          mark(np);
-          members.push(np);
-        }
-      }
-    }
-    return members;
-  };
 
   // 2) --enclosed: checkerboard showing through enclosed gaps (between hair strands, a wing
   //    and the tail, arms and reins) is not reached from the edges. Erase strictly-gray
@@ -262,12 +291,59 @@ function processFile(file) {
     }
   }
 
+  save(file, png, erased);
+}
+
+// Written as RGBA whatever the input was (an RGB sheet has no alpha channel to keep).
+function save(file, { width, height, data }, erased) {
   const out = new PNG({ width, height });
   data.copy(out.data);
   writeFileSync(file, PNG.sync.write(out));
-
-  const pct = ((erased / n) * 100).toFixed(1);
+  const pct = ((erased / (width * height)) * 100).toFixed(1);
   console.log(`  ${file} — erased ${pct}% as transparent`);
+}
+
+// --black (anna_attack.png): near-black regions connected to the image edge, and enclosed ones of
+// 600+ px (the gaps the curled tail encloses), become transparent; smaller dark spots (pupils)
+// stay. The 2 px band next to them is un-blended against black: alpha from the brightest channel
+// (opaque from 64), colour divided by alpha. Returns the number of erased pixels.
+function keyBlack(data, width, neighbours, region) {
+  const BLACK_MAX = 24; // every channel at most this: the painted black
+  const MIN_ENCLOSED = 600;
+  const BAND = 2;
+  const OPAQUE_FROM = 64;
+  const n = data.length / 4;
+  const isBlack = (p) => data[p * 4] <= BLACK_MAX && data[p * 4 + 1] <= BLACK_MAX && data[p * 4 + 2] <= BLACK_MAX;
+  const onEdge = (p) => p % width === 0 || p % width === width - 1 || p < width || p >= n - width;
+  const bg = new Uint8Array(n);
+  const seen = new Uint8Array(n);
+  for (let s = 0; s < n; s += 1) {
+    if (seen[s] || !isBlack(s)) continue;
+    const members = region(s, (p) => !seen[p] && isBlack(p), (p) => { seen[p] = 1; });
+    if (members.length >= MIN_ENCLOSED || members.some(onEdge)) for (const p of members) bg[p] = 1;
+  }
+  // Steps from the background (4-neighbours), up to the band.
+  const dist = new Uint8Array(n).fill(255);
+  let ring = [];
+  for (let p = 0; p < n; p += 1) if (bg[p]) { dist[p] = 0; ring.push(p); }
+  for (let d = 1; d <= BAND; d += 1) {
+    const next = [];
+    for (const p of ring) for (const np of neighbours(p)) if (dist[np] === 255) { dist[np] = d; next.push(np); }
+    ring = next;
+  }
+  let erased = 0;
+  for (let p = 0; p < n; p += 1) {
+    const i = p * 4;
+    if (bg[p]) {
+      data.fill(0, i, i + 4);
+      erased += 1;
+      continue;
+    }
+    const a = dist[p] <= BAND ? Math.min(1, Math.max(data[i], data[i + 1], data[i + 2]) / OPAQUE_FROM) : 1;
+    for (let c = 0; c < 3; c += 1) data[i + c] = a > 0 ? Math.min(255, Math.round(data[i + c] / a)) : 0;
+    data[i + 3] = Math.round(a * 255);
+  }
+  return erased;
 }
 
 function walk(dir) {
@@ -283,7 +359,7 @@ function walk(dir) {
   }
 }
 
-console.log(`Removing checkerboard background under: ${ROOT}`);
+console.log(`${BLACK ? 'Keying the black background' : 'Removing checkerboard background'} under: ${ROOT}`);
 if (statSync(ROOT).isDirectory()) walk(ROOT);
 else processFile(ROOT);
 console.log('Done.');

@@ -72,16 +72,17 @@ src/engine/
     minigameManager.js     registry; run(spec) → 'victory' | 'failure' (a throwing game → 'failure', D24;
                            a throwing clean-up can't leave the HUD up, D27)
     minigameHud.js         DOM overlay: title, score, skip menu, result dialog (Czech labels)
-    dragonAttack.js        the "Dračí nálet na bobry" minigame (all tunables in DEFAULTS, safety caps beside it, D24): Róza animated
-                           from strips, firing rules per dragon (maxShots, refireAfter), D23; sounds: each dragon's
+    dragonAttack.js        the "Dračí nálet na bobry" minigame (all tunables in DEFAULTS, safety caps beside it, D24): Róza and
+                           Anna animated from strips (D23, D30), firing rules per dragon (maxShots, refireAfter); sounds: each dragon's
                            shot and hit, the beaver's cry and log, each file once per tick (D29)
 src/styles/main.css        all styling (DOM UI is absolutely positioned over the canvas)
 public/story/story.json    the whole story (fetched at runtime, not bundled)
 public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, minigames/dragon-attack/,
                            minigames/dragon-attack/sfx/ (the effects, mp3, ≤ 15 KB each), music/ (mp3, ~3.6–4.8 MB
                            each, streamed)
-scripts/removeCheckerboard.mjs   flood-fills light-gray checkerboard to alpha (--enclosed, --glow, --force)
-scripts/packFrames.mjs           scattered sheet frames → one-row strip, anchored (eye / white-hot core)
+scripts/removeCheckerboard.mjs   flood-fills light-gray checkerboard to alpha (--enclosed, --glow, --force); --black keys a sheet
+                                 painted on black (D30)
+scripts/packFrames.mjs           scattered sheet frames → one-row strip, anchored (eye / white-hot core / a shot's tip)
 scripts/build-music.sh           the deployed music from art/music/ (9 dB quieter, D29)
 scripts/build-sfx.sh             the minigame's sound effects from art/minigames/dragon-attack/sfx/ (D29)
 art/                             source art kept in git but not deployed (originals of the packed strips, of the
@@ -171,8 +172,10 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
   −14 − mean_volume), add its line, and keep the stagger in its file (`adelay`), not in code. Renaming `fireball_hit.mp3`: it is
   also Nastavení's test sound (`TEST_SOUND_SRC` in `sfx.js`). Every effect plays at 0.7
   (`EFFECT_MIX`) × the effects slider; set per sound in the minigame config (README).
-- Róza's minigame strips (`public/assets/minigames/dragon-attack/roza_{fly,attack,fireball}.png`)
-  are generated from the originals in `art/minigames/dragon-attack/` (D23), one file at a time:
+- Róza's and Anna's minigame strips (`public/assets/minigames/dragon-attack/roza_{fly,attack,fireball}.png`,
+  `anna_{fly,attack,thorn}.png`) are generated from the originals in `art/minigames/dragon-attack/` (D23, D30), one
+  file at a time (Anna's move and thorn sheets are already transparent and are packed straight from `art/`; her attack
+  sheet is painted on black):
   ```
   cp art/minigames/dragon-attack/roza_move.png <tmp>/ && node scripts/removeCheckerboard.mjs <tmp>/roza_move.png --enclosed
   node scripts/packFrames.mjs <tmp>/roza_move.png public/assets/minigames/dragon-attack/roza_fly.png art/minigames/dragon-attack/roza_move.anchors.json
@@ -180,22 +183,31 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
   node scripts/packFrames.mjs <tmp>/roze_attack.png public/assets/minigames/dragon-attack/roza_attack.png art/minigames/dragon-attack/roze_attack.anchors.json
   cp art/minigames/dragon-attack/bezzubka_projektil.png <tmp>/ && node scripts/removeCheckerboard.mjs <tmp>/bezzubka_projektil.png --glow
   node scripts/packFrames.mjs <tmp>/bezzubka_projektil.png public/assets/minigames/dragon-attack/roza_fireball.png bright
+  node scripts/packFrames.mjs art/minigames/dragon-attack/anna_move.png public/assets/minigames/dragon-attack/anna_fly.png art/minigames/dragon-attack/anna_move.anchors.json
+  cp art/minigames/dragon-attack/anna_attack.png <tmp>/ && node scripts/removeCheckerboard.mjs <tmp>/anna_attack.png --black
+  node scripts/packFrames.mjs <tmp>/anna_attack.png public/assets/minigames/dragon-attack/anna_attack.png art/minigames/dragon-attack/anna_attack.anchors.json
+  node scripts/packFrames.mjs art/minigames/dragon-attack/borinoha_projektil.png public/assets/minigames/dragon-attack/anna_thorn.png art/minigames/dragon-attack/borinoha_projektil.anchors.json
   ```
   Róza rides Bezzubka; her fireball sheet was named `beska_projektil.png` until 2026-10-29 (D23 quotes that name).
-  The `beska_projektil.png` in `art/` since then is another sheet (a lightning strip, not used yet), like Anna's and
-  Emma's sheets beside it.
-  Both scripts refuse to write into `art/` (the originals and the hand-measured anchors stay untouched).
+  The `beska_projektil.png` in `art/` since then is another sheet (a lightning strip, not used yet), like Emma's
+  sheets beside it.
+  Both scripts refuse to write into `art/` (the originals and the hand-measured anchors stay untouched), also through a
+  link or a UNC path. `<tmp>` is a scratch folder: `anna_attack.png` has the same name as its packed strip in `public/`.
   `packFrames.mjs` prints the frame count, size and anchor that go into the dragon's `animation` config,
   and each frame's box around the anchor. All config px are strip px (the source downscaled by the
-  packer's `factor`, default 2): `bodyWidth` = the `medianWidth` it prints for the fly strip; `mouth` = the
-  mouth on the fire frame (attack frame 3), measured from the eye in the source ÷ factor.
+  packer's `factor`, default 2): `bodyWidth` = the `medianWidth` it prints for the fly strip; `launchPoint` = where
+  the shot leaves on the `launchFrame` (Róza's mouth, Anna's tail tip, both on attack frame 3), measured from the eye
+  in the source ÷ factor. A shot's anchors file holds the point the shot is turned around (Anna's thorn: its tip).
 - Source art arrives with a light-gray checkerboard baked in instead of
   transparency; run `scripts/removeCheckerboard.mjs <file.png|dir>` on a copy of it. It
   overwrites files in place and skips any PNG that already has transparency (a packed strip
   would turn into an opaque box; a cleaned sprite would just be rewritten), unless `--force`. `--enclosed`
   also erases checker showing through enclosed gaps (hair strands, wing gaps) but can take
   neutral grey-white art such as eye whites, so check eyes and teeth after it; `--glow` is
-  for fire and light painted over the checker.
+  for fire and light painted over the checker. `--black` is for a sheet painted on pure black instead (Anna's attack
+  sheet, D30): near-black regions touching the edge, or enclosed and 600+ px, become transparent and smaller dark spots
+  (pupils) stay, so dark art touching the frame edge would go too. It takes one opaque file (no folder, no sheet that
+  already has transparency, even with `--force`) and can't be combined with the other two.
 - Missing sprites never crash: the engine draws vector placeholders, and a background that
   fails to load gets a generated one (D20).
 

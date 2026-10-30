@@ -34,11 +34,14 @@ const real = (p) => {
 };
 // A hard link to an original would be written through: refuse an output that has other names.
 const hardLinked = (p) => existsSync(p) && statSync(p).nlink > 1;
-// art/ holds the untouched originals and their hand-measured anchors: never written.
+// art/ holds the untouched originals and their hand-measured anchors: never written. A UNC path
+// (\\localhost\C$\…) can name a file in art/ without starting with its path: refused too, unless the
+// repo itself is on a share.
 const ART = real(fileURLToPath(new URL('../art/', import.meta.url))) + sep;
-if (real(output) === real(input) || real(output) === real(mode) || real(output).startsWith(ART)
+const unc = process.platform === 'win32' && real(output).startsWith('\\\\') && !ART.startsWith('\\\\');
+if (real(output) === real(input) || real(output) === real(mode) || real(output).startsWith(ART) || unc
   || !/\.png$/i.test(output) || hardLinked(output)) {
-  console.error('packFrames: <out.png> must be a new .png outside art/ (not the input or the anchors file)');
+  console.error('packFrames: <out.png> must be a new .png outside art/ (not the input, the anchors file or a UNC path)');
   process.exit(1);
 }
 const MIN_FRAME_AREA = 1500;

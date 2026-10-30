@@ -87,8 +87,8 @@ const DEFAULTS = {
   //            straight while weaving sideways).
   //   launchFrom: 'center' | 'head' | 'tail' — where the shot spawns relative
   //            to the dragon's travel direction (launchOffset px from the
-  //            centre). A dragon with `animation.mouth` and its fly strip
-  //            launches from the mouth instead.
+  //            centre). A dragon with `animation.launchPoint` and its fly strip
+  //            launches from that point in its art instead.
   //   angleDeg: 0 = straight down; positive bends toward travel direction;
   //            values > 90 launch upward first (for arcing shots).
   //   maxShots: own shots in the air at once (default 1).
@@ -99,7 +99,8 @@ const DEFAULTS = {
   //
   // A dragon's `animation` (optional) uses strips made by scripts/packFrames.mjs:
   // one row of equal frames, the art facing right, `anchor` = the dragon's eye
-  // as fractions of a frame. Sizes are in strip px; `mouth` is relative to the anchor.
+  // as fractions of a frame. Sizes are in strip px; `launchPoint` (where the shot leaves on the
+  // launch frame: Róza's mouth, Anna's tail tip) is relative to the anchor.
   // DEFAULTS is the source of truth for every value. A custom `dragons` list replaces it
   // wholesale and must give every field a dragon uses (README); the `?? n` fallbacks in the code
   // only cover the optional ones (art, firing rules, sizes), not e.g. `color` or `speed`.
@@ -123,7 +124,7 @@ const DEFAULTS = {
         attackFrames: [1, 2, 3, 4, 5], // mouth opens, fire breath
         attackFps: 24,
         launchFrame: 3, // strip frame (one of attackFrames) on which the shot leaves: the fire
-        mouth: [5, 14], // where the shot leaves (source ≈ [1250, 623] on roze_attack.png's fire frame, eye [1240, 595])
+        launchPoint: [5, 14], // the mouth (source ≈ [1250, 623] on roze_attack.png's fire frame, eye [1240, 595])
       },
       attack: {
         pattern: 'ballistic',
@@ -179,28 +180,50 @@ const DEFAULTS = {
       },
     },
     {
-      // Anna: fires an arrow from her tail that arcs up-and-back, then down.
+      // Anna: flicks a thorn from her tail that arcs up-and-back, then down.
       name: 'Anna',
       color: '#3aa0e0',
       sprite: null,
-      width: 150,
+      width: 200,
       height: 96,
-      flightY: 0.21,
+      flightY: 0.21, // below ~1070 px tall the HUD clamp (her raised wings) sets her height instead (D30)
       speed: 300,
       entryFrom: 'left',
+      animation: {
+        fly: { src: 'assets/minigames/dragon-attack/anna_fly.png', frames: 6, anchor: [0.907, 0.549] },
+        attack: { src: 'assets/minigames/dragon-attack/anna_attack.png', frames: 6, anchor: [0.915, 0.613] },
+        bodyWidth: 200,
+        // Sára's cycle 0-1-2-3-4-3-2-1 started on frame 1, whose tail matches the flick's last frame.
+        flyFrames: [1, 2, 3, 4, 3, 2, 1, 0],
+        flyFps: 12,
+        attackFrames: [0, 1, 2, 3, 4, 5], // the tail flick (drawn at the fly strip's scale)
+        attackFps: 30, // quick (Sára)
+        launchFrame: 3, // tail straight back
+        launchPoint: [-156, -12], // the tail tip (source ≈ [1138, 385] on anna_attack.png's frame 3, eye [1450, 409])
+      },
       attack: {
         pattern: 'ballistic',
-        launchFrom: 'tail',
+        launchFrom: 'tail', // only without the fly strip (the vector fallback)
         speed: 430,
         angleDeg: -120, // launches backward and upward → gravity arcs it down
         gravity: 760, // heavy pull for a pronounced arc
-        radius: 16,
+        radius: 16, // around the thorn's tip
         color: '#5ad0ff',
         maxShots: 3,
-        refireAfter: 1 / 3, // up to three arrows in the air
+        refireAfter: 1 / 3, // up to three thorns in the air
         sound: { src: 'assets/minigames/dragon-attack/sfx/anna_shot.mp3', volume: EFFECT_MIX },
         hitSound: { src: 'assets/minigames/dragon-attack/sfx/anna_hit.mp3', volume: EFFECT_MIX },
         sprite: null,
+        animation: {
+          src: 'assets/minigames/dragon-attack/anna_thorn.png',
+          frames: 6,
+          anchor: [0.974, 0.589], // the tip
+          scale: 0.45,
+          fps: 8,
+          flightFrames: [0, 1, 2, 3, 4, 5, 4, 3, 2, 1], // the glow pulses
+          loop: true, // the flight frames repeat (without it the last one is held)
+          artAngleDeg: 3, // the thorn points slightly down in the art
+        },
       },
     },
   ],
@@ -476,7 +499,7 @@ export class DragonAttackMinigame {
     if (!this.canFire(dragon)) return;
 
     if (dragon.art.breath) {
-      // The attack animation launches the shot on its fire frame (animateDragon).
+      // The attack animation launches the shot on its launch frame (animateDragon).
       dragon.attackTime = 0;
       dragon.launched = false;
       showFrame(dragon.view, dragon.art.breath, dragon.config.animation.attackFrames?.[0] ?? 0);
@@ -492,8 +515,8 @@ export class DragonAttackMinigame {
     if (inAir >= Math.max(1, Math.floor(positive(attack.maxShots, 1)))) return false;
     if (dragon.attackTime !== null && !dragon.launched) return false; // its shot hasn't left yet
     // Not while the shot would start off the screen (the dragon entering or leaving, Anna's tail),
-    // judged where it will be on the fire frame: it would fall unseen and, with maxShots 1, block
-    // the next taps for its whole airtime; or the breath would play with no shot.
+    // judged where it will be on the launch frame: it would fall unseen and, with maxShots 1, block
+    // the next taps for its whole airtime; or the attack would play with no shot.
     if (!this.launchOrigin(dragon, dragon.art.breath ? secondsToFire(dragon) : 0).onScreen) return false;
     // Counted from the last launch, not from that shot's age: a shot that left early (a
     // resize) must not lock the dragon out.
@@ -504,13 +527,14 @@ export class DragonAttackMinigame {
   launchOrigin(dragon, ahead = 0) {
     const attack = dragon.config.attack;
     const dir = dragon.direction;
-    const mouth = dragon.config.animation?.mouth;
+    const point = dragon.config.animation?.launchPoint;
     let x = dragon.view.x + dragon.config.speed * dir * ahead;
     let y = dragon.view.y;
-    if (dragon.art.fly && mouth) {
-      // From the mouth in the art (strip px from the eye, mirrored with the direction).
-      x += mouth[0] * dragon.scale * dir;
-      y += mouth[1] * dragon.scale;
+    // Two finite numbers, like the anchors (a typo would make every shot NaN, or none fire): else launchFrom.
+    if (dragon.art.fly && Array.isArray(point) && point.length === 2 && point.every(Number.isFinite)) {
+      // From the launch point in the art (strip px from the eye, mirrored with the direction).
+      x += point[0] * dragon.scale * dir;
+      y += point[1] * dragon.scale;
     } else {
       // Spawn point: head is ahead of travel, tail is behind it.
       const dragonWidth = dragon.config.width ?? 150;
@@ -526,8 +550,8 @@ export class DragonAttackMinigame {
     const dir = dragon.direction;
     const pattern = attack.pattern ?? 'ballistic';
     const { x: originX, y: originY, onScreen } = this.launchOrigin(dragon);
-    // A shot that would start off the screen (the mouth moved past the edge while the attack
-    // played) is lost, like one whose dragon left before the fire frame.
+    // A shot that would start off the screen (its launch point moved past the edge while the attack
+    // played) is lost, like one whose dragon left before the launch frame.
     if (!onScreen) return;
 
     let vx;
@@ -561,7 +585,7 @@ export class DragonAttackMinigame {
     const shot = {
       dragonIndex: dragon.index,
       view,
-      strip, // the shot's animation strip (Róza's fireball), or null
+      strip, // the shot's animation strip (Róza's fireball, Anna's thorn), or null
       animation: attack.animation,
       dir,
       radius: attack.radius,
@@ -850,7 +874,7 @@ export class DragonAttackMinigame {
     dragon.view.y = flightY(dragon, size);
     this.animateDragon(dragon, dt);
 
-    // Leaving before the attack's fire frame loses that shot.
+    // Leaving before the attack's launch frame loses that shot.
     const margin = (dragon.config.width ?? 150);
     // Or after MAX_FLIGHT_SECONDS: a speed typo (0, negative, text) would never reach the edge.
     const exited = dragon.age >= MAX_FLIGHT_SECONDS
@@ -864,7 +888,7 @@ export class DragonAttackMinigame {
     }
   }
 
-  /** Flaps the wings, or plays the attack and launches its shot on the fire frame. Time only
+  /** Flaps the wings, or plays the attack and launches its shot on the launch frame. Time only
    *  moves in tick(), so the portrait pause also pauses an attack. */
   animateDragon(dragon, dt) {
     const { fly, breath } = dragon.art;
@@ -877,7 +901,7 @@ export class DragonAttackMinigame {
       const step = Math.floor(dragon.attackTime * positive(animation.attackFps, 24));
       if (step < frames.length) {
         showFrame(dragon.view, breath, frames[step]);
-        // >= : a long tick can skip the fire frame.
+        // >= : a long tick can skip the launch frame.
         if (!dragon.launched && step >= Math.max(0, frames.indexOf(animation.launchFrame))) {
           dragon.launched = true;
           this.launchProjectile(dragon);
@@ -897,7 +921,7 @@ export class DragonAttackMinigame {
   }
 
   updateProjectile(shot, dt, width, height) {
-    if (shot.fresh) { // first drawn at the mouth, not a tick's flight past it
+    if (shot.fresh) { // first drawn where it leaves, not a tick's flight past it
       shot.fresh = false;
       return;
     }
@@ -1140,7 +1164,7 @@ function nonNegative(value, fallback) {
   return Number.isFinite(value) && value >= 0 ? value : fallback;
 }
 
-/** Seconds from a tap to the fire frame of the dragon's attack animation. */
+/** Seconds from a tap to the launch frame of the dragon's attack animation. */
 function secondsToFire(dragon) {
   const animation = dragon.config.animation;
   return Math.max(0, (animation.attackFrames ?? []).indexOf(animation.launchFrame)) / positive(animation.attackFps, 24);
@@ -1152,7 +1176,8 @@ function refireAfter(attack) {
   return Number.isFinite(attack.refireAfter) ? attack.refireAfter : 0;
 }
 
-/** Back to flapping from the top of the stroke (wings up, like the attack frames). */
+/** Back to flapping from the cycle's first frame (Róza: wings up, like her attack frames; Anna: the tail as the
+ *  flick ends). */
 function endAttack(dragon) {
   dragon.attackTime = null;
   dragon.flyTime = 0;
@@ -1186,11 +1211,13 @@ function isOffScreen(shot, width, height) {
   return x < -side || x > width + side || shot.y > height + reach;
 }
 
-/** A strip shot's frame for its age (held on the last flight frame) and its rotation along its path. */
+/** A strip shot's frame for its age (the last flight frame held, or with `loop` the frames repeated) and its
+ *  rotation along its path. */
 function orientStrip(shot) {
   const animation = shot.animation;
   const frames = animation.flightFrames ?? [0];
-  showFrame(shot.view, shot.strip, frames[Math.min(Math.floor(shot.age * positive(animation.fps, 14)), frames.length - 1)]);
+  const step = Math.floor(shot.age * positive(animation.fps, 14));
+  showFrame(shot.view, shot.strip, frames[animation.loop === true ? step % frames.length : Math.min(step, frames.length - 1)]);
   const art = ((animation.artAngleDeg ?? 0) * Math.PI) / 180;
   // Mirrored (flying left), the art points the other way: 180° − its angle.
   shot.view.rotation = Math.atan2(shot.vy, shot.vx) - (shot.dir > 0 ? art : Math.PI - art);

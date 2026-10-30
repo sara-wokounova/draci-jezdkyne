@@ -22,17 +22,17 @@ The beaver sheets are cut on a fixed 6×2 grid, but the art isn't on that grid: 
 borders (`beaver1.png`: frame 1's log reaches into frame 2's cell, the falling log of hit frame 7 into the log
 frame 8), so a frame shows a sliver of the previous or next beaver or log, and a frame's own log end is cut off at
 the border. Most visible on the log left lying on the ground: about half of the falling log shows beside it. Fix: cut each frame by its own connected pixels, as `packFrames.mjs` does for Róza (D23), keeping the
-beavers' placement; to be planned after Anna's art.
+beavers' placement. Planned (`C:\tmp\claude\plans\beaver-frames.md`, confirmed by Sára); built after Anna's art (D30).
 
 ### P1 — Persuade branch crashes at `dam_with_beavers_persuade_04` (verified 2026-10-17)
 `next: "dam_with_beavers_persuade_05"` doesn't exist. Tapping throws
 "Unknown scene id" and the player is stuck (Back still works). Needs story text.
 
-### P2 — Minigame art missing → 404s (verified 2026-10-17; partly fixed 2026-10-28)
+### P2 — Minigame art missing → 404s (verified 2026-10-17; partly fixed 2026-10-28 and 2026-10-30)
 DEFAULTS in `dragonAttack.js` pointed to `background.png`, `dragon_{roza,emma,anna}.png`,
-`flame_roza.png`, `flash_emma.png`, `arrow_anna.png` — none exist. Since D23 Róza has her
-animated art, and the dragon/shot sprite paths are `null` (Emma and Anna stay vector
-placeholders, no requests). Still open: `background.png` 404s on every minigame start (the
+`flame_roza.png`, `flash_emma.png`, `arrow_anna.png` — none exist. Since D23 Róza and since D30
+Anna have their animated art, and the dragon/shot sprite paths are `null` (Emma stays a vector
+placeholder, no requests; her sheets are in `art/`, not planned yet). Still open: `background.png` 404s on every minigame start (the
 scene's dam background stays behind the game). Add the art or set it to `null`.
 
 ### P2 — The fight branch's victory has no way on (verified 2026-10-28)

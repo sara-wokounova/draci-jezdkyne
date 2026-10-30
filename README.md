@@ -190,9 +190,12 @@ placeholders are drawn until you supply it. Art slots:
 - `config.dragons[i].animation` — animated dragon art: `fly` and `attack`
   strips made by `scripts/packFrames.mjs` (one row of equal frames, the art
   facing right, `anchor` = the dragon's eye), the frame orders and rates, and
-  `mouth` (where the shot leaves, in strip px from the eye). Róza has it.
+  `launchPoint` (where the shot leaves on the `launchFrame`, in strip px from the eye: Róza's mouth, Anna's
+  tail tip). Róza and Anna have it.
 - `config.dragons[i].sprite` — a single image instead (the default list has none).
-- `config.dragons[i].attack.animation` — an animated shot strip (Róza's fireball);
+- `config.dragons[i].attack.animation` — an animated shot strip (Róza's fireball, Anna's thorn): its
+  `flightFrames` at `fps`, the last one held, or repeated with `"loop": true`; turned along its path
+  (`artAngleDeg` = the direction the art points, in degrees from pointing right, positive = down);
   `config.dragons[i].attack.sprite` — a single image instead.
 
 Sounds (optional): `config.dragons[i].attack.sound` plays when that dragon's shot

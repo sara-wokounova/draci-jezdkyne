@@ -558,3 +558,46 @@ defaults only Bezzubka's hit and the Nastavení test sound share one (both at 0.
 round). Uses Howler 2.2.4 internals (`_webAudio`, `Howler.state`, `Howler._autoSuspend()`, its pending suspend
 timer checking `autoSuspend` again; in audioManager.js `_playLock` and `volume()` stopping a fade on its target):
 rerun minigame-roza.mjs 29d, 29e, 29h and robustness.mjs "sample:" and "sliders:" after a Howler upgrade. The Nastavení page scrolls on a very short screen (two sliders and a checkbox).
+
+## D30 — Anna's minigame art: the tail flick and the thorn (2026-10-30) — Accepted
+Supersedes: D23's `animation.mouth` (now `launchPoint`); Anna is no longer a vector placeholder (her `sprite` paths stay
+`null`: she uses `animation`, as Róza does).
+Decision: Anna's dragon, tail flick and thorn come from Sára's sheets `anna_move.png`, `anna_attack.png` and
+`borinoha_projektil.png` in `art/minigames/dragon-attack/`, packed by D23's pipeline (factor 2) into `anna_fly.png`,
+`anna_attack.png` and `anna_thorn.png`, every frame on a hand-checked anchor (`*.anchors.json`: the eye; for the thorn
+its tip). The attack sheet is painted on pure black with no alpha: `removeCheckerboard.mjs --black` keys it (near-black
+regions touching the edge, and enclosed ones of 600+ px such as the gaps the curled tail encloses, become transparent;
+smaller dark spots like pupils stay; a 2 px band next to them is un-blended against black); `--black` refuses
+`--enclosed` and `--glow`. Anna is 200 game px wide like Róza and flaps `[1, 2, 3, 4, 3, 2, 1, 0]` at 12 fps (Sára's
+cycle 0-1-2-3-4-3-2-1 started on frame 1, whose tail matches the flick's last frame, so she resumes there). A tap plays
+the flick, all 6 frames at 30 fps (0.2 s), drawn at the fly strip's scale; the thorn leaves the tail tip on frame 3 (tail
+straight back, 0.1 s after the tap). The thorn is drawn at 0.45, anchored on its tip (where the hit circle, radius 16,
+is), turned along its velocity every tick (`artAngleDeg: 3`: the art points slightly down), its frames `[0 … 5 … 1]` at
+8 fps, looped: a shot animation's new `loop` repeats the flight frames instead of holding the last one. `animation.mouth`
+is renamed `launchPoint` (Róza's mouth, Anna's tail tip), used only as two finite numbers like the anchors (else the
+`launchFrom` fallback). Her firing rules stay (D23). `--black` takes one file, and refuses a sheet that already has
+any transparency, even with `--force` (its alpha would be lost). Both scripts also refuse a UNC path
+(`\\localhost\C$\…`): it names a file in `art/` without starting with its path (a gap in D23's guard, found by the
+review panel). Each strip falls back on its own
+(D7, D23): without the fly strip the vector dragon (now 200 wide) shoots at the tap from 80 px behind its centre; without
+only the attack strip she flaps on and the thorn leaves at the tap from `launchPoint`; without the thorn strip, the vector
+arrow.
+Why: asked for by Sára ("Can you change animation for anna from stick to these sprites", the tail movement "quite
+quick"), with her answers on the preview: cycle B; 30 fps ("start with that and we can adjust later"); the attack art at
+its own size (at 1.37, matched to the dragon's head, "dragon and anna become bigger for the attack"); the thorn's frames
+back and forth at 8 fps; the dragon as big as Róza's; the thorn turned with its curve ("its point always going along with
+the curve"); key the black rather than re-export; keep 200 wide and fly lower; the thorn at 0.45 after seeing 0.35 in the
+game. The tip anchor keeps the hit circle and the turn on the visible point (an anchor on the bright glow led it by ~100
+game px). The attack sheet is drawn ~10–25 % smaller than the move sheet: at 1.0 the eye stays put and the figure changes
+size for the 0.2 s of the flick (Sára judged it by eye). `launchPoint` because the shot leaves Anna's tail, not her mouth.
+Consequences: her raised wings reach ~140 game px above her eye, so the D23 clamp puts her below Emma on every screen
+under ~1070 px tall (her eye at 225 game px at 1280×720 instead of 151); her thorns start lower and land sooner, so the ⅓
+wait is a little shorter (slightly easier). Each thorn leaves 0.1 s after its tap: three overlap ~0.3 s instead of
+~0.5 s. A tap in the first 0.1 s of a flick does nothing (D23: no new attack before the shot has left); after it, the ⅓
+wait outlasts the flick. The shot sound plays as the thorn leaves (to adjust by ear). `--black` would also key away dark
+art touching the frame edge (used on this sheet only; the regeneration test checks the strip). The thorn's reach in
+`isOffScreen` is its whole length from the tip: a falling thorn is removed ~80 px later than a centred one (harmless).
+A faint haze (alpha < 10) around the move frames shows only on black, not on the daylight dam; and, as for every packed
+strip, a frame's cell takes the neighbouring frame's faint pixels (alpha 1–40) inside its box (thorn frame 0 gets
+~1500 px of frame 1's halo, mean alpha 12: invisible on daylight). Emma stays a
+vector placeholder: her sheets (and a lightning strip, `beska_projektil.png`) are in `art/`, not planned yet.
