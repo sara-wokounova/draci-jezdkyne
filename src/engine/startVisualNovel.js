@@ -4,6 +4,7 @@ import { AutoSave } from './autoSave.js';
 import { TAP_GUARD_MS, UiController } from './uiController.js';
 import { InputController } from './inputController.js';
 import { AudioManager } from './audioManager.js';
+import { loadTestSound, playTestSound, resumeAudio, setEffectsVolume } from './sfx.js';
 import { VisualRenderer } from './visualRenderer.js';
 import { MinigameManager } from './minigames/minigameManager.js';
 
@@ -18,6 +19,7 @@ export async function startVisualNovel(config) {
   const ui = new UiController(config.ui);
   const stage = await createPixiStage(config.pixiHost);
   const audio = new AudioManager(story.assets?.music ?? {}, save.settings.musicVolume, story.resumeMusic);
+  setEffectsVolume(save.settings.effectsVolume);
   const visuals = new VisualRenderer(stage, story);
   const minigames = new MinigameManager(stage, { root: config.ui.root });
 
@@ -198,9 +200,25 @@ export async function startVisualNovel(config) {
   }
 
   ui.bindNavigation({ onBack: goBack, onMenu: openMenuFromGame, onEndHome: backToStart });
-  ui.bindSettings(save.settings, (change) => {
-    save.saveSettings(change);
-    audio.setVolume(save.settings.musicVolume);
+  let settingsVisit = 0; // a test sound belongs to the visit to Nastavení whose slider was let go
+  ui.bindSettings(save.settings, {
+    onChange: (change) => {
+      save.saveSettings(change);
+      if ('musicVolume' in change) audio.setVolume(save.settings.musicVolume);
+      if ('effectsVolume' in change) setEffectsVolume(save.settings.effectsVolume);
+    },
+    onOpen: () => {
+      settingsVisit += 1;
+      loadTestSound(); // the effects slider's test sound
+    },
+    // The test sound, at the new level. Howler suspends the AudioContext 30 s after the last effect: resume it
+    // first, and play only if this visit to Nastavení is still open by then (one at a time, for a held arrow key).
+    onEffectsSet: () => {
+      const visit = settingsVisit;
+      resumeAudio().then(() => {
+        if (menuOpen && ui.menuPage() === 'settings' && visit === settingsVisit) playTestSound();
+      });
+    },
   });
   ui.bindMenu({
     // Disabled buttons ignore the player's clicks, not a script's: Pokračovat checks again.

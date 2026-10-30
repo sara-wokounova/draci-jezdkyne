@@ -489,3 +489,72 @@ of its own yet, issue P2). On a minigame scene left by a story typo in `onVictor
 the minigame again, as on a saved minigame scene; Back and Nová hra are the ways on. A clean-up that throws
 part-way may leave that game's own listeners live (theoretical). In fullscreen (phones) the browser takes Esc to
 leave fullscreen; the Menu button is the way there.
+
+## D28 — Commit messages are written in the past tense (2026-10-29) — Accepted
+Decision: every commit message says what was changed, in the past tense, starting with the verb:
+"Added a new scene with fire ants." (Sára's example), "Fixed …", "Changed …", "Removed …". The body, when
+there is one, keeps the same style.
+Why: decided by Sára.
+Consequences: applies to every commit from now on. Earlier commits keep their wording (history is not
+rewritten).
+
+## D29 — Sound effects in the minigame; music 9 dB quieter; two volume sliders (2026-10-29) — Accepted
+Supersedes: D19's single "Hlasitost hudby" master slider (Howler's master volume) and the 0.75 track volume it scaled
+(`TRACK_VOLUME` in audioManager.js), D25's battle.mp3 command (now with `volume=-9dB`).
+Decision: the dragonAttack minigame plays sound effects: each dragon's shot when it really launches (Bezzubka's
+fireball, Emma's lightning, Anna's thorn; a lost shot is silent) and that shot's hit sound, plus the beaver's cry and,
+when a log drops, the log sound on every hit, whoever shot. The cry and the log start with 150 and 250 ms of silence
+in their files (Sára's stagger), so all three start on the hit tick. A file plays at most once per game tick (two
+beavers hit at once: one hit, one cry, one log). Emma's lightning leaves her head (`launchFrom: 'head'`). Effects are
+Web Audio Howls, one per file for the page (`src/engine/sfx.js`), created before the round's single await and never
+awaited; one plays only when loaded, still on Web Audio and with the AudioContext running, so a file that loads late
+or a suspended context never plays anything late; without Web Audio there are none; nothing there throws. Howler's
+auto-suspend (30 s after the last sound) is off while a round runs and on again when it ends or is skipped (its timer
+armed again then, as Howler arms it only when a sound ends), so the
+context never falls asleep mid-round; while the page is hidden mid-round (a phone locked: the round can't end) it is on
+as usual; the round's start, its keydown and the canvas pointerup still resume a context
+the system suspended (an interruption), never awaited (an interrupted iOS context resumes only when the interruption
+ends), and set Howler's own state to running. Every effect is at 0.7 (`EFFECT_MIX`) × the effects slider; config per sound: `{ src, volume }`, a
+bare path or `null` (README). Nastavení has two sliders: "Hlasitost hudby" sets the music track's own volume (default
+75) and "Hlasitost efektů" the effects' (default 75); Howler's master stays at 1. Letting go of the effects slider
+plays a test sound (the fireball hit), one at a time, after resuming the context, only while Nastavení is still open.
+Every music file is 9 dB quieter, made from its original in `art/music/` by `scripts/build-music.sh`; the effects by
+`scripts/build-sfx.sh` (scripts, not commands in CLAUDE.md as the plan had it: the review panel kept finding ways to
+hide a line in a doc block that the tests checked and a reader would paste). A fade that
+would change nothing is a plain `volume()`, a fade-in is tracked by time, and a settings change touches the music only
+when the music volume changed; during Howler's play lock (its loop restart, a show after a hide) the music slider waits
+for the track's `play` event (Howler would queue the change and never run it), and a plain level is set with two
+`volume()` calls (with a fade still running, Howler's first one only stops it and leaves the sound on the fade's
+target, which the next loop restart plays). Saved settings are not migrated: a saved music volume stays the number it is; only a
+save from before this with the music at 0 (then the master: it silenced everything) gets the effects at 0 too.
+Why: asked for by Sára ("generate sounds for the bezzubka's projectile being shot, it hitting the beaver, beaver
+crying out loud and beaver dropping the wood", the cry and log "on every hit", Emma's lightning and Anna's thorn, "add
+effects volume as slider into settings", "set the default background music level to half"), with her picks from the
+listening page (shot a1 without its pause, cry b, log a, Emma c/c, Anna a/b, all at one mix, staggered 150/250 ms).
+The sounds came from Runway's sound-effect tool (AI-generated); the raw picks stay in `art/minigames/dragon-attack/sfx/`.
+Web Audio, not HTML5 like the music: short clips must start at once and overlap, and iPhone ignores HTML5 volume.
+Levelled by loudness (RMS −14 dBFS), not peak: by peak the clicks sat 17 dB under the battle music. 9 dB on the files
+rather than a lower slider default: on iPhone and iPad the HTML5 music ignores every volume, so only the file level
+reaches it; 6 dB would have left the music as loud as the effects there, about the balance Sára rejected. With the
+0.75 track factor gone, the default sounds as Sára chose ("35", a touch under half). No settings migration: a saved
+0.75 (nearly every save, the old default) is the new default by itself, and any other saved value plays quieter, in
+the direction asked for. Never awaiting the resume: on iOS an interrupted context's resume stays pending. No auto-suspend during a round
+(found by the review panel, against the plan's "no autoSuspend change"): Howler's 30 s timer, armed by the Nastavení
+test sound or an earlier round, could suspend the context mid-round, and the shot that woke it was silent. Howler's
+state is set after our resume because Howler otherwise queues every play behind a resume of its own.
+Consequences: on computers the shots and hits sit 5–6 dB over the music at the defaults, on iPhone and iPad 2.6–3.6 dB
+(the log drop just under it). Mashing Bezzubka's shot on a phone (a new shot as soon as the last one hit, 0.45 s
+apart) peaks at about +0.5 dBFS at the default effects level: a few samples clip for a moment (cosmetic; Sára's
+equal mix wins; a 1280×720 window stays at −0.6). The deployed music loses the C2PA provenance it carried (the
+originals keep it). The music files keep their names, so for up to ~10 minutes after a deploy (Pages' cache) a browser
+can mix new code with old cached music (2.5 dB louder than before) or an old open tab can stream the new files much
+quieter until a reload; the live check (D11) runs after a hard reload. An old tab open during the deploy writes
+settings without `effectsVolume`; the new code uses the default. A tall window means longer flights and so a longer
+wait between the shot and the hit (the world only scales down, D15). The minigame's sounds play the moment a shot
+launches, so a later change to when a dragon launches (Anna's tail flick) moves its sound with it. After the system
+suspended the audio mid-round (a phone locked and unlocked), the shot whose tap wakes it again is silent (the resume
+takes ~180 ms; later ones play). Sounds that use the same file share one volume (the last one played sets it); in the
+defaults only Bezzubka's hit and the Nastavení test sound share one (both at 0.7, never at once: no menu during a
+round). Uses Howler 2.2.4 internals (`_webAudio`, `Howler.state`, `Howler._autoSuspend()`, its pending suspend
+timer checking `autoSuspend` again; in audioManager.js `_playLock` and `volume()` stopping a fade on its target):
+rerun minigame-roza.mjs 29d, 29e, 29h and robustness.mjs "sample:" and "sliders:" after a Howler upgrade. The Nastavení page scrolls on a very short screen (two sliders and a checkbox).

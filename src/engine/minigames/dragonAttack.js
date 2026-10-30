@@ -1,5 +1,6 @@
 import { Assets, Container, Graphics, Rectangle, Sprite, Texture } from 'pixi.js';
 import { resolveAssetPath } from '../assetPath.js';
+import { EFFECT_MIX, keepAudioAwake, playSound, resumeAudio, sound } from '../sfx.js';
 
 /**
  * Dragon attack minigame.
@@ -66,6 +67,12 @@ const DEFAULTS = {
     scurryDirection: 'walk',
     flipForScurry: false, // mirror the sprite to face the scurry direction
     dropLogOnHit: true, // leave the "log" frame where the beaver was hit
+    // Played on every hit, whoever shot (D29). The cry's and the log's files start with their delay (150 ms,
+    // 250 ms) as silence: they play together with the hit, staggered.
+    sounds: {
+      cry: { src: 'assets/minigames/dragon-attack/sfx/beaver_cry.mp3', volume: EFFECT_MIX },
+      log: { src: 'assets/minigames/dragon-attack/sfx/log_drop.mp3', volume: EFFECT_MIX }, // only when a log drops
+    },
     spriteWidth: null, // on-screen width in px; defaults to radius * 2.4
 
     // Fallbacks used only when no sprite sheet is available.
@@ -87,6 +94,8 @@ const DEFAULTS = {
   //   maxShots: own shots in the air at once (default 1).
   //   refireAfter: after a launch, wait this fraction of that shot's on-screen
   //            time before the next one (default 0: as soon as maxShots allows).
+  //   sound / hitSound: played when the shot launches / hits a beaver (D29):
+  //            { src, volume 0–1 }, a bare path (volume EFFECT_MIX, 0.7) or null for none.
   //
   // A dragon's `animation` (optional) uses strips made by scripts/packFrames.mjs:
   // one row of equal frames, the art facing right, `anchor` = the dragon's eye
@@ -126,6 +135,9 @@ const DEFAULTS = {
         color: '#ff7b3d',
         maxShots: 1,
         refireAfter: 0,
+        sound: { src: 'assets/minigames/dragon-attack/sfx/bezzubka_shot.mp3', volume: EFFECT_MIX },
+        // also Nastavení's test sound (TEST_SOUND_SRC in sfx.js)
+        hitSound: { src: 'assets/minigames/dragon-attack/sfx/fireball_hit.mp3', volume: EFFECT_MIX },
         sprite: null,
         animation: {
           src: 'assets/minigames/dragon-attack/roza_fireball.png',
@@ -152,7 +164,7 @@ const DEFAULTS = {
       entryFrom: 'right',
       attack: {
         pattern: 'zigzag',
-        launchFrom: 'center',
+        launchFrom: 'head', // the lightning leaves her mouth (Sára)
         speed: 380, // downward descent speed
         gravity: 0, // constant fall so the zig-zag stays even
         zigzagAmplitude: 70, // sideways reach in px
@@ -161,6 +173,8 @@ const DEFAULTS = {
         color: '#ffe27a',
         maxShots: 1,
         refireAfter: 0,
+        sound: { src: 'assets/minigames/dragon-attack/sfx/emma_shot.mp3', volume: EFFECT_MIX },
+        hitSound: { src: 'assets/minigames/dragon-attack/sfx/emma_hit.mp3', volume: EFFECT_MIX },
         sprite: null,
       },
     },
@@ -184,6 +198,8 @@ const DEFAULTS = {
         color: '#5ad0ff',
         maxShots: 3,
         refireAfter: 1 / 3, // up to three arrows in the air
+        sound: { src: 'assets/minigames/dragon-attack/sfx/anna_shot.mp3', volume: EFFECT_MIX },
+        hitSound: { src: 'assets/minigames/dragon-attack/sfx/anna_hit.mp3', volume: EFFECT_MIX },
         sprite: null,
       },
     },
@@ -246,6 +262,15 @@ export class DragonAttackMinigame {
     // Firing state per dragon for this round. Never on the dragon's config: for `config: {}`
     // that is DEFAULTS.dragons itself and would carry into the next round (a retry).
     this.fire = this.config.dragons.map(() => ({ lastLaunchAt: -Infinity, lastAirtime: 0 }));
+    // Sounds, normalised here and never written into the config (as `fire`).
+    const beaverSounds = isPlainObject(this.config.beavers.sounds) ? this.config.beavers.sounds : {};
+    this.sounds = {
+      shot: this.config.dragons.map((dragon, i) => soundEntry(dragon.attack?.sound, `dragons[${i}].attack.sound`)),
+      hit: this.config.dragons.map((dragon, i) => soundEntry(dragon.attack?.hitSound, `dragons[${i}].attack.hitSound`)),
+      cry: soundEntry(beaverSounds.cry, 'beavers.sounds.cry'),
+      log: soundEntry(beaverSounds.log, 'beavers.sounds.log'),
+    };
+    this.playedThisTick = new Set(); // sound files, so two hits on one tick play each file once
     this.score = 0;
     this.time = 0;
     this.elapsedSinceFlight = 0;
@@ -261,6 +286,16 @@ export class DragonAttackMinigame {
   async start() {
     this.layer.addChild(this.root);
     this.root.addChild(this.logLayer, this.beaverLayer, this.dragonLayer, this.projectileLayer);
+
+    // The click that starts or retries the round may wake a suspended AudioContext (never awaited: D29), which then
+    // stays awake until the round ends. The sounds start loading here but are never waited for: one still loading
+    // is just skipped.
+    keepAudioAwake(true);
+    resumeAudio();
+    const { shot, hit, cry, log } = this.sounds;
+    for (const entry of [...shot, ...hit, cry, log]) {
+      if (entry) sound(entry.src);
+    }
 
     // Everything loads at once (the beaver sheets too), and nothing touches the scene before
     // this single await.
@@ -407,15 +442,19 @@ export class DragonAttackMinigame {
     if (this.config.input.pointer) {
       // Bind to the canvas so HUD button clicks don't trigger an attack.
       this.app.canvas.addEventListener('pointerdown', this.handlePointer);
+      // A touch's pointerdown is no user activation; its pointerup is (for resuming the audio).
+      this.app.canvas.addEventListener('pointerup', resumeAudio);
     }
   }
 
   unbindInput() {
     window.removeEventListener('keydown', this.handleKey);
     this.app.canvas.removeEventListener('pointerdown', this.handlePointer);
+    this.app.canvas.removeEventListener('pointerup', resumeAudio);
   }
 
   handleKey(event) {
+    resumeAudio();
     if (event.repeat) return;
     // Ignore pure modifier keys; everything else counts as an attack.
     if (['Shift', 'Control', 'Alt', 'Meta', 'Tab', 'Escape'].includes(event.key)) return;
@@ -545,6 +584,15 @@ export class DragonAttackMinigame {
     const fire = this.fire[dragon.index];
     fire.lastLaunchAt = this.time;
     fire.lastAirtime = shot.airtime;
+    this.playEffect(this.sounds.shot[dragon.index]);
+  }
+
+  /** Plays a sound entry, each file at most once per tick (two beavers hit at once: one hit, one cry). The set is
+   *  cleared at the top of update(), so a shot fired by a tap between ticks counts with the tick before it. */
+  playEffect(entry) {
+    if (!entry || this.playedThisTick.has(entry.src)) return;
+    this.playedThisTick.add(entry.src);
+    playSound(sound(entry.src), entry.volume);
   }
 
   /** Seconds the shot needs to leave the screen if it hits nothing: the same motion as
@@ -626,6 +674,7 @@ export class DragonAttackMinigame {
   }
 
   update(ticker) {
+    this.playedThisTick.clear();
     // Paused while #rotate-hint covers the game (portrait phone, D13), so no flights
     // are lost. Reads app.screen, which Pixi updates a frame after a rotation, so no
     // tick ever runs on a stale portrait-sized screen.
@@ -780,9 +829,10 @@ export class DragonAttackMinigame {
     }
   }
 
+  /** Leaves the "log" frame where the beaver was hit; false if the sheet has none. */
   dropLog(beaver) {
     const frames = beaver.frames;
-    if (!frames?.log?.length) return;
+    if (!frames?.log?.length) return false;
 
     const log = new Sprite(frames.log[0]);
     log.anchor.set(0.5);
@@ -790,6 +840,7 @@ export class DragonAttackMinigame {
     log.x = beaver.x;
     log.y = this.layout().height * this.config.beavers.laneY;
     this.logLayer.addChild(log);
+    return true;
   }
 
   updateDragon(dt, size) {
@@ -866,6 +917,7 @@ export class DragonAttackMinigame {
       const dy = beaver.view.y - shot.y;
       const reach = shot.radius + cfg.radius;
       if (dx * dx + dy * dy <= reach * reach) {
+        this.playEffect(this.sounds.hit[shot.dragonIndex]);
         // Before the hit is scored: a winning hit ends the round, and complete() must find it.
         this.addImpact(shot, beaver);
         this.eliminateBeaver(beaver);
@@ -904,8 +956,10 @@ export class DragonAttackMinigame {
     this.updateHud();
 
     const canAnimate = beaver.frames && (beaver.frames.hit?.length || beaver.frames.scurry?.length);
+    this.playEffect(this.sounds.cry);
     if (canAnimate) {
-      if (this.config.beavers.dropLogOnHit) this.dropLog(beaver);
+      // The log's sound only with a log (its delay is in its file, D29).
+      if (this.config.beavers.dropLogOnHit && this.dropLog(beaver)) this.playEffect(this.sounds.log);
       this.setBeaverState(beaver, beaver.frames.hit?.length ? 'hit' : 'scurry');
     } else {
       beaver.view.visible = false;
@@ -963,6 +1017,7 @@ export class DragonAttackMinigame {
     if (this.finished) return;
     this.finished = true;
     this.app.ticker.remove(this.tick);
+    keepAudioAwake(false);
     this.unbindInput();
     // Nothing may hang frozen under the result dialog: shots, impacts, a half-played attack.
     // tick()'s loops run over copies of these arrays, so they stop on `finished`, not on emptiness.
@@ -996,6 +1051,7 @@ export class DragonAttackMinigame {
   // ------------------------------------------------------------- cleanup ---
 
   destroy() {
+    keepAudioAwake(false); // first: nothing below may keep the audio from sleeping for the rest of the page
     this.finished = true;
     this.app.ticker.remove(this.tick);
     this.unbindInput();
@@ -1142,6 +1198,19 @@ function orientStrip(shot) {
 
 function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+/** A sound from the config as { src, volume }, or null: `{ src, volume }`, a bare path or null (none). Left out
+ *  means silent; anything without a path warns (a typo). The volume is clamped to 0–1, else EFFECT_MIX. */
+function soundEntry(entry, name) {
+  if (entry === undefined || entry === null) return null;
+  const src = typeof entry === 'string' ? entry : isPlainObject(entry) ? entry.src : undefined;
+  if (typeof src !== 'string') {
+    console.warn('Minigame sound without a path:', name);
+    return null;
+  }
+  const volume = Number.isFinite(entry.volume) ? Math.min(1, Math.max(0, entry.volume)) : EFFECT_MIX;
+  return { src, volume };
 }
 
 async function tryLoadTexture(src) {

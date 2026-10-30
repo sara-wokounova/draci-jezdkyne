@@ -1,9 +1,8 @@
 import { Howl, Howler } from 'howler';
 import { resolveAssetPath } from './assetPath.js';
 
-// Per-track volume; the slider (Nastavení) scales it via Howler's master volume, so the
-// default slider (0.75) plays tracks at 0.75 × 0.75.
-const TRACK_VOLUME = 0.75;
+// A track plays at the music slider's volume (Nastavení → Hlasitost hudby). Howler's master volume stays at 1:
+// the effects have their own slider (D29). The music files themselves are 9 dB quieter than the originals.
 const FADE_IN_MS = 650;
 const FADE_OUT_MS = 350;
 const UNLOAD_MARGIN_MS = 50; // a replaced track is unloaded this long after its fade-out ends
@@ -21,7 +20,9 @@ export class AudioManager {
     }
     this.currentTrack = null;
     this.currentKey = null;
-    this.setVolume(volume);
+    this.trackVolume = volume;
+    this.startedTrack = null; // the last track that began its fade-in: setVolume changes it only while it is current
+    this.fadeInUntil = 0; // performance.now() when its fade-in ends
 
     // Browsers keep sound off until the first click, tap or key (D22). Firefox even lets a
     // silent track start and then pauses it for good once its volume rises, so no track
@@ -64,7 +65,7 @@ export class AudioManager {
         // pause() ends a running fade-in at its target for the sound but not for the track's own
         // volume, which the next fade-out starts from: keep them equal, or that fade-out is a cut.
         // Only for a track that has started: one still waiting must start silent and fade in.
-        if (started) track.volume(TRACK_VOLUME);
+        if (started) setTrackVolume(track, this.trackVolume);
       } else if (this.resumeOnShow) {
         this.resumeOnShow = false;
         // Not if it is still (or again) playing: a second play() would start a second copy.
@@ -102,9 +103,33 @@ export class AudioManager {
     return typeof src === 'string' ? src : null;
   }
 
-  /** Master volume 0–1 (Nastavení → Hlasitost hudby). */
+  /** The music's volume 0–1 (Nastavení → Hlasitost hudby). */
   setVolume(volume) {
-    Howler.volume(volume);
+    // Unchanged: leave the music (and its fade) alone. The settings page calls this only on a music change too:
+    // two guards on purpose (a repeated input event must not cut a fade-in either).
+    if (volume === this.trackVolume) return;
+    this.trackVolume = volume;
+    // A track still starting fades in to the new target by itself (its 'play' handler reads it). One fading in
+    // fades on to it: Howler's volume() would stop the fade, or wait behind the play lock and cut it short.
+    const track = this.currentTrack;
+    if (!track || track !== this.startedTrack) return;
+    // Howler queues volume() and fade() behind its play lock (a loop restart, a show after a hide) and never runs them
+    // there: apply the level once that play has started (Howler 2.2.4 internal: after an upgrade rerun robustness.mjs
+    // "sliders:").
+    if (track._playLock) {
+      track.once('play', () => { if (this.currentTrack === track) setTrackVolume(track, this.trackVolume); });
+      return;
+    }
+    const left = this.fadeInUntil - performance.now();
+    if (left > 0) fadeTo(track, volume, left);
+    else setTrackVolume(track, volume);
+  }
+
+  /** Fades the current track in to the music's volume (from its own volume), and notes when that ends. */
+  fadeIn(track) {
+    this.startedTrack = track;
+    this.fadeInUntil = performance.now() + FADE_IN_MS;
+    fadeTo(track, this.trackVolume, FADE_IN_MS);
   }
 
   /**
@@ -140,7 +165,7 @@ export class AudioManager {
       if (this.resumable.has(previousKey) && previous !== this.forgottenTrack) {
         this.positions.set(previousKey, previous.seek());
       }
-      previous.fade(previous.volume(), 0, FADE_OUT_MS);
+      fadeTo(previous, 0, FADE_OUT_MS);
       // A timer, not Howler's 'fade' event: that never fires for a 0 → 0 fade (switched while
       // the fade-in was still at 0), which left the old track looping silently forever.
       const timer = setTimeout(() => {
@@ -165,7 +190,7 @@ export class AudioManager {
 
     if (revived) {
       this.currentTrack = revived.track;
-      revived.track.fade(revived.track.volume(), TRACK_VOLUME, FADE_IN_MS);
+      this.fadeIn(revived.track);
       return;
     }
 
@@ -176,7 +201,7 @@ export class AudioManager {
     }
 
     // html5: streams the multi-MB mp3 instead of downloading and decoding it all first.
-    // ponytail: iOS ignores HTML5 audio volume, so the volume slider and fades do nothing on iPhone.
+    // ponytail: iOS ignores HTML5 audio volume, so the music slider and fades do nothing on iPhone.
     const track = new Howl({ src: [resolveAssetPath(src)], loop: true, volume: 0, html5: true });
     // Back where the last visit left it: Howler queues the seek until the track has loaded, and runs it
     // before the queued play() (Chrome then buffers at that position before the 'play' event).
@@ -190,7 +215,7 @@ export class AudioManager {
       // Fade in on 'play', not right after play(): on an already loaded track Howler queues a
       // fade behind its play lock and never runs it, leaving the track playing at volume 0.
       track.once('play', () => {
-        if (this.currentTrack === track) track.fade(0, TRACK_VOLUME, FADE_IN_MS);
+        if (this.currentTrack === track) this.fadeIn(track);
       });
       // Autoread can move on in a background tab: that scene's track waits for the page.
       if (document.hidden) this.resumeOnShow = true;
@@ -199,4 +224,19 @@ export class AudioManager {
     if (this.userActive) start();
     else this.startWhenActive = start;
   }
+}
+
+// A fade with nothing to change is a plain volume(): Howler's fade timer stops only on a real change, so a
+// 0 → 0 fade (music at 0) would run for ever.
+function fadeTo(track, volume, ms) {
+  const from = track.volume();
+  if (from === volume) setTrackVolume(track, volume);
+  else track.fade(from, volume, ms);
+}
+
+// Twice: while one of Howler's fades still runs (its timer can outlast fadeInUntil), the first volume() only stops it
+// and puts the sound back on that fade's target, which the next loop restart would play again.
+function setTrackVolume(track, volume) {
+  track.volume(volume);
+  track.volume(volume);
 }

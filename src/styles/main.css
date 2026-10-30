@@ -444,6 +444,10 @@ button {
   grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
+#menu-settings {
+  overflow-y: auto; /* two sliders and a checkbox: on a very short screen the page scrolls */
+}
+
 .setting {
   justify-self: stretch;
   display: flex;

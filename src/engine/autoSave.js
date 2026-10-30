@@ -1,6 +1,6 @@
 // Every setting and its default. A saved value is kept only if it has the default's type
-// (see load()); a setting with a range also needs a clamp there, like musicVolume's.
-const DEFAULT_SETTINGS = { musicVolume: 0.75, autoRead: false };
+// (see load()); a setting with a range also needs a clamp there, like the volumes'.
+const DEFAULT_SETTINGS = { musicVolume: 0.75, effectsVolume: 0.75, autoRead: false };
 
 export class AutoSave {
   constructor(storyId) {
@@ -21,7 +21,7 @@ export class AutoSave {
     return this.data.readSceneIds;
   }
 
-  /** Nastavení: { musicVolume 0–1, autoRead }. Kept across restarts. */
+  /** Nastavení: { musicVolume 0–1, effectsVolume 0–1, autoRead }. Kept across restarts. */
   get settings() {
     return this.data.settings;
   }
@@ -71,9 +71,13 @@ export class AutoSave {
       }
       // A hand-edited or corrupt save must not leave the slider showing one volume while
       // another plays (Howler ignores values outside 0–1).
-      settings.musicVolume = Number.isFinite(settings.musicVolume)
-        ? Math.min(1, Math.max(0, settings.musicVolume))
-        : DEFAULT_SETTINGS.musicVolume;
+      for (const name of ['musicVolume', 'effectsVolume']) {
+        settings[name] = Number.isFinite(settings[name])
+          ? Math.min(1, Math.max(0, settings[name]))
+          : DEFAULT_SETTINGS[name];
+      }
+      // Before the effects slider (D29), the music slider was the master: at 0 it silenced everything.
+      if (!('effectsVolume' in saved) && saved.musicVolume === 0) settings.effectsVolume = 0;
       return {
         currentSceneId: parsed.currentSceneId ?? null,
         history: Array.isArray(parsed.history) ? parsed.history : [],

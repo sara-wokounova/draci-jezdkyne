@@ -195,6 +195,15 @@ placeholders are drawn until you supply it. Art slots:
 - `config.dragons[i].attack.animation` — an animated shot strip (Róza's fireball);
   `config.dragons[i].attack.sprite` — a single image instead.
 
+Sounds (optional): `config.dragons[i].attack.sound` plays when that dragon's shot
+launches, `attack.hitSound` when it hits a beaver, and `config.beavers.sounds.cry` and
+`.log` on every hit (the log only when a log is dropped). Each is `{ "src": "…mp3", "volume": 0.7 }`,
+a bare path (volume 0.7) or `null` for none. A dragon in a custom `dragons` list without them
+is silent; `beavers.sounds` is merged with the defaults, so only `null` silences the cry or the
+log. A file plays at most once per game tick, at its volume × the "Hlasitost efektů" slider
+(sounds using the same file share one volume); one still loading is skipped, never played late. A delay after the hit belongs in the file itself, as leading silence
+(the cry and the log have 150 and 250 ms).
+
 Each beaver sheet is a 6×2 grid (`config.beavers.sheet`). By default the frames
 are: top row (0–5) = walk cycle, then bottom row 6–7 = hit reaction, 8 = a log
 left on the ground, 9–11 = scurry/run. When a beaver is hit it plays the hit
@@ -218,7 +227,9 @@ defaults):
         "speed": 320,
         "entryFrom": "left",
         "attack": { "speed": 620, "angleDeg": 18, "gravity": 320, "radius": 22, "color": "#ff7b3d",
-                    "maxShots": 1, "refireAfter": 0 }
+                    "maxShots": 1, "refireAfter": 0,
+                    "sound": "assets/minigames/dragon-attack/sfx/bezzubka_shot.mp3",
+                    "hitSound": { "src": "assets/minigames/dragon-attack/sfx/fireball_hit.mp3", "volume": 0.7 } }
       }
     ],
     "flightsPerDragon": 5,
@@ -232,7 +243,8 @@ Providing a custom `dragons` array fully replaces the three defaults, so include
 every dragon you want, each with every field it uses: `name`, `color`, `flightY`,
 `speed`, `entryFrom` and an `attack` with `speed`, `angleDeg` (or `pattern: "zigzag"`),
 `gravity`, `radius` and `color` (a Róza without her `animation` is the vector
-placeholder again). The example above is a complete one-dragon list.
+placeholder again; one without `sound` and `hitSound` is silent). The example above is a
+complete one-dragon list.
 
 ## Navigation controls
 
@@ -241,6 +253,7 @@ placeholder again). The example above is a complete one-dragon list.
 - Back button, Backspace, or Left Arrow: go one scene back
 - Menu button or Esc: the main menu over the game (Esc again, or Pokračovat, goes back)
 - Nová hra in the menu: start again from the first scene (asks first when there is progress to lose)
+- Nastavení in the menu: music volume, effects volume (letting go of the slider plays a test sound), autoread
 
 Back history is stored in autosave, so refreshing the browser should preserve the current scene and the previous-scene stack.
 
@@ -259,5 +272,5 @@ The Vite config uses `base: './'`, so the build should work both for a user page
 - `src/engine/autoSave.js`: read-history storage for future auto-skip
 - `src/engine/effects/`: snow, wind, sunbeams, particles
 - `src/engine/visualRenderer.js`: real backgrounds, character sprites, transitions
-- `src/engine/audioManager.js`: music, sound effects, voice lines
+- `src/engine/audioManager.js`: music, voice lines (sound effects: `src/engine/sfx.js`)
 - `src/engine/startVisualNovel.js`: branching, minigame routing, flags, inventory

@@ -17,6 +17,13 @@ in Firefox, about +25–40 % to the first flight on a slow link. A resumed battl
 its position first (a range request): in Chrome on a slow link ~3–4 s instead of ~1 s. Rest of the fix: preload the
 sheets from the scenes before `beaver_battle`, and/or shrink them (see "Heavy assets").
 
+### P2 — Beaver frames show bits of their neighbours (user-reported 2026-10-29, verified)
+The beaver sheets are cut on a fixed 6×2 grid, but the art isn't on that grid: the carried logs cross the cell
+borders (`beaver1.png`: frame 1's log reaches into frame 2's cell, the falling log of hit frame 7 into the log
+frame 8), so a frame shows a sliver of the previous or next beaver or log, and a frame's own log end is cut off at
+the border. Most visible on the log left lying on the ground: about half of the falling log shows beside it. Fix: cut each frame by its own connected pixels, as `packFrames.mjs` does for Róza (D23), keeping the
+beavers' placement; to be planned after Anna's art.
+
 ### P1 — Persuade branch crashes at `dam_with_beavers_persuade_04` (verified 2026-10-17)
 `next: "dam_with_beavers_persuade_05"` doesn't exist. Tapping throws
 "Unknown scene id" and the player is stuck (Back still works). Needs story text.
@@ -88,7 +95,9 @@ transparency, so the cleaner skips them without `--force`), then check faces.
 `npm audit` reports high advisories in the dev toolchain (vite 7.3.5's dev server and
 launch-editor, esbuild, postcss, nanoid, source-map-js) and in `@xmldom/xmldom` (pulled in by
 pixi.js, not in the browser bundle). Not caused by recent changes; `package.json` is untouched.
-Run `npm audit fix` and re-test some time.
+Run `npm audit fix` and re-test some time. If it moves Howler (package.json allows ^2.2.3): `sfx.js` and
+`audioManager.js` rely on Howler 2.2.4 internals (D29), so rerun minigame-roza.mjs 29d, 29e, 29h and robustness.mjs
+"sample:" and "sliders:".
 
 ### P3 — HTML5 audio artefacts (2026-10-28)
 Each track has a gap where it loops (HTML5 audio loops aren't gapless): ~60–90 ms in Chrome,
@@ -124,9 +133,33 @@ Pokračovat is disabled, yet the ending's picture is behind the menu, and Nová 
 Cosmetic. Fix if it matters: draw the story's start behind the menu when the save is on an ending.
 
 ### P3 — Music volume does nothing on iPhone (2026-10-28)
-Music streams as HTML5 audio (D21), and iOS ignores its volume, so neither the volume
-slider nor the fades work there. Fix if it matters: Web Audio (`html5: false`) for iOS
-only, at the cost of full download + decode.
+Music streams as HTML5 audio (D21), and iOS ignores its volume, so neither the music
+slider nor the fades work there. Since D29 the files themselves are 9 dB quieter, so the music
+sits 2.6–3.6 dB under the minigame's effects there too (the effects slider works: Web Audio).
+Fix if it matters: Web Audio (`html5: false`) for iOS only, at the cost of full download + decode.
+
+### P3 — Sound effects not tried on a real phone (D29, 2026-10-29)
+Checked in Chrome, Firefox (autoplay allowed: an automated Firefox can't give the real first input) and headed
+Chrome with the real autoplay rule, never on a device; also to try: the effects in Firefox with its default
+autoplay policy. To try on an iPhone and an Android phone: the effects play at all (Web Audio after the first tap); the iPhone's silent
+switch (iOS may silence Web Audio while the HTML5 music keeps playing); a phone locked mid-round and
+unlocked (Howler mutes on hide, D22; the context may come back suspended until the next tap); the first
+shot of a round started after 30 s of quiet (start() resumes the context); after a system interruption
+mid-round, the canvas pointerup and keys resume it (that first shot is silent, D29); the music keeps playing while
+Howler suspends the AudioContext 30 s after the last effect and when the next round or the effects slider resumes
+it (iOS's audio session, never seen on a device).
+
+### P3 — Mashing Bezzubka's shot on a phone clips for a moment (D29, 2026-10-29)
+A new shot as soon as the last one hit (0.45 s apart at 844×390) stacks shot, hit, cry and log to about +0.5 dBFS at
+the default effects level: a few samples clip. Accepted as cosmetic in D29's Consequences (Sára's equal mix); a
+1280×720 window stays at −0.6. The beaver-frames plan's safety limiter takes it away.
+
+### P3 — Flights take longer on taller windows (2026-10-29)
+The world only scales down (D15), so on a window taller than 600 px the lane is further away: Bezzubka's
+fireball needs 0.37 s from launch to a hit at 844×390, 0.5 at 1280×720, 0.9 at 1920×1080 and 1.7 at
+3840×2160 (measured). With sound (D29) the gap between the shot and the hit is audible there. Sára once
+saw "several seconds" in Firefox: not reproduced at 60 fps (a tall window or a low frame rate would explain
+it). Fix if it matters: scale the world up too, or cap the lane distance.
 
 ### P3 — A track switched away while it is starting isn't faded out (found by review 2026-10-28)
 If the scene changes while the new track's `play()` is still starting (Howler's play lock,
@@ -138,14 +171,14 @@ the volume: there it can sound for up to ~400 ms. Check that it stays silent els
 
 ## Fixed
 
-### P2 — Back or Restart during a minigame scene's render ran the minigame over another scene (found by review 2026-10-29) — fixed 2026-10-29, verified locally
+### P2 — Back or Restart during a minigame scene's render ran the minigame over another scene (found by review 2026-10-29) — fixed 2026-10-29 in `2beba7f`, verified live
 Pressed while `beaver_battle` was still drawing (its background slow to load), they left the scene, but the
 stale `showScene` still started the minigame once its render resolved: the HUD ran over the start scene (R) or
 `dam_with_beavers_fight` (Back), and its result jumped back into the dam branch. Since minigames (D9).
 Fix: a minigame scene starts its minigame without awaiting its render (D27), and R is gone. Check: `menu.mjs`
 "minigame: starts at once".
 
-### P3 — Battle music started over on every attempt (2026-10-29) — fixed 2026-10-29, verified locally
+### P3 — Battle music started over on every attempt (2026-10-29) — fixed 2026-10-29 in `2beba7f`, verified live
 A round lasts ~80 s, battle.mp3 299 s (D25), so battle_02 (from 2:26) was practically never heard.
 Fix: a retry continues where the last attempt stopped (D26). Checks: `robustness.mjs` resume.
 

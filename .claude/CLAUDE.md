@@ -24,6 +24,7 @@ More docs in this directory (keep them current):
   Fixed one → move it to the Fixed section with the date.
 - Story text is **Czech**. Keep UI strings Czech too (see issues: engine UI is still English).
 - Don't commit or push unless asked. A push to `main` deploys to production.
+- Commit messages are in the past tense, starting with the verb: "Added a new scene with fire ants." (D28).
 - Temp files go in `C:\tmp\claude`, not the OS temp dir.
 
 ## Commands
@@ -37,7 +38,7 @@ npm run clean-sprites  # strip baked checkerboard from character PNGs (in place;
 ```
 
 No unit tests in the repo and no linter. The Playwright check scripts (and node checks
-for `AutoSave`, the sprite scripts and the battle music) live outside the repo (see the Tests section of workflow.md). Also verify changes by running the game
+for `AutoSave`, the sprite scripts, the music and the sound-effect files) live outside the repo (see the Tests section of workflow.md). Also verify changes by running the game
 (`npm run dev`) in a browser, including a phone-sized viewport.
 
 ## Architecture
@@ -52,7 +53,8 @@ src/engine/
   startVisualNovel.js      game loop: showScene / advance / goBack / runMinigame; the menu (Pokračovat, Nová hra,
                            Menu, Esc; the session rule and the 500 ms tap guard after it closes, D27)
   storyRepository.js       fetch + minimal validation of story.json, scene lookup
-  autoSave.js              localStorage: current scene, back-history, readSceneIds, settings (volume, autoRead)
+  autoSave.js              localStorage: current scene, back-history, readSceneIds, settings (musicVolume,
+                           effectsVolume, autoRead)
   uiController.js          DOM dialogue text, speaker name, choice buttons, end card, main menu (pages, focus,
                            Ano's tap guard, TAP_GUARD_MS) + gallery
   inputController.js       click/tap anywhere = advance; keys: Space/Enter, 1-9, Backspace/←, Esc (menu)
@@ -61,21 +63,29 @@ src/engine/
   pixiStage.js             Pixi Application + layers: background, characters, effects, minigame, overlay
   audioManager.js          Howler music per scene + menu (HTML5 streaming; same key continues, none = silence;
                            nothing starts before the page's first click/tap/key, D22; keys in resumeMusic
-                           continue where they were left, D26)
+                           continue where they were left, D26); the music slider sets the track's own volume (D29)
+  sfx.js                   sound effects (D29): one Web Audio Howl per file for the page, played only when loaded
+                           with the AudioContext running (never late, never thrown); the effects slider and its
+                           test sound; resumeAudio; no auto-suspend during a round (keepAudioAwake)
   effects/atmosphereEffects.js   sunsetGlow, wind, snow
   minigames/
     minigameManager.js     registry; run(spec) → 'victory' | 'failure' (a throwing game → 'failure', D24;
                            a throwing clean-up can't leave the HUD up, D27)
     minigameHud.js         DOM overlay: title, score, skip menu, result dialog (Czech labels)
     dragonAttack.js        the "Dračí nálet na bobry" minigame (all tunables in DEFAULTS, safety caps beside it, D24): Róza animated
-                           from strips, firing rules per dragon (maxShots, refireAfter), D23
+                           from strips, firing rules per dragon (maxShots, refireAfter), D23; sounds: each dragon's
+                           shot and hit, the beaver's cry and log, each file once per tick (D29)
 src/styles/main.css        all styling (DOM UI is absolutely positioned over the canvas)
 public/story/story.json    the whole story (fetched at runtime, not bundled)
 public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, minigames/dragon-attack/,
-                           music/ (mp3, ~3.6–4.8 MB each, streamed)
+                           minigames/dragon-attack/sfx/ (the effects, mp3, ≤ 15 KB each), music/ (mp3, ~3.6–4.8 MB
+                           each, streamed)
 scripts/removeCheckerboard.mjs   flood-fills light-gray checkerboard to alpha (--enclosed, --glow, --force)
 scripts/packFrames.mjs           scattered sheet frames → one-row strip, anchored (eye / white-hot core)
-art/                             source art kept in git but not deployed (originals of the packed strips and of battle.mp3)
+scripts/build-music.sh           the deployed music from art/music/ (9 dB quieter, D29)
+scripts/build-sfx.sh             the minigame's sound effects from art/minigames/dragon-attack/sfx/ (D29)
+art/                             source art kept in git but not deployed (originals of the packed strips, of the
+                                 music and of the sound effects)
 .github/workflows/deploy.yml     push to main → npm ci → build → GitHub Pages
 ```
 
@@ -144,14 +154,23 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
 - Beaver sheets: `beaver1..7.png`, 1448×1086, 6×2 grid (walk 0–5, hit 6–7, log 8, scurry 9–11).
 - Music: `public/assets/music/*.mp3` (~3.6–4.8 MB each, streamed as HTML5 audio), referenced
   by key from `story.assets.music`; scenes pick a track with `music`, the menu with
-  `menuMusic` (D21, D22). `battle.mp3` (the minigame) is the two songs in `art/music/` joined and
-  re-encoded at 128 kbps (D25), from the repo root (the committed file was made with ffmpeg 8.1;
-  another build makes the same audio but not the same bytes):
-  ```
-  ffmpeg -y -i art/music/battle_01.mp3 -i art/music/battle_02.mp3 -filter_complex "[0:a][1:a]concat=n=2:v=0:a=1" -vn -map_metadata -1 -c:a libmp3lame -b:a 128k -fflags +bitexact public/assets/music/battle.mp3
-  ```
-  The originals keep their C2PA provenance metadata (AI-generated content); the joined file loses it, and
-  `-vn -map_metadata -1` keep a future song's cover art and text tags out of the deployed file.
+  `menuMusic` (D21, D22). Every deployed track is made from its original in `art/music/`, **9 dB quieter**
+  (D29: the effects must be heard over it, also on iPhone, where HTML5 music ignores every volume), at the
+  original's bit rate; `battle.mp3` (the minigame) is the two songs joined and re-encoded at 128 kbps (D25).
+  Made by `bash scripts/build-music.sh` (the committed files with ffmpeg 8.1; another build makes the same audio but
+  not the same bytes). The originals keep their C2PA provenance metadata (AI-generated content); the deployed files
+  lose it, and `-vn -map_metadata -1` keep a future song's cover art and text tags out of them. A new track: put the
+  original in `art/music/` and add its line to the script (its own bit rate, from `ffprobe`).
+- Sound effects (D29): `public/assets/minigames/dragon-attack/sfx/*.mp3`, made from Sára's picks in
+  `art/minigames/dragon-attack/sfx/` (Runway's sound-effect tool, AI-generated), mono, levelled to an RMS
+  target of −14 dBFS (the `volume` gain is measured beforehand on the trimmed clip; the limiter then takes the
+  peaky clips lower: the log −18.8, Anna's hit −16.9), peaks limited to −1 dBFS, the trailing
+  silence trimmed, 96 kbps. Bezzubka's shot drops its 0.50–0.75 s pause (Sára's "a1"); the cry and the log
+  start with 150 and 250 ms of silence (Sára's stagger after the hit). Made by `bash scripts/build-sfx.sh`.
+  A new or replaced sound: measure its gain first (the script's chain up to `$T`, then `volumedetect`: gain =
+  −14 − mean_volume), add its line, and keep the stagger in its file (`adelay`), not in code. Renaming `fireball_hit.mp3`: it is
+  also Nastavení's test sound (`TEST_SOUND_SRC` in `sfx.js`). Every effect plays at 0.7
+  (`EFFECT_MIX`) × the effects slider; set per sound in the minigame config (README).
 - Róza's minigame strips (`public/assets/minigames/dragon-attack/roza_{fly,attack,fireball}.png`)
   are generated from the originals in `art/minigames/dragon-attack/` (D23), one file at a time:
   ```
@@ -159,9 +178,12 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
   node scripts/packFrames.mjs <tmp>/roza_move.png public/assets/minigames/dragon-attack/roza_fly.png art/minigames/dragon-attack/roza_move.anchors.json
   cp art/minigames/dragon-attack/roze_attack.png <tmp>/ && node scripts/removeCheckerboard.mjs <tmp>/roze_attack.png --enclosed
   node scripts/packFrames.mjs <tmp>/roze_attack.png public/assets/minigames/dragon-attack/roza_attack.png art/minigames/dragon-attack/roze_attack.anchors.json
-  cp art/minigames/dragon-attack/beska_projektil.png <tmp>/ && node scripts/removeCheckerboard.mjs <tmp>/beska_projektil.png --glow
-  node scripts/packFrames.mjs <tmp>/beska_projektil.png public/assets/minigames/dragon-attack/roza_fireball.png bright
+  cp art/minigames/dragon-attack/bezzubka_projektil.png <tmp>/ && node scripts/removeCheckerboard.mjs <tmp>/bezzubka_projektil.png --glow
+  node scripts/packFrames.mjs <tmp>/bezzubka_projektil.png public/assets/minigames/dragon-attack/roza_fireball.png bright
   ```
+  Róza rides Bezzubka; her fireball sheet was named `beska_projektil.png` until 2026-10-29 (D23 quotes that name).
+  The `beska_projektil.png` in `art/` since then is another sheet (a lightning strip, not used yet), like Anna's and
+  Emma's sheets beside it.
   Both scripts refuse to write into `art/` (the originals and the hand-measured anchors stay untouched).
   `packFrames.mjs` prints the frame count, size and anchor that go into the dragon's `animation` config,
   and each frame's box around the anchor. All config px are strip px (the source downscaled by the

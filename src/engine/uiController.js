@@ -97,6 +97,7 @@ export class UiController {
     }
     this.pageOpener = opener;
     if (name === 'confirm') this.armConfirm?.();
+    if (name === 'settings') this.onSettingsOpen?.();
     menu.querySelector(`#menu-${name} button`).focus();
   }
 
@@ -113,14 +114,22 @@ export class UiController {
     this.elements.mainMenu.querySelector('#menu-start').disabled = !isAvailable;
   }
 
-  /** Nastavení page controls; onChange gets only the changed setting. */
-  bindSettings(settings, onChange) {
+  /**
+   * Nastavení page controls. onChange gets only the changed setting; onOpen runs when the page is shown,
+   * onEffectsSet when the effects slider is let go (for its test sound).
+   */
+  bindSettings(settings, { onChange, onOpen, onEffectsSet }) {
     const music = this.elements.mainMenu.querySelector('#setting-music');
+    const effects = this.elements.mainMenu.querySelector('#setting-effects');
     const autoRead = this.elements.mainMenu.querySelector('#setting-autoread');
     music.value = Math.round(settings.musicVolume * 100);
+    effects.value = Math.round(settings.effectsVolume * 100);
     autoRead.checked = settings.autoRead;
     music.addEventListener('input', () => onChange({ musicVolume: music.value / 100 }));
+    effects.addEventListener('input', () => onChange({ effectsVolume: effects.value / 100 }));
+    effects.addEventListener('change', onEffectsSet);
     autoRead.addEventListener('change', () => onChange({ autoRead: autoRead.checked }));
+    this.onSettingsOpen = onOpen;
   }
 
   /** The menu always opens on its main page, with the first enabled button focused. */
