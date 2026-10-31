@@ -1,0 +1,7 @@
+[
+  { "src": "emma_flight_01.png", "anchor": [337.9, 317.4], "scale": 0.523 },
+  { "src": "emma_flight_02.png", "anchor": [789.1, 544], "scale": 0.233 },
+  { "src": "emma_flight_03.png", "anchor": [269.3, 136.8], "scale": 0.67 },
+  { "src": "emma_flight_03b.png", "anchor": [780.5, 421.4], "scale": 0.225 },
+  { "src": "emma_flight_04.png", "anchor": [248.2, 139], "scale": 0.643 }
+]

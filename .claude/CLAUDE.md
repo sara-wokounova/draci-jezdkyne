@@ -73,8 +73,8 @@ src/engine/
     minigameManager.js     registry; run(spec) → 'victory' | 'failure' (a throwing game → 'failure', D24;
                            a throwing clean-up can't leave the HUD up, D27)
     minigameHud.js         DOM overlay: title, score, skip menu, result dialog (Czech labels)
-    dragonAttack.js        the "Dračí nálet na bobry" minigame (all tunables in DEFAULTS, safety caps beside it, D24): Róza and
-                           Anna animated from strips (D23, D30), firing rules per dragon (maxShots, refireAfter); sounds: each dragon's
+    dragonAttack.js        the "Dračí nálet na bobry" minigame (all tunables in DEFAULTS, safety caps beside it, D24): Róza,
+                           Emma and Anna animated from strips (D23, D32, D30), firing rules per dragon (maxShots, refireAfter); sounds: each dragon's
                            shot and hit, the beaver's cry and log, each file once per tick (D29); the beavers' padded
                            sheets, the hit 7 → 6 with the log landing after frame 7, the hint pill hidden after the
                            first attack (D31)
@@ -85,12 +85,14 @@ public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, miniga
                            each, streamed)
 scripts/removeCheckerboard.mjs   flood-fills light-gray checkerboard to alpha (--enclosed, --glow, --force); --black keys a sheet
                                  painted on black (D30)
-scripts/packFrames.mjs           scattered sheet frames → one-row strip, anchored (eye / white-hot core / a shot's tip)
+scripts/packFrames.mjs           scattered sheet frames → one-row strip, anchored (eye / white-hot core / a shot's tip);
+                                 or a frames list of separate pictures (`*.frames.json`, resampled by their scales, D32)
 scripts/build-music.sh           the deployed music from art/music/ (9 dB quieter, D29)
 scripts/build-sfx.sh             the minigame's sound effects from art/minigames/dragon-attack/sfx/ (D29)
 scripts/cleanBeavers.mjs         the beaver sheets cut by their own pieces into padded cells (D31; no arguments)
-art/                             source art kept in git but not deployed (originals of the packed strips, of the
-                                 beaver sheets, of the music and of the sound effects)
+scripts/measureEmmaAnchors.mjs   prints Emma's attack anchors, found from her face in each attack frame (D32; no arguments)
+art/                             source art kept in git but not deployed (originals of the packed strips, Emma's flight
+                                 poses and their frames list, the beaver sheets, the music and the sound effects)
 .github/workflows/deploy.yml     push to main → npm ci → build → GitHub Pages
 ```
 
@@ -185,10 +187,11 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
   sound tied to something the game draws (the log landing) is played by the game at that moment instead. Renaming `fireball_hit.mp3`: it is
   also Nastavení's test sound (`TEST_SOUND_SRC` in `sfx.js`). Every effect plays at 0.7
   (`EFFECT_MIX`) × the effects slider; set per sound in the minigame config (README).
-- Róza's and Anna's minigame strips (`public/assets/minigames/dragon-attack/roza_{fly,attack,fireball}.png`,
-  `anna_{fly,attack,thorn}.png`) are generated from the originals in `art/minigames/dragon-attack/` (D23, D30), one
-  file at a time (Anna's move and thorn sheets are already transparent and are packed straight from `art/`; her attack
-  sheet is painted on black):
+- The dragons' minigame strips (`public/assets/minigames/dragon-attack/roza_{fly,attack,fireball}.png`,
+  `emma_{fly,attack,bolt}.png`, `anna_{fly,attack,thorn}.png`) are generated from the originals in
+  `art/minigames/dragon-attack/` (D23, D32, D30), one file at a time (Emma's and Anna's sheets are already transparent and
+  are packed straight from `art/`, except Anna's attack sheet, painted on black; Emma's fly strip comes from a frames
+  list of five pictures):
   ```
   cp art/minigames/dragon-attack/roza_move.png <tmp>/ && node scripts/removeCheckerboard.mjs <tmp>/roza_move.png --enclosed
   node scripts/packFrames.mjs <tmp>/roza_move.png public/assets/minigames/dragon-attack/roza_fly.png art/minigames/dragon-attack/roza_move.anchors.json
@@ -196,21 +199,38 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
   node scripts/packFrames.mjs <tmp>/roze_attack.png public/assets/minigames/dragon-attack/roza_attack.png art/minigames/dragon-attack/roze_attack.anchors.json
   cp art/minigames/dragon-attack/bezzubka_projektil.png <tmp>/ && node scripts/removeCheckerboard.mjs <tmp>/bezzubka_projektil.png --glow
   node scripts/packFrames.mjs <tmp>/bezzubka_projektil.png public/assets/minigames/dragon-attack/roza_fireball.png bright
+  node scripts/packFrames.mjs art/minigames/dragon-attack/emma_fly.frames.json public/assets/minigames/dragon-attack/emma_fly.png
+  node scripts/packFrames.mjs art/minigames/dragon-attack/emma_attack.png public/assets/minigames/dragon-attack/emma_attack.png art/minigames/dragon-attack/emma_attack.anchors.json
+  node scripts/packFrames.mjs art/minigames/dragon-attack/beska_projektil.png public/assets/minigames/dragon-attack/emma_bolt.png art/minigames/dragon-attack/beska_projektil.anchors.json
   node scripts/packFrames.mjs art/minigames/dragon-attack/anna_move.png public/assets/minigames/dragon-attack/anna_fly.png art/minigames/dragon-attack/anna_move.anchors.json
   cp art/minigames/dragon-attack/anna_attack.png <tmp>/ && node scripts/removeCheckerboard.mjs <tmp>/anna_attack.png --black
   node scripts/packFrames.mjs <tmp>/anna_attack.png public/assets/minigames/dragon-attack/anna_attack.png art/minigames/dragon-attack/anna_attack.anchors.json
   node scripts/packFrames.mjs art/minigames/dragon-attack/borinoha_projektil.png public/assets/minigames/dragon-attack/anna_thorn.png art/minigames/dragon-attack/borinoha_projektil.anchors.json
   ```
   Róza rides Bezzubka; her fireball sheet was named `beska_projektil.png` until 2026-10-29 (D23 quotes that name).
-  The `beska_projektil.png` in `art/` since then is another sheet (a lightning strip, not used yet), like Emma's
-  sheets beside it.
-  Both scripts refuse to write into `art/` (the originals and the hand-measured anchors stay untouched), also through a
-  link or a UNC path. `<tmp>` is a scratch folder: `anna_attack.png` has the same name as its packed strip in `public/`.
+  The `beska_projektil.png` in `art/` since then is another sheet: Emma's lightning (D32).
+  Emma's five flight poses are separate pictures (`emma_flight_01`, `_03`, `_04` by Sára; `_02` and `_03b` made with
+  Runway on her pick and committed untouched, so they keep their C2PA provenance; their prompts are in
+  `emma_flight_runway.txt`), listed in `emma_fly.frames.json` with each pose's eye and scale: its registration scale
+  against 03 × 0.67, so Emma is as big as in the attack sheet packed at factor 2 (D32; a new or re-exported pose: pack
+  it with a guessed scale, and the sprite test's "emma" head check prints its scale against 03: divide the guess by
+  it). `emma_flight.png` is not used
+  (Sára: some frames show Emma over the wing). Emma's attack anchors aren't hand-measured eyes: Emma's face is found in
+  each attack frame by NCC, and each anchor is the face + 03's face-to-eye offset × 1.34:
+  `node scripts/measureEmmaAnchors.mjs > <tmp>/emma_attack.anchors.json`, then copy it into `art/` by hand. After a
+  re-export of `emma_attack.png`, update the script's `GUESS` (Emma's face in each frame, source px, ±8) if the frames
+  moved; it stops, printing nothing, when it can't find her face.
+  `removeCheckerboard.mjs` and `packFrames.mjs` refuse to write into `art/` (the originals and their anchors stay
+  untouched), also through a link or a UNC path; `packFrames.mjs` also refuses a link at the output and, on Windows, a
+  stream name (`art:x.png`). `<tmp>` is a scratch folder: `anna_attack.png` has the same name as its packed strip in `public/`.
   `packFrames.mjs` prints the frame count, size and anchor that go into the dragon's `animation` config,
   and each frame's box around the anchor. All config px are strip px (the source downscaled by the
-  packer's `factor`, default 2): `bodyWidth` = the `medianWidth` it prints for the fly strip; `launchPoint` = where
-  the shot leaves on the `launchFrame` (Róza's mouth, Anna's tail tip, both on attack frame 3), measured from the eye
-  in the source ÷ factor. A shot's anchors file holds the point the shot is turned around (Anna's thorn: its tip).
+  packer's `factor`, default 2; a frames list by each picture's scale): `bodyWidth` = the `medianWidth` it prints for the
+  fly strip; `launchPoint` = where the shot leaves on the `launchFrame` (Róza's mouth and Anna's tail tip on attack frame
+  3, Emma's mouth on frame 4), measured from that frame's anchor in the source ÷ factor. An anchor is the point that lines
+  up with the fly strip's anchor (the eye for Róza and Anna; for Emma's attack, where 03's eye sits relative to her). A
+  shot's anchors file holds the point the shot is turned around (Anna's thorn and Emma's bolt: the tip; the bolt's spark
+  and burst: their white-hot core).
 - Source art arrives with a light-gray checkerboard baked in instead of
   transparency; run `scripts/removeCheckerboard.mjs <file.png|dir>` on a copy of it. It
   overwrites files in place and skips any PNG that already has transparency (a packed strip

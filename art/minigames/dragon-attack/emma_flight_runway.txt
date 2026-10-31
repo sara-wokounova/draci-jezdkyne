@@ -1,0 +1,26 @@
+Emma's two flight poses made with Runway (D32, 2026-10-31), on Sára's picks. Both with nano-banana-pro, the
+references uploaded from this folder; the results came on a flat green background and were cut out with Runway's
+background removal (birefnet-v2). The cut-outs are committed untouched (they carry their C2PA provenance).
+
+emma_flight_02.png (half raised, the round's "D"), references @up = emma_flight_01.png, @level = emma_flight_03.png:
+
+@up and @level are two frames of a flight animation of the same white dragon with a girl rider, side view flying to
+the right, soft painted storybook illustration. Paint the frame exactly halfway between them: the identical dragon and
+girl, same design, colours, size and painting style. The wings are only half raised: each wing points up and back at
+about 45 degrees, clearly lower than in @up and clearly higher than in @level. The near wing is in front of the girl:
+its lower edge covers her skirt and legs, as in @up; her head, arms and upper body show above and behind it. Her hair
+exactly as in @level: one brown braid of the same length, tied with the same small blue ribbon (no red ribbons), and
+the same blue headband. Head, body, legs and tail as in @level. Plain flat solid green background (#00B140), no
+shadow, no ground, nothing else; the whole dragon, tail tip and wing tips inside the image.
+
+emma_flight_03b.png (half lowered, the round's "K"), reference @level = emma_flight_03.png:
+
+Edit @level with one change only: the dragon's two wings are lowered partway, so each wing slants down and back at
+about 30 degrees below horizontal instead of being held level. The dragon has exactly two wings, one on each side of
+its body: the near wing in front of its body and below the girl, the far wing behind the body, both in this same
+half-lowered position. Everything else stays exactly as in @level: the same dragon, the same girl with her brown
+braid, small blue ribbon and blue headband, the same colours, size, position, side view facing right and painted
+storybook style. Plain flat solid green background (#00B140), no shadow, no ground, nothing else; the whole dragon,
+tail tip and wing tips inside the image.
+
+The models give a different picture each time: the same prompt makes a new candidate to pick from, not this one.

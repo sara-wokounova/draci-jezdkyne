@@ -661,3 +661,74 @@ full scale for a few ms (up to +0.6 dBFS; issue P3, accepted by Sára). For up t
 with the old code cached asks for `beaver{n}.png`, now in `art/`: the vector beavers (D7) for that visit. `sfx.js` now
 also relies on Howler's master gain going straight to the destination and on its one-time context reset inside the
 page's first Howl: rerun minigame-roza.mjs 31f after a Howler upgrade.
+
+## D32 — Emma's minigame art: five flight poses, the attack and the lightning (2026-10-31) — Accepted
+Supersedes: D29's "Emma's lightning leaves her head" (`launchFrom: 'head'` is now only the fallback without her fly
+strip; her shot sound plays on her attack's launch frame); D30's "Emma stays a vector placeholder" and its consequence
+that Anna flies below Emma on screens under ~1070 px tall (Emma now flies below Anna); D31's squeeze budgets (4.5 and
+6.5 dB, `sfx.test.mjs`'s budgets for D31's stacks) no longer cover Emma's sounds.
+Decision: Emma's dragon, attack and lightning come from art in `art/minigames/dragon-attack/` through D23's pipeline.
+Her five flight poses are separate pictures: `emma_flight_01.png` (up), `_03` (level) and `_04` (down) by Sára, `_02`
+(half raised, "D") and `_03b` (half lowered, "K") made with Runway on her picks (nano-banana-pro from her 01 and 03, and
+from her 03; cut out with birefnet-v2; the prompts in `emma_flight_runway.txt` beside them) and committed untouched, so
+they keep their C2PA provenance (`caBX`, AI-generated content); `emma_flight.png` stays unused (Sára: some of its frames
+show Emma over the wing). `scripts/packFrames.mjs` gains a frames list (`emma_fly.frames.json`: per picture its `src` in
+the list's folder, its `anchor` = the dragon's eye and its `scale`): each picture is one frame (every pixel inside the
+box of its pixels above alpha 40, widened by 2 px), resampled by its scale with an area filter in premultiplied space so
+that its anchor lands on the top-left corner of the cell's anchor pixel (where sheet mode puts the anchor's pixel); a
+malformed list is refused, writing nothing, and D23's `art/` guards hold for it; both forms now also refuse a link at
+the output (a dangling one has no real path to compare) and, on Windows, a stream name (`art:x.png`, which lands on the
+art folder itself). A pose's scale = its registration scale against 03 (head, neck and saddle by NCC: 01 0.78, D 0.348,
+03 1, K 0.336, 04 0.96; checked on Emma's face) × 0.67, so Emma is as big in the flight as in the attack sheet packed at
+factor 2. The attack anchors aren't hand-measured: Emma's face is found in each attack frame by NCC (03's face masked to
+alpha > 200) and each anchor = the face + 03's face-to-eye offset (from its unrounded eye, 269.3, 136.8) × 1.34, printed
+by `scripts/measureEmmaAnchors.mjs` (after a re-export of the attack sheet: re-run, its face guesses updated if the
+frames moved), so Emma stays still while the dragon's head dips around her. Emma is 200 game px wide like Róza and Anna
+and flaps `[2, 3, 4, 3, 2, 1, 0, 1]` (03 → K → 04 → K → 03 → D → 01 → D; in file names 03 → 03b → 04 → 03b → 03 → 02 →
+01 → 02) at 12 fps on the dragon's eye, starting on 03, whose level wings match the attack. A tap plays attack frames
+`[0, 1, 2, 3, 4, 5, 4, 3, 2, 1, 0]` at 24 fps (0.46 s: the mouth closes again, so the head doesn't jump back up to the
+flap) drawn at the fly strip's scale, and the bolt leaves her open mouth (`launchPoint` [−3, 42] from frame 4's anchor)
+on the first frame 4, 0.167 s after the tap, with her shot sound. The bolt (`emma_bolt.png`, from `beska_projektil.png`)
+is anchored on its tip (the spark and the burst on their white-hot core), drawn at 0.7 (~100 game px), its frames `[1,
+2, 3, 4, 3, 2]` looped at 12 fps, on Emma's zigzag (falling 380 px/s, ±70 px at 9 rad/s) with two engine changes: the
+weave's first swing goes forward, the way the dragon flies (`moveShot`: the weave × the shot's direction), and a zigzag
+shot strip is turned along its real path, the weave's sideways speed included (`orientStrip`), so the bolt leans up to
+~59° from vertical in the middle of each swing; a hit shows the burst (frame 5) for 300 ms as painted. Her firing rules
+stay (D23). Each strip falls back on its own (D7, D23).
+Why: asked for by Sára ("Can you use runway to generate more flight sprites for emma? … This should be all sprites
+needed for emma and her dragon for the minigame. Replace the stick with these sprites."), with her picks (D and K, after
+rejecting A and B for a long braid with a red ribbon, and E, F and H for two or three wings) and her answers on the
+preview: the same width as the others, the flap as proposed on the eye, Emma still while the head drops, the mouth
+closing again, the launch on frame 4, Emma keeping her size, the art in `art/`, the limiter working harder accepted. The
+lightning's look picked from a comparison page of four variants (variant "D", not the pose: "D is the best": turned with
+its weave, the weave forward first; the page's other switches at their defaults: no spark first, the burst as painted,
+size 0.70). No config key for either engine change: Emma is the only zigzag shooter. A frames list rather than a sheet:
+no integer factor brings five pictures at five scales to one size, and a separate compose script would have been a third
+copy of the `art/` guards. Emma's size kept ("matched") rather than the art's own: for Anna Sára turned down the option
+that made her bigger for the attack (D30). Anchors on Emma's face: in the attack the dragon's eye moves with the dipping
+head (5–39 game px), so eye anchors would make Emma drop. Frame 4: the first wide-open frame (frame 5's snout is cut by
+the sheet's edge).
+Consequences: Emma is drawn at 1.03 game px per strip px (Anna 1.0), a little softer than the preview. Her raised wings
+(her fly cell reaches 154 strip px above the eye, 01's art ~148) put her below Anna on every screen (her eye at ~244
+game px at 1280×720, Anna's 225). Bolts per missed flight, tapping as soon as allowed (measured; today's vector Emma in
+brackets): 3 at 1280×720, 1366×768, 1920×1080, 1024×600 and on phones (844×390, 640×360, 640×300, 568×270) (3), only
+just (the third at x 9–16) at 1470×830, 1536×864, 1600×900 (3); 2 at 1512×860, 1680×950, 1728×1000 (3); 2 at 1440×900
+and in half-screen windows (960×947, 840×830, 864×770, 756×750, 683×650) (2); 1 at 800×1000 (2) and 768×1000 (1). Sára's
+queued gameplay change retunes them. In 01 and 04 Emma sits ~12 and ~8 game px off where 03 has her, so she pops for one
+flap frame each, and an attack started on 01 or 04 moves her by that on its first frame. At the launch the leaning bolt
+lies from the mouth back across the dragon's neck, its glow reaching Emma's hands; at ~60 ms across the dragon's face;
+from ~100 ms it swings ahead, under the chin (the preview's panel D drew its first frame straight down, one 16 ms
+frame). On the screens where the third bolt of a flight leaves near the left edge (x 9–46), its first swing carries all
+of it off the screen for ~0.1–0.2 s (its tip, the hit point, for ~0.2–0.3 s) before it swings back (as the first bolt
+did at the right edge before). Any zigzag dragon flying left in a story config now swings forward first too (none does;
+one flying right is unchanged). The weave's direction and the bolt's turn change neither the bolts per flight nor her
+sound stacks (the launch rules, the fall and the airtime are the same). Without only the attack strip the bolt leaves
+~43 game px under the fly eye (`launchPoint` is frame 4's). The attack art has no far wing (it vanishes for each 0.46 s
+attack) and frame 5's snout is cut flat for its 42 ms (Sára's art; a re-export would fix both, issue P3); each attack
+cell holds faint ghosts of its neighbours' halo (alpha ≤ 18, the class D30 accepted for the thorn). The limiter works
+harder for Emma's sounds than D31's figures (accepted by Sára): measured in planning over Howler's start grid at 48 and
+44.1 kHz, the worst cases found: a single hit cut by up to 5.1 dB (≤ 2.7 ms above the knee), fast tapping by 7.6 dB or
+more, up to 43 ms per 6 shots; `sfx.test.mjs` prints her stacks without a budget (4.0 dB, 2.3 ms for a single hit;
+5.0–5.5 dB, 26–33 ms per 6 shots at her 0.267 and 0.657 s flights); nothing passes the ceiling; the gameplay change
+re-measures them. ~0.7 MB more to download. `emma_attack.png` in `public/` has the same name as its source in `art/` (as
+Anna's). The head check on her poses accepts NCC ≥ 0.5 (01 reaches 0.54: its raised near wing crosses the window).

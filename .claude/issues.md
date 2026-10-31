@@ -13,7 +13,8 @@ nothing until then. Not a regression. Since D23 everything loads in parallel (`P
 instead of one sheet after another, which cuts the wait on a fast connection but not on one
 limited by bandwidth (same bytes). Since D25 battle.mp3 also downloads at that moment (music
 starts before the render, D21): ~3 MiB in Chrome (it buffers that far ahead), the whole 4.8 MB
-in Firefox. Since D31 the sheets are the smaller part (~1.7 MB), so on a slow link the music now dominates the wait. A
+in Firefox. Since D31 the sheets are the smaller part (~1.7 MB), so on a slow link the music now dominates the wait
+(Emma's strips add ~0.7 MB since D32). A
 resumed battle (D26) buffers at its position first (a range request): in Chrome on a slow link ~3–4 s instead of ~1 s.
 Rest of the fix: preload the sheets (and start the battle music's download) from the scenes before `beaver_battle`.
 
@@ -21,12 +22,31 @@ Rest of the fix: preload the sheets (and start the battle music's download) from
 `next: "dam_with_beavers_persuade_05"` doesn't exist. Tapping throws
 "Unknown scene id" and the player is stuck (Back still works). Needs story text.
 
-### P2 — Minigame art missing → 404s (verified 2026-10-17; partly fixed 2026-10-28 and 2026-10-30)
+### P2 — Minigame art missing → 404s (verified 2026-10-17; partly fixed 2026-10-28, 2026-10-30 and 2026-10-31)
 DEFAULTS in `dragonAttack.js` pointed to `background.png`, `dragon_{roza,emma,anna}.png`,
-`flame_roza.png`, `flash_emma.png`, `arrow_anna.png` — none exist. Since D23 Róza and since D30
-Anna have their animated art, and the dragon/shot sprite paths are `null` (Emma stays a vector
-placeholder, no requests; her sheets are in `art/`, not planned yet). Still open: `background.png` 404s on every minigame start (the
-scene's dam background stays behind the game). Add the art or set it to `null`.
+`flame_roza.png`, `flash_emma.png`, `arrow_anna.png` — none exist. Since D23 Róza, since D30
+Anna and since D32 Emma have their animated art, and the dragon/shot sprite paths are `null`. Still open:
+`background.png` 404s on every minigame start (the scene's dam background stays behind the game). Add the art or set it
+to `null`.
+
+### P3 — Emma's attack art: no far wing, frame 5's snout cut (D32, 2026-10-31)
+`emma_attack.png` (Sára's sheet) has no far wing, so it vanishes for the 0.46 s of every attack, and frame 5's snout tip
+is cut flat by the sheet's right edge (shown for 42 ms per attack). A re-export of the sheet would fix both; then update
+the face guesses (`GUESS`) in `scripts/measureEmmaAnchors.mjs` if the frames moved and re-run it for its anchors file and repack (CLAUDE.md → Assets).
+
+### P3 — Checks 3 and 30b can't see a wrong anchor (found in planning D32, 2026-10-31)
+`minigame-roza.mjs`'s `eye()` helper returns `getBounds().minX + anchor.x × width`, which is always `view.x`: with
+Róza's or Anna's attack anchor replaced by [0.5, 0.5] it moved 0.00 px while the dragon jumped. Pre-existing. Check 32b
+follows a point fixed in the art through the sprite's own transform instead (`position + scale × (P − anchor) × frame
+size`); the same method would make 3 and 30b real checks. (The sprite test's `pack` part still pins every DEFAULTS
+anchor to the packer's output.)
+
+### P3 — The safety limiter works harder for Emma's sounds (D32, 2026-10-31)
+At Emma's timing her hit overlaps the end of her shot sound, and fast tapping lands her next shot on the previous hit's
+cry and log: in the worst cases found (over Howler's start grid at 48 and 44.1 kHz) the limiter (D31) cuts a single hit
+by up to 5.1 dB (≤ 2.7 ms above the knee) and fast tapping by 7.6 dB or more, up to 43 ms per 6 shots, beyond D31's
+figures for Bezzubka (`sfx.test.mjs` prints 4.0 dB and 5.0–5.5 dB at two of her flights). Nothing passes its ceiling. Accepted by Sára; `sfx.test.mjs` prints her stacks without a budget. Re-measure
+with the queued gameplay change (it moves every timing); trimming the tail of `emma_shot.mp3` would ease it.
 
 ### P2 — The fight branch's victory has no way on (verified 2026-10-28)
 `beaver_battle_win` → `beaver_after_battle_win_01` … `_07` (being written by Sára), and
@@ -45,7 +65,8 @@ internal scene ids ("Autosaved • river_dam"). Minigame HUD is already Czech.
 - `dam_with_beavers_persuade_04`: "byly z nám obří bobři" → "byli z nás obří bobři"; trailing space
 
 ### P3 — Heavy assets for mobile data
-Backgrounds ~3.3 MB, character poses ~2 MB, beaver sheets ~250 KB each since D31 (~1.5 MB before), all PNG.
+Backgrounds ~3.3 MB, character poses ~2 MB, beaver sheets ~250 KB each since D31 (~1.5 MB before), Emma's three
+strips ~0.7 MB (D32), all PNG.
 WebP / downscaling would cut load time a lot.
 
 ### P3 — "Velký bobr" has no sprite
@@ -143,7 +164,11 @@ The effects' limiter never passes −3.2 dBFS, and with the music at its default
 −0.22 dBFS at most. With the music at file level (iPhone and iPad ignore its volume) or the music slider at 85 or more,
 the sum can reach +0.6 dBFS for a few ms: single hits 0.3–1 % of the time at the default effects level (1–3.8 % at the
 maximum), phone mashing in 8 % of 2.7 s bursts (21–24 % at the maximum). Accepted by Sára ("A": clean on computers at
-the default levels).
+the default levels). Emma's stacks (D32), at the default effects level over 400 offsets into the whole battle track, with
+the log at 0.136 s: never at the default music volume or at 85; at file level a single hit 0.3–0.5 % of the time, fast
+tapping (6 shots) 6.8–11.5 %; the same method gives Bezzubka's single hit 0.8 % and his mashing 12.3 % (D31's figures
+above were measured differently), so Emma's are no worse (`C:\tmp\claude\as-test\emma-fullscale.mjs`, which decodes
+battle.mp3 itself and takes the limiter's curve and the default volumes from the code).
 
 ### P3 — Flights take longer on taller windows (2026-10-29)
 The world only scales down (D15), so on a window taller than 600 px the lane is further away: Bezzubka's
@@ -162,7 +187,7 @@ the volume: there it can sound for up to ~400 ms. Check that it stays silent els
 
 ## Fixed
 
-### P2 — Beaver frames showed bits of their neighbours (user-reported 2026-10-29, verified) — fixed 2026-10-31
+### P2 — Beaver frames showed bits of their neighbours (user-reported 2026-10-29, verified) — fixed 2026-10-31 in `edf1ad4`, verified live
 The sheets were cut on a fixed 6×2 grid the art isn't on: a frame showed a sliver of the next beaver's log, its own
 log end was cut off, and the log lying on the ground showed half of the falling log beside it. Also the hit frames
 stood ~57 game px above the walkers, the log lay on the ground before it had fallen, and the startled beaver held no
@@ -170,11 +195,11 @@ log for 0.1 s. Fix (D31): `scripts/cleanBeavers.mjs` cuts every frame by its own
 on the walkers' ground and the lying log under the falling one; the hit plays 7 → 6 and the log lands (with its thud)
 when frame 7 ends. Checks: `as-test/sprites.test.mjs` "beavers", `minigame-roza.mjs` 31a–h.
 
-### P3 — Minigame instructions pill covered the beavers' feet on short screens (verified 2026-10-17) — fixed 2026-10-31
+### P3 — Minigame instructions pill covered the beavers' feet on short screens (verified 2026-10-17) — fixed 2026-10-31 in `edf1ad4`, verified live
 At 640x360 and 844x390 the bottom `.mg-instructions` pill overlapped the beaver lane. Fix (D31, Sára): it hides after
 the round's first attack (a retry shows it again). Check: `minigame-roza.mjs` 31g.
 
-### P3 — Mashing Bezzubka's shot on a phone clipped for a moment (D29, 2026-10-29) — fixed 2026-10-31
+### P3 — Mashing Bezzubka's shot on a phone clipped for a moment (D29, 2026-10-29) — fixed 2026-10-31 in `edf1ad4`, verified live
 A new shot as soon as the last one hit stacked to about +0.5 dBFS. Fix: the effects' safety limiter (D31) keeps them at
 −3.2 dBFS at most. Checks: `as-test/sfx.test.mjs` "stacks", `minigame-roza.mjs` 31f.
 

@@ -85,7 +85,7 @@ const DEFAULTS = {
   //
   // Each attack supports:
   //   pattern: 'ballistic' (angle + speed + gravity) or 'zigzag' (descends
-  //            straight while weaving sideways).
+  //            straight while weaving sideways, its first swing forward).
   //   launchFrom: 'center' | 'head' | 'tail' — where the shot spawns relative
   //            to the dragon's travel direction (launchOffset px from the
   //            centre). A dragon with `animation.launchPoint` and its fly strip
@@ -99,9 +99,11 @@ const DEFAULTS = {
   //            { src, volume 0–1 }, a bare path (volume EFFECT_MIX, 0.7) or null for none.
   //
   // A dragon's `animation` (optional) uses strips made by scripts/packFrames.mjs:
-  // one row of equal frames, the art facing right, `anchor` = the dragon's eye
+  // one row of equal frames, the art facing right, `anchor` = the point that lines up across the
+  // strips (the dragon's eye; for Emma's attack, where her level pose's eye sits relative to her, D32)
   // as fractions of a frame. Sizes are in strip px; `launchPoint` (where the shot leaves on the
-  // launch frame: Róza's mouth, Anna's tail tip) is relative to the anchor.
+  // launch frame: Róza's and Emma's mouth, Anna's tail tip) is relative to the launch frame's anchor.
+  // The shot leaves on the first place of `launchFrame` in `attackFrames` (Emma's 4 is in it twice).
   // DEFAULTS is the source of truth for every value. A custom `dragons` list replaces it
   // wholesale and must give every field a dragon uses (README); the `?? n` fallbacks in the code
   // only cover the optional ones (art, firing rules, sizes), not e.g. `color` or `speed`.
@@ -155,18 +157,33 @@ const DEFAULTS = {
       },
     },
     {
-      // Emma: a flash that drops straight down while zig-zagging side to side.
+      // Emma: a lightning bolt that falls while zig-zagging side to side, turned along its path.
       name: 'Emma',
       color: '#e0a33a',
       sprite: null,
-      width: 150,
+      width: 200,
       height: 96,
-      flightY: 0.26,
+      flightY: 0.26, // below ~940 px tall the HUD clamp (her raised wings) sets her height instead (D32)
       speed: 380,
       entryFrom: 'right',
+      animation: {
+        // The fly strip packed from five pictures (emma_fly.frames.json), anchored on the eye; the attack anchored
+        // where the eye of her level pose (emma_flight_03) sits relative to Emma, so she stays still while the
+        // dragon's head dips (D32).
+        fly: { src: 'assets/minigames/dragon-attack/emma_fly.png', frames: 5, anchor: [0.762, 0.554] },
+        attack: { src: 'assets/minigames/dragon-attack/emma_attack.png', frames: 6, anchor: [0.905, 0.39] },
+        bodyWidth: 194,
+        // 03 → 03b → 04 → 03b → 03 → 02 → 01 → 02 (the strip: emma_flight_01, 02, 03, 03b, 04)
+        flyFrames: [2, 3, 4, 3, 2, 1, 0, 1],
+        flyFps: 12,
+        attackFrames: [0, 1, 2, 3, 4, 5, 4, 3, 2, 1, 0], // the mouth opens and closes again: no jump back to the flap
+        attackFps: 24,
+        launchFrame: 4, // the first wide-open frame
+        launchPoint: [-3, 42], // the open mouth (source ≈ [1583, 452] on emma_attack.png's frame 4, anchor [1588.6, 368.3])
+      },
       attack: {
         pattern: 'zigzag',
-        launchFrom: 'head', // the lightning leaves her mouth (Sára)
+        launchFrom: 'head', // only without the fly strip (the vector fallback)
         speed: 380, // downward descent speed
         gravity: 0, // constant fall so the zig-zag stays even
         zigzagAmplitude: 70, // sideways reach in px
@@ -178,6 +195,18 @@ const DEFAULTS = {
         sound: { src: 'assets/minigames/dragon-attack/sfx/emma_shot.mp3', volume: EFFECT_MIX },
         hitSound: { src: 'assets/minigames/dragon-attack/sfx/emma_hit.mp3', volume: EFFECT_MIX },
         sprite: null,
+        animation: {
+          src: 'assets/minigames/dragon-attack/emma_bolt.png',
+          frames: 6,
+          anchor: [0.713, 0.512], // the bolt's tip (the spark's and the burst's white-hot core)
+          scale: 0.7,
+          fps: 12,
+          flightFrames: [1, 2, 3, 4, 3, 2], // the bolt flickers
+          loop: true,
+          impactFrame: 5, // the burst at the contact point
+          impactMs: 300,
+          artAngleDeg: 0, // the bolt points right in the art (turned along its path, the weave included)
+        },
       },
     },
     {
@@ -540,7 +569,7 @@ export class DragonAttackMinigame {
     let y = dragon.view.y;
     // Two finite numbers, like the anchors (a typo would make every shot NaN, or none fire): else launchFrom.
     if (dragon.art.fly && Array.isArray(point) && point.length === 2 && point.every(Number.isFinite)) {
-      // From the launch point in the art (strip px from the eye, mirrored with the direction).
+      // From the launch point in the art (strip px from the launch frame's anchor, mirrored with the direction).
       x += point[0] * dragon.scale * dir;
       y += point[1] * dragon.scale;
     } else {
@@ -593,7 +622,7 @@ export class DragonAttackMinigame {
     const shot = {
       dragonIndex: dragon.index,
       view,
-      strip, // the shot's animation strip (Róza's fireball, Anna's thorn), or null
+      strip, // the shot's animation strip (Róza's fireball, Emma's bolt, Anna's thorn), or null
       animation: attack.animation,
       dir,
       radius: attack.radius,
@@ -974,7 +1003,8 @@ export class DragonAttackMinigame {
     if (isOffScreen(shot, width, height) || shot.age >= MAX_SHOT_SECONDS) this.removeShot(shot);
   }
 
-  /** The shot strip's impact frame (Róza's dissipating flame) where it touched the beaver; fades out in tick(). */
+  /** The shot strip's impact frame (Róza's dissipating flame, Emma's burst) where it touched the beaver, drawn as
+   *  painted (the shot's scale, not its rotation); fades out in tick(). */
   addImpact(shot, beaver) {
     const animation = shot.animation;
     if (!shot.strip || animation.impactFrame == null) return;
@@ -1124,7 +1154,7 @@ function mergeConfig(defaults, override) {
 }
 
 /** Dragon y in game px: `flightY` of the height, but never behind the HUD top bar (D15).
- *  Animated art keeps its real extent above the eye (the attack strip's included) below it. */
+ *  Animated art keeps its real extent above its anchor (the attack strip's included) below it. */
 function flightY(dragon, size) {
   const { fly, breath } = dragon.art;
   const above = fly
@@ -1168,7 +1198,7 @@ async function loadStrip(spec) {
 }
 
 /** Shows a strip's frame. Sets the anchor too: Pixi's texture setter ignores the texture's
- *  own anchor, and the strips' anchors differ, so the eye would jump on every switch. */
+ *  own anchor, and the strips' anchors differ, so the eye (Emma in her attack) would jump on every switch. */
 function showFrame(view, strip, index) {
   // Integers only: a config typo like "length" must not reach the texture setter (it would throw
   // in the ticker and freeze the game).
@@ -1199,7 +1229,7 @@ function refireAfter(attack) {
 }
 
 /** Back to flapping from the cycle's first frame (Róza: wings up, like her attack frames; Anna: the tail as the
- *  flick ends). */
+ *  flick ends; Emma: 03, the attack's level wings). */
 function endAttack(dragon) {
   dragon.attackTime = null;
   dragon.flyTime = 0;
@@ -1211,7 +1241,7 @@ function moveShot(shot, dt) {
   if (shot.pattern === 'zigzag') {
     shot.baseX += shot.vx * dt; // vx is 0 by default, so the column stays put
     shot.y += shot.vy * dt;
-    shot.x = shot.baseX + Math.sin(shot.age * shot.zigzagFrequency) * shot.zigzagAmplitude;
+    shot.x = shot.baseX + weave(shot); // the first swing forward, the way the dragon flies (D32)
   } else {
     shot.x += shot.vx * dt;
     shot.y += shot.vy * dt;
@@ -1226,15 +1256,23 @@ function isOffScreen(shot, width, height) {
     reach = Math.hypot(Math.max(ax, 1 - ax) * shot.strip.width, Math.max(ay, 1 - ay) * shot.strip.height)
       * Math.abs(shot.view.scale.y);
   }
-  // A zigzag shot swings back: judge its column, widened by the swing, not where the weave has it now.
+  // A zigzag shot swings both ways: judge its column, widened by the swing, not where the weave has it now.
   const zigzag = shot.pattern === 'zigzag';
   const x = zigzag ? shot.baseX : shot.x;
   const side = reach + (zigzag ? shot.zigzagAmplitude : 0);
   return x < -side || x > width + side || shot.y > height + reach;
 }
 
+/** A zigzag shot's sideways offset from its column at its age, and that offset's speed. */
+function weave(shot) {
+  return shot.dir * Math.sin(shot.age * shot.zigzagFrequency) * shot.zigzagAmplitude;
+}
+function weaveSpeed(shot) {
+  return shot.dir * Math.cos(shot.age * shot.zigzagFrequency) * shot.zigzagFrequency * shot.zigzagAmplitude;
+}
+
 /** A strip shot's frame for its age (the last flight frame held, or with `loop` the frames repeated) and its
- *  rotation along its path. */
+ *  rotation along its velocity (a zigzag shot's weave included: Emma's bolt leans into each swing, D32). */
 function orientStrip(shot) {
   const animation = shot.animation;
   const frames = animation.flightFrames ?? [0];
@@ -1242,7 +1280,8 @@ function orientStrip(shot) {
   showFrame(shot.view, shot.strip, frames[animation.loop === true ? step % frames.length : Math.min(step, frames.length - 1)]);
   const art = ((animation.artAngleDeg ?? 0) * Math.PI) / 180;
   // Mirrored (flying left), the art points the other way: 180° − its angle.
-  shot.view.rotation = Math.atan2(shot.vy, shot.vx) - (shot.dir > 0 ? art : Math.PI - art);
+  const vx = shot.vx + (shot.pattern === 'zigzag' ? weaveSpeed(shot) : 0);
+  shot.view.rotation = Math.atan2(shot.vy, vx) - (shot.dir > 0 ? art : Math.PI - art);
 }
 
 function isPlainObject(value) {

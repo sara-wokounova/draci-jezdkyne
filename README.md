@@ -188,14 +188,16 @@ placeholders are drawn until you supply it. Art slots:
 - `config.beavers.sheetPattern` — per-beaver sprite **sheets** (`beaver1_frames.png` …
   `beaver7_frames.png`, made by `scripts/cleanBeavers.mjs`); `{n}` is replaced with `1..count`.
 - `config.dragons[i].animation` — animated dragon art: `fly` and `attack`
-  strips made by `scripts/packFrames.mjs` (one row of equal frames, the art
-  facing right, `anchor` = the dragon's eye), the frame orders and rates, and
-  `launchPoint` (where the shot leaves on the `launchFrame`, in strip px from the eye: Róza's mouth, Anna's
-  tail tip). Róza and Anna have it.
+  strips made by `scripts/packFrames.mjs` from a sheet or a frames list of separate pictures (one row of equal
+  frames, the art facing right, `anchor` = the point that lines up across the strips: the dragon's eye, or for
+  Emma's attack where her fly strip's eye sits relative to her), the frame orders and rates, and `launchPoint`
+  (where the shot leaves on the `launchFrame`, in strip px from that frame's anchor: Róza's and Emma's mouth, Anna's
+  tail tip). All three dragons have it.
 - `config.dragons[i].sprite` — a single image instead (the default list has none).
-- `config.dragons[i].attack.animation` — an animated shot strip (Róza's fireball, Anna's thorn): its
-  `flightFrames` at `fps`, the last one held, or repeated with `"loop": true`; turned along its path
-  (`artAngleDeg` = the direction the art points, in degrees from pointing right, positive = down);
+- `config.dragons[i].attack.animation` — an animated shot strip (Róza's fireball, Emma's bolt, Anna's thorn): its
+  `flightFrames` at `fps`, the last one held, or repeated with `"loop": true`; turned along its velocity, a zigzag
+  shot's weave included; `artAngleDeg` = the direction the art points, in degrees from pointing right, positive =
+  down; `impactFrame` shown for `impactMs` where the shot hits, as painted;
   `config.dragons[i].attack.sprite` — a single image instead.
 
 Sounds (optional): `config.dragons[i].attack.sound` plays when that dragon's shot
@@ -247,7 +249,8 @@ defaults):
 
 Providing a custom `dragons` array fully replaces the three defaults, so include
 every dragon you want, each with every field it uses: `name`, `color`, `flightY`,
-`speed`, `entryFrom` and an `attack` with `speed`, `angleDeg` (or `pattern: "zigzag"`),
+`speed`, `entryFrom` and an `attack` with `speed`, `angleDeg` (or `pattern: "zigzag"`:
+a straight fall weaving sideways, its first swing forward, the way the dragon flies),
 `gravity`, `radius` and `color` (a Róza without her `animation` is the vector
 placeholder again; one without `sound` and `hitSound` is silent). The example above is a
 complete one-dragon list.
