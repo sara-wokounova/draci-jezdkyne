@@ -601,3 +601,63 @@ A faint haze (alpha < 10) around the move frames shows only on black, not on the
 strip, a frame's cell takes the neighbouring frame's faint pixels (alpha 1–40) inside its box (thorn frame 0 gets
 ~1500 px of frame 1's halo, mean alpha 12: invisible on daylight). Emma stays a
 vector placeholder: her sheets (and a lightning strip, `beska_projektil.png`) are in `art/`, not planned yet.
+
+## D31 — Clean beaver frames, the log at the landing, the effects' safety limiter (2026-10-31) — Accepted
+Supersedes: D29's "the cry and the log start with 150 and 250 ms of silence … all three start on the hit tick" for the
+log, its "(the log drop just under it)" and its accepted mashing clip ("+0.5 dBFS … cosmetic"); D23's "a round is lost
+only when the flights are over, no shot is in the air, and beavers remain"; D24's normalisation list gains
+`sheet.padding` and `MAX_HIT_SECONDS`.
+Decision: the beaver frames are cut by their own pieces, not by the sheet's grid (as D23 does for Róza's sheets), and
+keep the grid layout: `scripts/cleanBeavers.mjs` (fixed paths, no arguments) reads the 7 sheets now kept in
+`art/minigames/dragon-attack/beaver{n}.png` (moved there with `git mv`), finds each sheet's 13 pieces (8-connected
+blobs, in reading order) and gives them to frames by an explicit list (`0,1,2,3,4,5,6,7,7,8,9,10,11`: frame 7 is the
+beaver and its falling log; no rule fits every sheet), puts each into a cell of the same 6×2 grid padded by 100 source
+px a side at its offset from its old cell's centre, moves row 2 (hit, log, run) down onto the walkers' ground (the
+sheet's `lift`: the walk frames' median bottom minus row 2's, 153–168 px) and frame 8's log under frame 7's falling log,
+and halves the result into `public/assets/minigames/dragon-attack/beaver{n}_frames.png` (1326×544). All 7 sheets are
+checked before anything is written; a sheet with another piece count or a piece that doesn't fit stops it. The game
+reads `sheet.padding` (50 sheet px a side; `spriteWidth` is a cell's width without it), a number from 0 up to a
+quarter of the frame width, else the default, itself only where it fits that quarter, else 0. The hit plays frames 7
+then 6 (`hit: [7, 6]`: the log falls, then the startled beaver stands beside it); whether a log drops is still decided at
+the hit (`dropLogOnHit`, a log frame), but the lying log and its sound come when the hit animation leaves its first
+frame, or when the beaver starts to run if that comes first; a beaver runs at the latest `MAX_HIT_SECONDS` (5) after
+its hit, whatever `hitFps` says (a D24 cap, like `MAX_FLIGHT_SECONDS`). The log's sound file is only its thud
+(`log_land.mp3`: the creak trimmed, no delay, its gain kept at the 5.8 dB Sára heard). A lost round also waits for any
+beaver still in its hit, and `maybeFinish` runs again when a beaver leaves it, so the log always lands and thuds before
+the result. The minigame's hint pill hides once the round's first attack passes `canFire`. All the effects go through a
+safety limiter in `sfx.js`: a WaveShaper (a soft clipper: y = x up to the knee 0.6, −4.4 dBFS, then a tanh towards the
+ceiling 0.69, −3.2 dBFS; 4097 points, no oversampling) between Howler's master gain and the destination, set up after
+`new Howl()` whenever Howler's context is not the one it was built on; on any error the master gain goes straight to the
+destination again. `cleanBeavers.mjs` writes its outputs beside their targets and renames them over them, so a link at a
+target is replaced, not written through (as the other two scripts refuse to write into `art/` through a link, D23, D30).
+Why: asked for by Sára ("there is a little bit of the previous and next beaver… cut each sprite separately", "when the
+log is lying on the ground … there is a little of the sprite it falling down left to it", "can you clean up these
+sprtites?"), with her answers on the preview: halve the sheets, the hit B (the log falls first), the same ground, the
+pill hidden after the first attack, the thud at the landing played by the game, a safety limiter rather than lower
+levels ("nothing clips", then "leave room for the music", then "A: clean on computers"). The art crosses the grid's
+borders (the carried logs, frame 7's log reaching into cell 8), so no grid cut is clean. A padded grid rather than
+`packFrames.mjs`'s strip: the strip's anchor would differ per sheet (its cells fit each sheet's extents) while all 7
+share one `sheet` config, and the beavers' anchor stays 0.5. New file names, because Pages caches files for ~10 minutes:
+new code with an old `beaver{n}.png` would draw the beavers 1.66× too big, an old `log_drop.mp3` would thud at the wrong
+moment. The limiter's ceiling sits 3.2 dB under full scale because the HTML5 music is mixed after it, by the browser:
+the ceiling plus the battle track's true peak (−8.4 dBTP) at the default music volume stays ≤ −0.2 dBFS. No
+oversampling: `4x` overshot the ceiling after its filter, added 4 ms and cost ~8× the CPU, for aliasing on ~10 ms of
+every 4 s of mashing. Not a DynamicsCompressorNode: no parameters to tune (its makeup gain, its 6 ms look-ahead).
+Consequences: the beavers stay their size (a cell 242 source px wide vs 241.33, 0.3 % smaller); a walking beaver's log
+end now reaches ~60 game px ahead of its centre (frame 7's falling log ~80) while the "on the screen" test still uses
+half the cell (45.6 px), so a beaver walking in shows its log ~0.15 s before it can be hit. `beaver6` frame 5 (and 5 px of
+`beaver7`) are cut by the original sheet's own edge (needs new art). Downloads: 11.9 MB of beaver sheets → ~1.7 MB, ~88
+→ ~40 MB of memory. The log lands up to ~7.5 game px lower, or on `beaver6` ~7 px higher, than it fell (subtle at 0.1 s
+a frame). Its thud is heard ~124–141 ms after the hit at 60 fps (the landing plus its 24 ms onset), just before the cry
+(151 ms); at 30 fps up to ~157 ms. A lost round can now end up to 0.2 s later (a beaver in its hit, often from Anna's
+last thorns), and with a tiny `hitFps` typo at most `MAX_HIT_SECONDS` later. Beavers still running off-screen when a
+round is lost freeze under the result dialog, as before (the last hit one on its first run frame, beside its log): waiting
+for them too would hold the dialog ~1 s more.
+The limiter squeezes the loudest milliseconds of a hit at the default level (above the knee for up to 4.2 ms, its peak
+cut by up to 3.8 dB at 30–60 fps, 4.2 dB when a slow device lands the log later; phone mashing 41 ms per 2.7 s, up to
+5.9 dB, 6.4 dB on a slow device); a single sound at the default level stays below the
+knee, unchanged. With the music at file level (iPhone, iPad) or the music slider at 85 or more, effects + music can pass
+full scale for a few ms (up to +0.6 dBFS; issue P3, accepted by Sára). For up to ~10 minutes after the deploy, a browser
+with the old code cached asks for `beaver{n}.png`, now in `art/`: the vector beavers (D7) for that visit. `sfx.js` now
+also relies on Howler's master gain going straight to the destination and on its one-time context reset inside the
+page's first Howl: rerun minigame-roza.mjs 31f after a Howler upgrade.

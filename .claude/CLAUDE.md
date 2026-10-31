@@ -66,7 +66,8 @@ src/engine/
                            continue where they were left, D26); the music slider sets the track's own volume (D29)
   sfx.js                   sound effects (D29): one Web Audio Howl per file for the page, played only when loaded
                            with the AudioContext running (never late, never thrown); the effects slider and its
-                           test sound; resumeAudio; no auto-suspend during a round (keepAudioAwake)
+                           test sound; resumeAudio; no auto-suspend during a round (keepAudioAwake); the effects'
+                           safety limiter (a soft clipper after Howler's master gain, ceiling −3.2 dBFS, D31)
   effects/atmosphereEffects.js   sunsetGlow, wind, snow
   minigames/
     minigameManager.js     registry; run(spec) → 'victory' | 'failure' (a throwing game → 'failure', D24;
@@ -74,7 +75,9 @@ src/engine/
     minigameHud.js         DOM overlay: title, score, skip menu, result dialog (Czech labels)
     dragonAttack.js        the "Dračí nálet na bobry" minigame (all tunables in DEFAULTS, safety caps beside it, D24): Róza and
                            Anna animated from strips (D23, D30), firing rules per dragon (maxShots, refireAfter); sounds: each dragon's
-                           shot and hit, the beaver's cry and log, each file once per tick (D29)
+                           shot and hit, the beaver's cry and log, each file once per tick (D29); the beavers' padded
+                           sheets, the hit 7 → 6 with the log landing after frame 7, the hint pill hidden after the
+                           first attack (D31)
 src/styles/main.css        all styling (DOM UI is absolutely positioned over the canvas)
 public/story/story.json    the whole story (fetched at runtime, not bundled)
 public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, minigames/dragon-attack/,
@@ -85,8 +88,9 @@ scripts/removeCheckerboard.mjs   flood-fills light-gray checkerboard to alpha (-
 scripts/packFrames.mjs           scattered sheet frames → one-row strip, anchored (eye / white-hot core / a shot's tip)
 scripts/build-music.sh           the deployed music from art/music/ (9 dB quieter, D29)
 scripts/build-sfx.sh             the minigame's sound effects from art/minigames/dragon-attack/sfx/ (D29)
+scripts/cleanBeavers.mjs         the beaver sheets cut by their own pieces into padded cells (D31; no arguments)
 art/                             source art kept in git but not deployed (originals of the packed strips, of the
-                                 music and of the sound effects)
+                                 beaver sheets, of the music and of the sound effects)
 .github/workflows/deploy.yml     push to main → npm ci → build → GitHub Pages
 ```
 
@@ -152,7 +156,13 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
 
 - Backgrounds: 1672×941 PNG (~16:9, ~3.3 MB each). Displayed contain-fit (letterboxed).
 - Characters: 1024×1536 RGBA PNG (~2 MB each), 6 poses per character.
-- Beaver sheets: `beaver1..7.png`, 1448×1086, 6×2 grid (walk 0–5, hit 6–7, log 8, scurry 9–11).
+- Beaver sheets: `beaver{n}_frames.png` (n = 1…7), 1326×544, a 6×2 grid of 221×272 cells padded 50 px a side
+  (walk 0–5, hit 7 then 6, log 8, scurry 9–11), made by `node scripts/cleanBeavers.mjs` from
+  `art/minigames/dragon-attack/beaver{n}.png` (1448×1086, already cleaned of their checkerboard on 2026-10-17, unlike
+  the checkerboard sheets in `art/`; the raw ones are in git history, `d498b26`). The script cuts every frame by its own
+  pieces (the art isn't on the grid), puts row 2 on the walkers' ground and frame 8's log under frame 7's falling log,
+  and halves the result (D31). It stops, writing nothing, if a sheet doesn't have the 13 pieces it expects (new art:
+  check it by eye and update its `PIECES` list) or a piece doesn't fit its padded cell.
 - Music: `public/assets/music/*.mp3` (~3.6–4.8 MB each, streamed as HTML5 audio), referenced
   by key from `story.assets.music`; scenes pick a track with `music`, the menu with
   `menuMusic` (D21, D22). Every deployed track is made from its original in `art/music/`, **9 dB quieter**
@@ -164,12 +174,15 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
   original in `art/music/` and add its line to the script (its own bit rate, from `ffprobe`).
 - Sound effects (D29): `public/assets/minigames/dragon-attack/sfx/*.mp3`, made from Sára's picks in
   `art/minigames/dragon-attack/sfx/` (Runway's sound-effect tool, AI-generated), mono, levelled to an RMS
-  target of −14 dBFS (the `volume` gain is measured beforehand on the trimmed clip; the limiter then takes the
-  peaky clips lower: the log −18.8, Anna's hit −16.9), peaks limited to −1 dBFS, the trailing
-  silence trimmed, 96 kbps. Bezzubka's shot drops its 0.50–0.75 s pause (Sára's "a1"); the cry and the log
-  start with 150 and 250 ms of silence (Sára's stagger after the hit). Made by `bash scripts/build-sfx.sh`.
+  target of −14 dBFS (the `volume` gain is measured beforehand on the trimmed clip; ffmpeg's limiter (`$L`) then
+  takes the peaky clips lower: Anna's hit −16.9), peaks limited to −1 dBFS, the trailing
+  silence trimmed, 96 kbps. Bezzubka's shot drops its 0.50–0.75 s pause (Sára's "a1"); the cry starts with 150 ms
+  of silence (Sára's stagger after the hit). The log (`log_land.mp3`, −15.0) is only its thud, which the game plays
+  when the log lands (D31): its creak is trimmed and its gain stays the 5.8 dB Sára heard (the recipe would give
+  +2.0 dB). Made by `bash scripts/build-sfx.sh`.
   A new or replaced sound: measure its gain first (the script's chain up to `$T`, then `volumedetect`: gain =
-  −14 − mean_volume), add its line, and keep the stagger in its file (`adelay`), not in code. Renaming `fireball_hit.mp3`: it is
+  −14 − mean_volume), add its line, and keep a fixed stagger after the hit in its file (`adelay`), not in code; a
+  sound tied to something the game draws (the log landing) is played by the game at that moment instead. Renaming `fireball_hit.mp3`: it is
   also Nastavení's test sound (`TEST_SOUND_SRC` in `sfx.js`). Every effect plays at 0.7
   (`EFFECT_MIX`) × the effects slider; set per sound in the minigame config (README).
 - Róza's and Anna's minigame strips (`public/assets/minigames/dragon-attack/roza_{fly,attack,fireball}.png`,

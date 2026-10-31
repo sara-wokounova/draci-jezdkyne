@@ -5,13 +5,22 @@ import { resolveAssetPath } from './assetPath.js';
 // HTML5 streaming. One Howl per file for the whole page, so a retry loads nothing again. Nothing here throws:
 // a sound must never break the game. Relies on Howler 2.2.4 internals: reads `howl._webAudio`, sets `Howler.state`,
 // calls `Howler._autoSuspend()`, and counts on Howler's pending suspend timer checking `autoSuspend` again when it
-// fires (keepAudioAwake). After a Howler upgrade rerun minigame-roza.mjs 29d, 29e and 29h.
+// fires (keepAudioAwake), on `Howler.masterGain` going straight to the destination and on Howler's one-time context
+// reset inside the page's first Howl (limitEffects). After a Howler upgrade rerun minigame-roza.mjs 29d, 29e, 29h and
+// 31f.
 
 export const EFFECT_MIX = 0.7; // every effect's volume before the effects slider (Sára: all equal)
 // Nastavení's test sound: Bezzubka's hitSound in dragonAttack's DEFAULTS (rename both together).
 const TEST_SOUND_SRC = 'assets/minigames/dragon-attack/sfx/fireball_hit.mp3';
 
+// The effects' safety limiter (D31): nothing below the knee changes; louder stacks (a hit's sounds at once, mashing)
+// bend towards the ceiling and never pass it. The ceiling leaves room for the HTML5 music, which the browser mixes in
+// after it (Sára: "A", clean at the default levels on computers).
+export const SOFT_CLIP_KNEE = 0.6; // −4.4 dBFS: where squeezing starts
+export const SOFT_CLIP_CEILING = 0.69; // −3.2 dBFS: never exceeded
+
 const howls = new Map(); // src → Howl, or null once it failed
+let limitedCtx = null; // the AudioContext the limiter was built on
 let effectsVolume = 1; // startup sets the saved one (setEffectsVolume)
 let roundAwake = false; // keepAudioAwake: a minigame round runs
 
@@ -44,11 +53,47 @@ export function sound(src) {
     // onloaderror in the options: Howler reads its listeners when it reports an error, and some errors (a path
     // without an audio extension) it reports from inside the constructor, before a listener added afterwards exists.
     const howl = new Howl({ src: [resolveAssetPath(src)], html5: false, preload: true, onloaderror: fail });
+    limitEffects(); // after the Howl: the page's first one can replace Howler's context
     howl.once('load', () => { if (!howl._webAudio) fail(); });
     howls.set(src, howl);
     return howl;
   } catch {
     return null;
+  }
+}
+
+/** The limiter's curve, 4097 points over −1…1: y = x up to the knee, then a tanh towards the ceiling. */
+export function softClipCurve() {
+  const curve = new Float32Array(4097);
+  const room = SOFT_CLIP_CEILING - SOFT_CLIP_KNEE;
+  for (let i = 0; i < curve.length; i += 1) {
+    const x = (i / (curve.length - 1)) * 2 - 1;
+    curve[i] = Math.abs(x) <= SOFT_CLIP_KNEE ? x
+      : Math.sign(x) * (SOFT_CLIP_KNEE + room * Math.tanh((Math.abs(x) - SOFT_CLIP_KNEE) / room));
+  }
+  return curve;
+}
+
+// Puts the limiter between Howler's master gain and the destination, once per AudioContext. The shaper goes to the
+// destination first and the master gain moves last; on any error it goes straight to the destination again, so a
+// failure can never leave the effects silent (a browser without WaveShaperNode plays as before).
+function limitEffects() {
+  const ctx = Howler.ctx;
+  if (!ctx || ctx === limitedCtx || !Howler.masterGain) return;
+  limitedCtx = ctx;
+  try {
+    const shaper = ctx.createWaveShaper();
+    shaper.curve = softClipCurve();
+    shaper.oversample = 'none'; // no latency, the ceiling held exactly (4x overshoots it after its filter)
+    shaper.connect(ctx.destination);
+    Howler.masterGain.disconnect();
+    Howler.masterGain.connect(shaper);
+  } catch {
+    try {
+      Howler.masterGain.connect(ctx.destination);
+    } catch {
+      // nothing more to try
+    }
   }
 }
 

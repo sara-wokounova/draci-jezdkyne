@@ -135,6 +135,10 @@ export class MinigameHud {
     if (this.instructionsEl) this.instructionsEl.textContent = text ?? '';
   }
 
+  hideInstructions() {
+    this.instructionsEl?.classList.add('hidden');
+  }
+
   /**
    * Show the win/lose result screen.
    * @param {'victory'|'failure'} outcome
@@ -145,7 +149,7 @@ export class MinigameHud {
   showResult(outcome, details, onContinue) {
     const isVictory = outcome === 'victory';
     this.toggleSkipMenu(false);
-    this.instructionsEl?.classList.add('hidden');
+    this.hideInstructions();
 
     this.el.classList.toggle('mg-result-victory', isVictory);
     this.el.classList.toggle('mg-result-failure', !isVictory);

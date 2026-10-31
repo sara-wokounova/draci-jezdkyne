@@ -14,7 +14,7 @@ import { EFFECT_MIX, keepAudioAwake, playSound, resumeAudio, sound } from '../sf
  * configurable number of flights.
  *
  * Win: every beaver has been hit.
- * Lose: all flights are used up, no shot is in the air, and beavers remain.
+ * Lose: all flights are used up, no shot is in the air, no beaver is still in its hit, and beavers remain.
  *
  * Every number is configurable via the `config` object (see {@link DEFAULTS}).
  * Anything you omit falls back to the default. Art is optional: if a sprite or
@@ -42,19 +42,21 @@ const DEFAULTS = {
     bobSpeed: 2.4, // bob cycles per second (radians/sec multiplier)
 
     // Sprite-sheet animation. Each beaver loads its own sheet via `sheetPattern`
-    // where `{n}` is replaced with 1..count (beaver1.png … beaver7.png). The
-    // sheet is a `columns` x `rows` grid; the frame index lists below pick which
-    // cells belong to each animation (0-based, left-to-right, top-to-bottom):
+    // where `{n}` is replaced with 1..count (beaver1_frames.png … beaver7_frames.png,
+    // made by scripts/cleanBeavers.mjs, D31). The sheet is a `columns` x `rows`
+    // grid; the frame index lists below pick which cells belong to each animation
+    // (0-based, left-to-right, top-to-bottom):
     //   walk   — looping walk cycle (top row)
-    //   hit    — played once when struck
-    //   log    — a single static "log on the ground" frame, dropped on hit
+    //   hit    — played once when struck; the log drops when its first frame ends
+    //   log    — a single static "log on the ground" frame, left where the log landed
     //   scurry — looping run played while fleeing off-screen
-    sheetPattern: 'assets/minigames/dragon-attack/beaver{n}.png',
+    sheetPattern: 'assets/minigames/dragon-attack/beaver{n}_frames.png',
     sheet: {
       columns: 6,
       rows: 2,
+      padding: 50, // px of the sheet added on each side of every cell; spriteWidth is a cell's width without it
       walk: [0, 1, 2, 3, 4, 5],
-      hit: [6, 7],
+      hit: [7, 6], // the log falls, then the startled beaver beside it (Sára)
       log: [8],
       scurry: [9, 10, 11],
     },
@@ -66,12 +68,11 @@ const DEFAULTS = {
     // 'nearestEdge', 'left' or 'right'.
     scurryDirection: 'walk',
     flipForScurry: false, // mirror the sprite to face the scurry direction
-    dropLogOnHit: true, // leave the "log" frame where the beaver was hit
-    // Played on every hit, whoever shot (D29). The cry's and the log's files start with their delay (150 ms,
-    // 250 ms) as silence: they play together with the hit, staggered.
+    dropLogOnHit: true, // leave the "log" frame where the log landed
+    // The cry on every hit, whoever shot (D29), its 150 ms delay as silence in its file; the log when it lands (D31).
     sounds: {
       cry: { src: 'assets/minigames/dragon-attack/sfx/beaver_cry.mp3', volume: EFFECT_MIX },
-      log: { src: 'assets/minigames/dragon-attack/sfx/log_drop.mp3', volume: EFFECT_MIX }, // only when a log drops
+      log: { src: 'assets/minigames/dragon-attack/sfx/log_land.mp3', volume: EFFECT_MIX }, // only when a log drops
     },
     spriteWidth: null, // on-screen width in px; defaults to radius * 2.4
 
@@ -253,6 +254,7 @@ const MAX_SHOT_SECONDS = 10; // no shot stays longer, whatever its path
 const MAX_BEAVERS = 50; // a typo in beavers.count must not start thousands of sheet loads at once
 const MAX_FLIGHTS_PER_DRAGON = 100; // nor may flightsPerDragon build a queue of billions
 const MAX_FLIGHT_SECONDS = 30; // a flight ends by then even if the dragon never reaches the edge
+const MAX_HIT_SECONDS = 5; // a hit beaver runs by then even with a tiny hitFps (a lost round waits for it, D31)
 
 export class DragonAttackMinigame {
   /**
@@ -426,6 +428,11 @@ export class DragonAttackMinigame {
     };
 
     const targetWidth = cfg.spriteWidth ?? cfg.radius * 2.4;
+    // The cell's padding: 0 up to a quarter of the frame, else the default, itself only where it fits a quarter (a
+    // typo like 100, or 50 inherited by a narrow custom sheet, would make the beavers enormous; D24).
+    const fits = (value) => Number.isFinite(value) && value >= 0 && value <= frameWidth / 4;
+    const fallback = DEFAULTS.beavers.sheet.padding;
+    const padding = fits(cfg.sheet.padding) ? cfg.sheet.padding : fits(fallback) ? fallback : 0;
 
     return {
       walk: (cfg.sheet.walk ?? []).map(frameAt),
@@ -434,7 +441,7 @@ export class DragonAttackMinigame {
       scurry: (cfg.sheet.scurry ?? []).map(frameAt),
       frameWidth,
       frameHeight,
-      displayScale: targetWidth / frameWidth,
+      displayScale: targetWidth / (frameWidth - 2 * padding),
     };
   }
 
@@ -497,6 +504,7 @@ export class DragonAttackMinigame {
     if (this.state !== 'flying' || !this.currentDragon) return;
     const dragon = this.currentDragon;
     if (!this.canFire(dragon)) return;
+    this.hud.hideInstructions(); // the player has got it (a tap that does nothing keeps the hint)
 
     if (dragon.art.breath) {
       // The attack animation launches the shot on its launch frame (animateDragon).
@@ -767,7 +775,12 @@ export class DragonAttackMinigame {
           beaver.view.x = beaver.x;
           beaver.view.y = laneY;
           const done = this.stepAnimation(beaver, beaver.frames?.hit, cfg.hitFps, false, dt);
-          if (done || !beaver.frames?.hit?.length) this.setBeaverState(beaver, 'scurry');
+          if (beaver.frameIndex > 0) this.landLog(beaver); // the falling-log frame is over
+          beaver.hitTime += dt;
+          if (done || !beaver.frames?.hit?.length || beaver.hitTime >= MAX_HIT_SECONDS) {
+            this.setBeaverState(beaver, 'scurry');
+            this.maybeFinish(); // a lost round waits for beavers in their hit
+          }
           break;
         }
 
@@ -831,6 +844,7 @@ export class DragonAttackMinigame {
     }
 
     if (state === 'scurry') {
+      this.landLog(beaver); // no hit frames, or one: the log lands as the beaver runs
       beaver.scurryDir = this.computeScurryDir(beaver);
       if (this.config.beavers.flipForScurry) {
         beaver.view.scale.x = Math.abs(beaver.view.scale.x) * beaver.scurryDir;
@@ -853,18 +867,23 @@ export class DragonAttackMinigame {
     }
   }
 
-  /** Leaves the "log" frame where the beaver was hit; false if the sheet has none. */
+  /** The log decided at the hit (`dropsLog`) lands: the lying log and its sound, once per beaver. */
+  landLog(beaver) {
+    if (!beaver.dropsLog) return; // decided at the hit: dropLogOnHit and a log frame
+    beaver.dropsLog = false;
+    this.dropLog(beaver);
+    this.playEffect(this.sounds.log);
+  }
+
+  /** Leaves the "log" frame where the beaver was hit. */
   dropLog(beaver) {
     const frames = beaver.frames;
-    if (!frames?.log?.length) return false;
-
     const log = new Sprite(frames.log[0]);
     log.anchor.set(0.5);
     log.scale.set(frames.displayScale);
     log.x = beaver.x;
     log.y = this.layout().height * this.config.beavers.laneY;
     this.logLayer.addChild(log);
-    return true;
   }
 
   updateDragon(dt, size) {
@@ -982,8 +1001,10 @@ export class DragonAttackMinigame {
     const canAnimate = beaver.frames && (beaver.frames.hit?.length || beaver.frames.scurry?.length);
     this.playEffect(this.sounds.cry);
     if (canAnimate) {
-      // The log's sound only with a log (its delay is in its file, D29).
-      if (this.config.beavers.dropLogOnHit && this.dropLog(beaver)) this.playEffect(this.sounds.log);
+      // Decided now, dropped when the falling-log frame ends or the beaver starts to run (landLog): the lying log
+      // and its sound at the landing (D31).
+      beaver.dropsLog = Boolean(this.config.beavers.dropLogOnHit && beaver.frames.log?.length);
+      beaver.hitTime = 0;
       this.setBeaverState(beaver, beaver.frames.hit?.length ? 'hit' : 'scurry');
     } else {
       beaver.view.visible = false;
@@ -1005,8 +1026,8 @@ export class DragonAttackMinigame {
    * Settles the round once it is decided:
    *  - Victory only after every struck beaver has fully scurried off-screen, so
    *    the flee animation always plays out before the result screen.
-   *  - Failure once the flights run out, every shot has resolved, and at
-   *    least one beaver was never hit.
+   *  - Failure once the flights run out, every shot has resolved, no beaver is
+   *    still in its hit (its log lands first), and at least one beaver was never hit.
    */
   maybeFinish() {
     if (this.finished) return;
@@ -1017,7 +1038,8 @@ export class DragonAttackMinigame {
     }
 
     const allHit = this.beavers.every((b) => !b.alive);
-    if (this.state === 'done' && this.projectiles.length === 0 && !allHit) {
+    const inHit = this.beavers.some((b) => b.state === 'hit');
+    if (this.state === 'done' && this.projectiles.length === 0 && !allHit && !inHit) {
       this.fail();
     }
   }

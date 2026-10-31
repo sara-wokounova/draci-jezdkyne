@@ -178,15 +178,15 @@ its own shots in the air at once (Róza and Emma 1, Anna 3), and after a launch
 waits `attack.refireAfter` × that shot's on-screen time (Anna ⅓) before the
 next. A dragon attacks only while its shot would start on the screen. Each dragon flies a
 configurable number of flights. **Win** when every
-beaver is hit; **lose** when the flights run out, no shot is in the air, and
-beavers remain.
+beaver is hit; **lose** when the flights run out, no shot is in the air, no beaver is
+still in its hit, and beavers remain.
 
 Every number is configurable through `config`. Art is optional — vector
 placeholders are drawn until you supply it. Art slots:
 
 - `config.background.sprite` — optional dedicated minigame background.
-- `config.beavers.sheetPattern` — per-beaver sprite **sheets** (`beaver1.png` …
-  `beaver7.png`); `{n}` is replaced with `1..count`.
+- `config.beavers.sheetPattern` — per-beaver sprite **sheets** (`beaver1_frames.png` …
+  `beaver7_frames.png`, made by `scripts/cleanBeavers.mjs`); `{n}` is replaced with `1..count`.
 - `config.dragons[i].animation` — animated dragon art: `fly` and `attack`
   strips made by `scripts/packFrames.mjs` (one row of equal frames, the art
   facing right, `anchor` = the dragon's eye), the frame orders and rates, and
@@ -199,18 +199,21 @@ placeholders are drawn until you supply it. Art slots:
   `config.dragons[i].attack.sprite` — a single image instead.
 
 Sounds (optional): `config.dragons[i].attack.sound` plays when that dragon's shot
-launches, `attack.hitSound` when it hits a beaver, and `config.beavers.sounds.cry` and
-`.log` on every hit (the log only when a log is dropped). Each is `{ "src": "…mp3", "volume": 0.7 }`,
+launches, `attack.hitSound` when it hits a beaver, `config.beavers.sounds.cry` on every hit and
+`.log` when the beaver's log lands (only when a log is dropped). Each is `{ "src": "…mp3", "volume": 0.7 }`,
 a bare path (volume 0.7) or `null` for none. A dragon in a custom `dragons` list without them
 is silent; `beavers.sounds` is merged with the defaults, so only `null` silences the cry or the
 log. A file plays at most once per game tick, at its volume × the "Hlasitost efektů" slider
-(sounds using the same file share one volume); one still loading is skipped, never played late. A delay after the hit belongs in the file itself, as leading silence
-(the cry and the log have 150 and 250 ms).
+(sounds using the same file share one volume); one still loading is skipped, never played late. A fixed delay after the hit belongs in the file itself, as leading silence
+(the cry has 150 ms). All the effects go through a safety limiter that never lets them pass −3.2 dBFS (room for the
+music, which the browser mixes in after it).
 
-Each beaver sheet is a 6×2 grid (`config.beavers.sheet`). By default the frames
-are: top row (0–5) = walk cycle, then bottom row 6–7 = hit reaction, 8 = a log
-left on the ground, 9–11 = scurry/run. When a beaver is hit it plays the hit
-frames, drops the log, then scurries off-screen before it counts as gone (the
+Each beaver sheet is a 6×2 grid (`config.beavers.sheet`), every cell padded by `sheet.padding`
+px of the sheet on each side (50; `spriteWidth` is a cell's width without it; set `padding: 0` for your own
+unpadded sheets). By default the frames are: top row (0–5) = walk cycle, then 7 and 6 = the hit (`hit: [7, 6]`:
+the log falls, then the startled beaver stands beside it), 8 = a log left on the ground, 9–11 = scurry/run. When a
+beaver is hit the log falls, lies where it fell (it drops when the hit's first frame ends, so list the falling-log
+frame first: `[6, 7]` would show two logs), then the beaver scurries off-screen before it counts as gone (the
 victory screen waits for the last beaver to flee). Tunables include `walkFps`,
 `hitFps`, `scurryFps`, `scurrySpeed`, `scurryDirection`, `dropLogOnHit` and
 `spriteWidth`.

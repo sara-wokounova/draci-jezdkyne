@@ -7,22 +7,15 @@ Severity: **P0** broken for everyone · **P1** blocks play on some setups · **P
 
 ### P2 — Minigame starts seconds after its HUD appears (verified 2026-10-17)
 Scene preload (D8) only covers backgrounds and characters, so the minigame loads the 7
-beaver sheets (~12 MB) after its HUD shows. On the live site the HUD showed over an empty
+beaver sheets (~12 MB; ~1.7 MB since D31) after its HUD shows. On the live site the HUD showed over an empty
 lane for ~2–4 s on a fast connection; on phone data it will be much longer, and taps do
 nothing until then. Not a regression. Since D23 everything loads in parallel (`Promise.all`)
 instead of one sheet after another, which cuts the wait on a fast connection but not on one
 limited by bandwidth (same bytes). Since D25 battle.mp3 also downloads at that moment (music
 starts before the render, D21): ~3 MiB in Chrome (it buffers that far ahead), the whole 4.8 MB
-in Firefox, about +25–40 % to the first flight on a slow link. A resumed battle (D26) buffers at
-its position first (a range request): in Chrome on a slow link ~3–4 s instead of ~1 s. Rest of the fix: preload the
-sheets from the scenes before `beaver_battle`, and/or shrink them (see "Heavy assets").
-
-### P2 — Beaver frames show bits of their neighbours (user-reported 2026-10-29, verified)
-The beaver sheets are cut on a fixed 6×2 grid, but the art isn't on that grid: the carried logs cross the cell
-borders (`beaver1.png`: frame 1's log reaches into frame 2's cell, the falling log of hit frame 7 into the log
-frame 8), so a frame shows a sliver of the previous or next beaver or log, and a frame's own log end is cut off at
-the border. Most visible on the log left lying on the ground: about half of the falling log shows beside it. Fix: cut each frame by its own connected pixels, as `packFrames.mjs` does for Róza (D23), keeping the
-beavers' placement. Planned (`C:\tmp\claude\plans\beaver-frames.md`, confirmed by Sára); built after Anna's art (D30).
+in Firefox. Since D31 the sheets are the smaller part (~1.7 MB), so on a slow link the music now dominates the wait. A
+resumed battle (D26) buffers at its position first (a range request): in Chrome on a slow link ~3–4 s instead of ~1 s.
+Rest of the fix: preload the sheets (and start the battle music's download) from the scenes before `beaver_battle`.
 
 ### P1 — Persuade branch crashes at `dam_with_beavers_persuade_04` (verified 2026-10-17)
 `next: "dam_with_beavers_persuade_05"` doesn't exist. Tapping throws
@@ -52,7 +45,7 @@ internal scene ids ("Autosaved • river_dam"). Minigame HUD is already Czech.
 - `dam_with_beavers_persuade_04`: "byly z nám obří bobři" → "byli z nás obří bobři"; trailing space
 
 ### P3 — Heavy assets for mobile data
-Backgrounds ~3.3 MB, character poses ~2 MB, beaver sheets ~1.5 MB each, all PNG.
+Backgrounds ~3.3 MB, character poses ~2 MB, beaver sheets ~250 KB each since D31 (~1.5 MB before), all PNG.
 WebP / downscaling would cut load time a lot.
 
 ### P3 — "Velký bobr" has no sprite
@@ -77,11 +70,6 @@ back) Róza's fireball moves 70–80 px per tick, more than the 60 px hit reach 
 can skip over a beaver. Not a regression; matters only on very slow devices. Fix if needed:
 test the segment travelled in the tick, or sub-step fast shots.
 
-### P3 — Minigame instructions pill covers the beavers' feet on short screens (verified 2026-10-17)
-At 640x360 and 844x390 the bottom `.mg-instructions` pill overlaps the lower part of
-the beaver lane (`laneY` 0.84). Visual only. Could hide the pill after the first
-attack, or raise `laneY` on short screens.
-
 ### P2 — Checkerboard between hair strands in the character sprites (verified 2026-10-28)
 The 18 character poses show grey checkerboard in enclosed gaps: between loose hair strands
 (clearest on Anna), around Emma's braids and Róza's ponytail, and in some arm gaps. The
@@ -96,8 +84,8 @@ transparency, so the cleaner skips them without `--force`), then check faces.
 launch-editor, esbuild, postcss, nanoid, source-map-js) and in `@xmldom/xmldom` (pulled in by
 pixi.js, not in the browser bundle). Not caused by recent changes; `package.json` is untouched.
 Run `npm audit fix` and re-test some time. If it moves Howler (package.json allows ^2.2.3): `sfx.js` and
-`audioManager.js` rely on Howler 2.2.4 internals (D29), so rerun minigame-roza.mjs 29d, 29e, 29h and robustness.mjs
-"sample:" and "sliders:".
+`audioManager.js` rely on Howler 2.2.4 internals (D29, D31), so rerun minigame-roza.mjs 29d, 29e, 29h and 31f and
+robustness.mjs "sample:" and "sliders:".
 
 ### P3 — HTML5 audio artefacts (2026-10-28)
 Each track has a gap where it loops (HTML5 audio loops aren't gapless): ~60–90 ms in Chrome,
@@ -147,12 +135,15 @@ unlocked (Howler mutes on hide, D22; the context may come back suspended until t
 shot of a round started after 30 s of quiet (start() resumes the context); after a system interruption
 mid-round, the canvas pointerup and keys resume it (that first shot is silent, D29); the music keeps playing while
 Howler suspends the AudioContext 30 s after the last effect and when the next round or the effects slider resumes
-it (iOS's audio session, never seen on a device).
+it (iOS's audio session, never seen on a device); the effects still heard through the safety limiter (D31) on both,
+also after Howler's context reset in the page's first Howl (on iOS its sample-rate fix).
 
-### P3 — Mashing Bezzubka's shot on a phone clips for a moment (D29, 2026-10-29)
-A new shot as soon as the last one hit (0.45 s apart at 844×390) stacks shot, hit, cry and log to about +0.5 dBFS at
-the default effects level: a few samples clip. Accepted as cosmetic in D29's Consequences (Sára's equal mix); a
-1280×720 window stays at −0.6. The beaver-frames plan's safety limiter takes it away.
+### P3 — Effects and music can pass full scale for a few ms where the music is loud (D31, 2026-10-31)
+The effects' limiter never passes −3.2 dBFS, and with the music at its default volume effects + battle music stay at
+−0.22 dBFS at most. With the music at file level (iPhone and iPad ignore its volume) or the music slider at 85 or more,
+the sum can reach +0.6 dBFS for a few ms: single hits 0.3–1 % of the time at the default effects level (1–3.8 % at the
+maximum), phone mashing in 8 % of 2.7 s bursts (21–24 % at the maximum). Accepted by Sára ("A": clean on computers at
+the default levels).
 
 ### P3 — Flights take longer on taller windows (2026-10-29)
 The world only scales down (D15), so on a window taller than 600 px the lane is further away: Bezzubka's
@@ -170,6 +161,22 @@ the volume: there it can sound for up to ~400 ms. Check that it stays silent els
 `music-race.mjs` "switch while starting".
 
 ## Fixed
+
+### P2 — Beaver frames showed bits of their neighbours (user-reported 2026-10-29, verified) — fixed 2026-10-31
+The sheets were cut on a fixed 6×2 grid the art isn't on: a frame showed a sliver of the next beaver's log, its own
+log end was cut off, and the log lying on the ground showed half of the falling log beside it. Also the hit frames
+stood ~57 game px above the walkers, the log lay on the ground before it had fallen, and the startled beaver held no
+log for 0.1 s. Fix (D31): `scripts/cleanBeavers.mjs` cuts every frame by its own pieces into a padded grid, puts row 2
+on the walkers' ground and the lying log under the falling one; the hit plays 7 → 6 and the log lands (with its thud)
+when frame 7 ends. Checks: `as-test/sprites.test.mjs` "beavers", `minigame-roza.mjs` 31a–h.
+
+### P3 — Minigame instructions pill covered the beavers' feet on short screens (verified 2026-10-17) — fixed 2026-10-31
+At 640x360 and 844x390 the bottom `.mg-instructions` pill overlapped the beaver lane. Fix (D31, Sára): it hides after
+the round's first attack (a retry shows it again). Check: `minigame-roza.mjs` 31g.
+
+### P3 — Mashing Bezzubka's shot on a phone clipped for a moment (D29, 2026-10-29) — fixed 2026-10-31
+A new shot as soon as the last one hit stacked to about +0.5 dBFS. Fix: the effects' safety limiter (D31) keeps them at
+−3.2 dBFS at most. Checks: `as-test/sfx.test.mjs` "stacks", `minigame-roza.mjs` 31f.
 
 ### P2 — Back or Restart during a minigame scene's render ran the minigame over another scene (found by review 2026-10-29) — fixed 2026-10-29 in `2beba7f`, verified live
 Pressed while `beaver_battle` was still drawing (its background slow to load), they left the scene, but the
