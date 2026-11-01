@@ -164,29 +164,41 @@ with `start()` and `destroy()` methods and register it in `minigameManager.js`:
 manager.register('myGame', (context) => new MyGame(context));
 ```
 
-A throw in its constructor or `start()` ends the minigame as a failure; a throw in its
+Its `context` holds `app`, `layer`, `config`, `hud`, `onComplete` and `difficulty` (Nastavení's 'easy', 'normal' or
+'hard'). A throw in its constructor or `start()` ends the minigame as a failure; a throw in its
 `destroy()` is logged, and the HUD and the game's sprites are removed anyway. Its own
 ticker listener must catch errors and end the round itself (see
 `DragonAttackMinigame#tick`), or one error freezes the game.
 
 ### Dragon attack minigame (`type: "dragonAttack"`)
 
-Three dragons fly, one after another, above a line of moving beavers. A key
+Three dragons fly in from the right, one after another, above a line of beavers walking in from the left
+(`beavers.count` 30, `spacingPx` 225 apart, centre to centre: the first at `startXRatio` of the width, counted from the
+side they walk in from (`direction` 1: from the left; −1: from the right), the others
+queued behind it off the screen; a beaver that walks off the far edge joins the back of the line again). A key
 press, mouse click or screen touch makes the dragon in flight attack. Each
 dragon has its own attack angle/speed/gravity, may have `attack.maxShots` of
 its own shots in the air at once (Róza and Emma 1, Anna 3), and after a launch
-waits `attack.refireAfter` × that shot's on-screen time (Anna ⅓) before the
+waits `attack.refireAfter` × that shot's on-screen time (Anna 0.33) before the
 next. A dragon attacks only while its shot would start on the screen. Each dragon flies a
-configurable number of flights. **Win** when every
-beaver is hit; **lose** when the flights run out, no shot is in the air, no beaver is
-still in its hit, and beavers remain.
+configurable number of flights (`flightsPerDragon`, 5). **Win** when every beaver is hit, or when the flights run
+out (no shot in the air, no beaver still in its hit) with at least `winPercent` of the beavers hit
+(`{ "easy": 40, "normal": 80, "hard": 100 }`, picked by "Obtížnost minihry" in Nastavení; a value that isn't a number
+from 0 to 100 falls back to that level's default); **lose** otherwise. Reaching the goal early doesn't end the round.
+Every hit speeds the walkers up: `speed × (1 + (speedUp − 1) × hits / beavers)` (`beavers`: how many there are) (`speedUp` 2, so 2× with every beaver
+hit), the walk animation in step (`walkFps` is for 90 px/s; scale it for your own sheets drawn for another speed). A lying log stays `logSeconds` (3), then fades out over
+`logFadeSeconds` (1). The HUD status (`config.labels.status`) takes `{hit}`, `{percent}` (the share hit, rounded
+down), `{target}` (the goal in %), `{needed}` (the goal in beavers), `{flight}` and `{flights}` (and `{alive}`,
+`{total}`, `{dragon}`); the result dialog adds the hits (`labels.resultHits` on the scene's `minigame`, like the
+other HUD labels; it takes `{hit}`, `{total}`, `{percent}` and `{target}`). Its Pokračovat takes a tap or key only after 500 ms without one.
 
 Every number is configurable through `config`. Art is optional — vector
 placeholders are drawn until you supply it. Art slots:
 
 - `config.background.sprite` — optional dedicated minigame background.
 - `config.beavers.sheetPattern` — per-beaver sprite **sheets** (`beaver1_frames.png` …
-  `beaver7_frames.png`, made by `scripts/cleanBeavers.mjs`); `{n}` is replaced with `1..count`.
+  `beaver7_frames.png`, made by `scripts/cleanBeavers.mjs`); `{n}` is replaced with `1..sheetCount` (7), in turn
+  (beaver 8 uses sheet 1).
 - `config.dragons[i].animation` — animated dragon art: `fly` and `attack`
   strips made by `scripts/packFrames.mjs` from a sheet or a frames list of separate pictures (one row of equal
   frames, the art facing right, `anchor` = the point that lines up across the strips: the dragon's eye, or for
@@ -215,8 +227,8 @@ px of the sheet on each side (50; `spriteWidth` is a cell's width without it; se
 unpadded sheets). By default the frames are: top row (0–5) = walk cycle, then 7 and 6 = the hit (`hit: [7, 6]`:
 the log falls, then the startled beaver stands beside it), 8 = a log left on the ground, 9–11 = scurry/run. When a
 beaver is hit the log falls, lies where it fell (it drops when the hit's first frame ends, so list the falling-log
-frame first: `[6, 7]` would show two logs), then the beaver scurries off-screen before it counts as gone (the
-victory screen waits for the last beaver to flee). Tunables include `walkFps`,
+frame first: `[6, 7]` would show two logs), then the beaver scurries off-screen before it counts as gone (a
+victory by hitting every beaver waits for the last one to flee). Tunables include `walkFps`,
 `hitFps`, `scurryFps`, `scurrySpeed`, `scurryDirection`, `dropLogOnHit` and
 `spriteWidth`.
 
@@ -226,15 +238,16 @@ defaults):
 ```json
 {
   "config": {
-    "beavers": { "count": 7, "speed": 90, "spacingPx": 150, "laneY": 0.84 },
+    "beavers": { "count": 30, "speed": 90, "speedUp": 2, "spacingPx": 225, "laneY": 0.84 },
+    "winPercent": { "easy": 40, "normal": 80, "hard": 100 },
     "dragons": [
       {
         "name": "Róza",
         "color": "#d6462f",
         "flightY": 0.16,
         "speed": 320,
-        "entryFrom": "left",
-        "attack": { "speed": 620, "angleDeg": 18, "gravity": 320, "radius": 22, "color": "#ff7b3d",
+        "entryFrom": "right",
+        "attack": { "speed": 720, "angleDeg": 16, "gravity": 140, "radius": 22, "color": "#ff7b3d",
                     "maxShots": 1, "refireAfter": 0,
                     "sound": "assets/minigames/dragon-attack/sfx/bezzubka_shot.mp3",
                     "hitSound": { "src": "assets/minigames/dragon-attack/sfx/fireball_hit.mp3", "volume": 0.7 } }
@@ -255,6 +268,15 @@ a straight fall weaving sideways, its first swing forward, the way the dragon fl
 placeholder again; one without `sound` and `hitSound` is silent). The example above is a
 complete one-dragon list.
 
+### Play-test page
+
+`playtest.html` (handed out as `…/playtest/`, a redirect that keeps the query) plays one round of the minigame at a
+time with 15 sliders: the beavers (count, spacing, speed, speed-up), the goal (%) and the flights per dragon, each
+dragon's flight and shot speed, Anna's thorn angle, gravity and her wait between thorns (% of a thorn's on-screen time).
+The values live only in the URL (written when a slider is let go); "Kopírovat odkaz" copies a `playtest.html?…` link
+that also records the tester's field size (`field=WxH`, in game px; information only, never read back). It uses the
+game's saved music and effects volumes and never saves anything. Dev: `http://localhost:5173/playtest.html`.
+
 ## Navigation controls
 
 - Click/tap, Space, or Enter: advance
@@ -262,7 +284,10 @@ complete one-dragon list.
 - Back button, Backspace, or Left Arrow: go one scene back
 - Menu button or Esc: the main menu over the game (Esc again, or Pokračovat, goes back)
 - Nová hra in the menu: start again from the first scene (asks first when there is progress to lose)
-- Nastavení in the menu: music volume, effects volume (letting go of the slider plays a test sound), autoread
+- Nastavení in the menu: music volume, effects volume (letting go of the slider plays a test sound), autoread, the
+  minigame's difficulty (Lehká / Normální / Těžká: the share of the beavers to hit)
+- Minigame result: Enter or Space presses Pokračovat once nothing was pressed for 500 ms; the story then waits another
+  500 ms (a double tap or a held key doesn't skip a line)
 
 Back history is stored in autosave, so refreshing the browser should preserve the current scene and the previous-scene stack.
 

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- "Add to Home Screen" launches without browser UI, as for the game (D12); no manifest: the game's would open the game. -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Zkušební nálet na bobry</title>
+    <meta name="robots" content="noindex" /><!-- for a few testers, for a while -->
+  </head>
+  <body>
+    <!-- The play-test page (D33): the beaver minigame with its main numbers on sliders, handed out as …/playtest/. -->
+    <main id="game-root" aria-label="Zkušební nálet na bobry">
+      <section id="pixi-host" aria-hidden="true"></section>
+
+      <section id="pt-panel" class="glass-panel">
+        <h1>Zkušební nálet na bobry</h1>
+        <p class="pt-intro">Nastav hodnoty, zahraj si a pošli odkaz s nastavením, které se ti hrálo nejlépe. Odkaz obsahuje i velikost tvé obrazovky.</p>
+        <div id="pt-sliders"></div>
+        <div class="pt-actions">
+          <button id="pt-play" class="choice-button" type="button">Hrát</button>
+          <button id="pt-copy" class="control-button" type="button">Kopírovat odkaz</button>
+          <span id="pt-copied" hidden>Zkopírováno</span>
+          <a id="pt-defaults" href="playtest.html">Výchozí hodnoty</a>
+        </div>
+        <input id="pt-link" type="text" readonly aria-label="Odkaz s nastavením" />
+      </section>
+    </main>
+
+    <div id="rotate-hint">
+      <p>Otoč telefon na šířku</p>
+      <small>Když se obraz neotočí, vypni zámek otáčení.</small>
+    </div>
+
+    <script type="module" src="/src/playtest.js"></script>
+  </body>
+</html>

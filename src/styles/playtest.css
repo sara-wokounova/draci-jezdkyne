@@ -1,0 +1,104 @@
+/* The play-test page (D33), over main.css. */
+
+#pt-panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 6; /* above the canvas, below #rotate-hint */
+  transform: translate(-50%, -50%);
+  width: min(60rem, calc(100vw - 2rem - env(safe-area-inset-left) - env(safe-area-inset-right))); /* clear of a notch */
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow-y: auto; /* on a phone always */
+  padding: 1rem 1.4rem;
+  border-radius: 1.1rem;
+}
+
+#pt-panel.pt-guarded {
+  pointer-events: none; /* for browsers without inert */
+}
+
+#pt-panel h1 {
+  margin: 0;
+  color: var(--gold);
+  font-size: clamp(1.2rem, 2.4vw, 1.6rem);
+}
+
+.pt-intro {
+  margin: 0.2rem 0 0.4rem;
+  color: var(--text-muted);
+}
+
+@media (min-width: 900px) {
+  #pt-sliders {
+    columns: 2;
+    column-gap: 2rem;
+  }
+}
+
+.pt-group {
+  break-inside: avoid;
+}
+
+.pt-group h2 {
+  margin: 0.4rem 0 0;
+  color: var(--gold);
+  font-size: 1rem;
+}
+
+.pt-row {
+  display: grid;
+  grid-template-columns: 1fr minmax(6rem, 12rem) 3rem;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.pt-row input {
+  width: 100%;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+
+.pt-row output {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.pt-hint {
+  display: block;
+  margin-top: -0.3rem;
+  color: var(--text-muted);
+}
+
+.pt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  margin: 0.8rem 0 0.6rem;
+}
+
+.pt-actions .choice-button {
+  width: auto;
+  min-width: 8rem;
+  text-align: center;
+}
+
+#pt-defaults {
+  color: var(--gold);
+}
+
+#pt-link {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  font: inherit; /* 16 px or more: iOS zooms the page on focus below that */
+  color: #fff8e8;
+  border: 1px solid var(--panel-border);
+  border-radius: 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  user-select: text; /* #game-root has none */
+  -webkit-user-select: text;
+}

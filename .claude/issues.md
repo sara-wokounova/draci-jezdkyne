@@ -22,7 +22,7 @@ Rest of the fix: preload the sheets (and start the battle music's download) from
 `next: "dam_with_beavers_persuade_05"` doesn't exist. Tapping throws
 "Unknown scene id" and the player is stuck (Back still works). Needs story text.
 
-### P2 — Minigame art missing → 404s (verified 2026-10-17; partly fixed 2026-10-28, 2026-10-30 and 2026-10-31)
+### P2 — Minigame art missing → 404s (verified 2026-10-17; partly fixed 2026-10-28, 2026-10-30 and 2026-10-31 in `57d6432`, verified live)
 DEFAULTS in `dragonAttack.js` pointed to `background.png`, `dragon_{roza,emma,anna}.png`,
 `flame_roza.png`, `flash_emma.png`, `arrow_anna.png` — none exist. Since D23 Róza, since D30
 Anna and since D32 Emma have their animated art, and the dragon/shot sprite paths are `null`. Still open:
@@ -45,13 +45,29 @@ anchor to the packer's output.)
 At Emma's timing her hit overlaps the end of her shot sound, and fast tapping lands her next shot on the previous hit's
 cry and log: in the worst cases found (over Howler's start grid at 48 and 44.1 kHz) the limiter (D31) cuts a single hit
 by up to 5.1 dB (≤ 2.7 ms above the knee) and fast tapping by 7.6 dB or more, up to 43 ms per 6 shots, beyond D31's
-figures for Bezzubka (`sfx.test.mjs` prints 4.0 dB and 5.0–5.5 dB at two of her flights). Nothing passes its ceiling. Accepted by Sára; `sfx.test.mjs` prints her stacks without a budget. Re-measure
-with the queued gameplay change (it moves every timing); trimming the tail of `emma_shot.mp3` would ease it.
+figures for Bezzubka (`sfx.test.mjs` prints 4.0 dB and 5.0–5.5 dB at two of her flights). Nothing passes its ceiling. Accepted by Sára; `sfx.test.mjs` prints her stacks without a budget.
+Re-measured with D33 (her bolt falls at 460 px/s: it hits 0.556 s after it leaves at 1280×720, 0.221 s on the shortest
+screen): a single hit cut by 3.8–4.7 dB (2.3–2.6 ms above the knee), 6 fast shots 4.9–5.3 dB, 28–35 ms; over the battle
+music never past full scale at the default music volume. Trimming the tail of `emma_shot.mp3` would ease it.
 
 ### P2 — The fight branch's victory has no way on (verified 2026-10-28)
 `beaver_battle_win` → `beaver_after_battle_win_01` … `_07` (being written by Sára), and
 `_07` → `_06` → `_07` loops forever (with autoread on it ping-pongs by itself). Until
 2026-10-28 it looped back to `forest_flight_01` instead. Needs story text, or an ending (D18).
+
+### P3 — The minigame's skip menu can't be opened by keyboard (found in planning D33, 2026-11-01)
+During a round Enter and Space are attacks, so `inputController` cancels them even on a focused Přeskočit (and its
+menu's buttons); Esc is blocked during a minigame (D27). A keyboard-only player can't skip; the result dialog's
+Pokračovat works by keyboard since D33. Fix if it matters: let Enter/Space through on a focused `.mg-skip-*` button, and
+change the same rule in `src/playtest.js` (its keydown listener; `playtest.mjs` "skip by keyboard" asserts it).
+
+### P3 — The play-test page is public (D33, 2026-11-01)
+`…/playtest/` is deployed with the game, for Sára's testers. Remove `playtest.html`, `playtest/`, `src/playtest.js`,
+`src/styles/playtest.css` and their two Vite inputs when the testing is over (Sára decides). Meanwhile: `src/playtest.js`
+hard-codes the story id (`draci-jezdkyne-z-vlpu`, for the saved volumes), `assets/music/battle.mp3` and
+`assets/backgrounds/dam_02.png`; renaming any of them (Pages' cache has made renames necessary before, D31) means updating
+it there too, or the page loses its music, background (the generated fallback, D20) or the saved volumes. Once the page
+goes, `export` on dragonAttack.js's `DEFAULTS` and `worldScale` has no other user.
 
 ### P3 — Engine UI is English, story is Czech
 `index.html` has `lang="en"` and title "Visual Novel Starter"; the "← Back" button
@@ -165,8 +181,8 @@ The effects' limiter never passes −3.2 dBFS, and with the music at its default
 the sum can reach +0.6 dBFS for a few ms: single hits 0.3–1 % of the time at the default effects level (1–3.8 % at the
 maximum), phone mashing in 8 % of 2.7 s bursts (21–24 % at the maximum). Accepted by Sára ("A": clean on computers at
 the default levels). Emma's stacks (D32), at the default effects level over 400 offsets into the whole battle track, with
-the log at 0.136 s: never at the default music volume or at 85; at file level a single hit 0.3–0.5 % of the time, fast
-tapping (6 shots) 6.8–11.5 %; the same method gives Bezzubka's single hit 0.8 % and his mashing 12.3 % (D31's figures
+the log at 0.136 s: never at the default music volume or at 85; at file level a single hit 0.3–0.8 % of the time, fast
+tapping (6 shots) 9.0–11.3 % (re-measured with D33's bolt at 460; D32: 0.3–0.5 %, 6.8–11.5 %); the same method gives Bezzubka's single hit 0.8 % and his mashing 12.3 % (D31's figures
 above were measured differently), so Emma's are no worse (`C:\tmp\claude\as-test\emma-fullscale.mjs`, which decodes
 battle.mp3 itself and takes the limiter's curve and the default volumes from the code).
 
@@ -175,7 +191,11 @@ The world only scales down (D15), so on a window taller than 600 px the lane is 
 fireball needs 0.37 s from launch to a hit at 844×390, 0.5 at 1280×720, 0.9 at 1920×1080 and 1.7 at
 3840×2160 (measured). With sound (D29) the gap between the shot and the hit is audible there. Sára once
 saw "several seconds" in Firefox: not reproduced at 60 fps (a tall window or a low frame rate would explain
-it). Fix if it matters: scale the world up too, or cap the lane distance.
+it). Since D33 (a round judged by the share hit after a fixed number of flights) the screen also sets how many shots a
+round has: 70–75 on an iPad-like 1024×768 (69 s; Těžká needs near-perfect play there), 95–105 at 640×360 (71 s),
+85–95 at 1280×720 (81 s), 110–120 at 844×390 (82 s), 100–105 at 1920×1080 (110 s; more of the 30 beavers walk on). Sára
+accepted that ("this is a minigame"); the play-test link records each tester's field size. Fix if it matters: one world
+size on every screen (scale up as well as down: blurrier art on big monitors, most checks at 1280×720 redone).
 
 ### P3 — A track switched away while it is starting isn't faded out (found by review 2026-10-28)
 If the scene changes while the new track's `play()` is still starting (Howler's play lock,
@@ -186,6 +206,17 @@ the volume: there it can sound for up to ~400 ms. Check that it stays silent els
 `music-race.mjs` "switch while starting".
 
 ## Fixed
+
+### P2 — Keyboard players were stuck on the minigame's result (found in planning D33, 2026-11-01) — fixed 2026-11-01 in D33, not yet live
+`inputController` cancelled Space and Enter during a minigame unless the focus was in the menu or the end card, so Enter
+on the focused Pokračovat did nothing, and Esc is blocked during a minigame (D27). Fix: `.mg-result` joins the list;
+its Pokračovat takes a key only after 500 ms without a tap or key (D33's guard). Check: `minigame-roza.mjs` 33j.
+
+### P3 — A double tap or a held Enter on the minigame's Pokračovat ran on into the story (found in planning D33, 2026-11-01) — fixed 2026-11-01 in D33, not yet live
+The second tap of a double tap on Pokračovat landed on the next scene and skipped its line (`beaver_battle_win` →
+`_01`), and with Enter working a held Enter's repeats ran through `beaver_battle_win` … `_07` in ~1.2 s (the menu's
+Pokračovat had the same path for a held Enter). Fix (D33): story input waits 500 ms after a minigame ends, and a key held
+down from a button never repeats into the story. Checks: `minigame-roza.mjs` 33m, `menu.mjs` "held Enter on Pokračovat".
 
 ### P2 — Beaver frames showed bits of their neighbours (user-reported 2026-10-29, verified) — fixed 2026-10-31 in `edf1ad4`, verified live
 The sheets were cut on a fixed 6×2 grid the art isn't on: a frame showed a sliver of the next beaver's log, its own

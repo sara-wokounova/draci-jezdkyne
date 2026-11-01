@@ -1,7 +1,87 @@
 import { backgroundImage, resolveAssetPath } from './assetPath.js';
 
-// A tap this soon after a page switch or the menu closing is taken as the rest of a double tap (D27).
+// A tap this soon after a page switch, the menu closing or a minigame's end is taken as the rest of a double tap (D27, D33).
 export const TAP_GUARD_MS = 500;
+
+/**
+ * A button that takes a tap only after TAP_GUARD_MS without any tap (arming it counts as one), dimmed (`waiting`)
+ * while it would ignore one, and while a press that won't count is held (D27). A click without a press of its own
+ * (assistive technology) is judged by its own time. Keyboard clicks (`detail` 0) always count, unless `keys`:
+ * then a key press is judged like a tap and its repeats re-arm the wait without changing their press's verdict
+ * (the result's Pokračovat, focused while the player may still be pressing attack keys, D33), and a key press gives the
+ * button back the focus (a click elsewhere took it).
+ * `shown()` says whether the button is on show; presses elsewhere in the page count only then.
+ */
+export function guardTaps(button, { shown, onPress, keys = false }) {
+  const state = { lastTapAt: 0, tapCounts: false, tapPending: false, keyCounts: false, keyPending: false, held: false, timer: 0 };
+  const quiet = () => performance.now() - state.lastTapAt >= TAP_GUARD_MS;
+  const dimUntilQuiet = () => {
+    button.classList.add('waiting');
+    clearTimeout(state.timer);
+    state.timer = setTimeout(() => { if (!state.held) button.classList.remove('waiting'); }, TAP_GUARD_MS);
+  };
+  const listeners = [
+    ['pointerdown', () => {
+      if (!shown()) return;
+      state.tapCounts = quiet();
+      state.lastTapAt = performance.now();
+      state.tapPending = true;
+      state.held = !state.tapCounts;
+      dimUntilQuiet();
+    }, true],
+    // The end of a press, also one the browser cancels (a scroll, a system gesture).
+    ...['pointerup', 'pointercancel'].map((type) => [type, () => {
+      if (!state.held) return;
+      state.held = false;
+      if (quiet()) button.classList.remove('waiting');
+    }, true]),
+    // Any click ends the press it belongs to (bubbling: after the button's own handler has read it).
+    ['click', () => {
+      state.tapPending = false;
+      state.keyPending = false;
+    }, false],
+  ];
+  if (keys) {
+    listeners.push(['keydown', (event) => {
+      if (!shown()) return;
+      if (document.activeElement !== button) button.focus();
+      if (!event.repeat) {
+        state.keyCounts = quiet();
+        state.keyPending = true;
+        state.held = !state.keyCounts; // dimmed while held, also with the system's key repeat off
+      }
+      state.lastTapAt = performance.now();
+      dimUntilQuiet();
+    }, true]);
+    // Space clicks on its keyup, after this listener: the press stays pending until that click has read it.
+    listeners.push(['keyup', () => {
+      setTimeout(() => { state.keyPending = false; });
+      if (!state.held) return;
+      state.held = false;
+      if (quiet()) button.classList.remove('waiting');
+    }, true]);
+  }
+  for (const [type, listener, capture] of listeners) document.addEventListener(type, listener, capture);
+  button.addEventListener('click', (event) => {
+    let counts = true;
+    if (event.detail > 0) counts = state.tapPending ? state.tapCounts : quiet();
+    else if (keys) counts = state.keyPending ? state.keyCounts : quiet();
+    if (counts) onPress();
+  });
+  return {
+    arm() {
+      state.lastTapAt = performance.now();
+      state.tapPending = false;
+      state.keyPending = false;
+      state.held = false;
+      dimUntilQuiet();
+    },
+    dispose() {
+      clearTimeout(state.timer);
+      for (const [type, listener, capture] of listeners) document.removeEventListener(type, listener, capture);
+    },
+  };
+}
 
 export class UiController {
   constructor(elements) {
@@ -34,51 +114,11 @@ export class UiController {
 
   // "Ano" takes a tap only after TAP_GUARD_MS without any tap (opening the page counts as one): its page
   // replaces the main one at once, right where Nová hra was, so a double tap or a child mashing the button
-  // would otherwise confirm (D27). Keyboard clicks (detail 0) always count. Ano is dimmed while it would
-  // ignore a tap, and while a press that won't count is held.
+  // would otherwise confirm (D27).
   bindConfirm(onConfirm) {
     const page = this.elements.mainMenu.querySelector('#menu-confirm');
-    const yes = page.querySelector('#menu-confirm-yes');
     const shown = () => this.elements.root.classList.contains('menu-open') && !page.classList.contains('hidden');
-    const state = { lastTapAt: 0, tapCounts: false, tapPending: false, held: false, timer: 0 };
-    const dimUntilQuiet = () => {
-      yes.classList.add('waiting');
-      clearTimeout(state.timer);
-      state.timer = setTimeout(() => { if (!state.held) yes.classList.remove('waiting'); }, TAP_GUARD_MS);
-    };
-    this.armConfirm = () => {
-      state.lastTapAt = performance.now();
-      state.tapPending = false;
-      state.held = false;
-      dimUntilQuiet();
-    };
-    document.addEventListener('pointerdown', () => {
-      if (!shown()) return;
-      const now = performance.now();
-      state.tapCounts = now - state.lastTapAt >= TAP_GUARD_MS;
-      state.lastTapAt = now;
-      state.tapPending = true;
-      state.held = !state.tapCounts;
-      dimUntilQuiet();
-    }, true);
-    // The end of a press, also one the browser cancels (a scroll, a system gesture).
-    for (const type of ['pointerup', 'pointercancel']) {
-      document.addEventListener(type, () => {
-        if (!state.held) return;
-        state.held = false;
-        if (performance.now() - state.lastTapAt >= TAP_GUARD_MS) yes.classList.remove('waiting');
-      }, true);
-    }
-    // Any click ends the press it belongs to (bubbling: after Ano's own handler has read it).
-    document.addEventListener('click', () => { state.tapPending = false; });
-    yes.addEventListener('click', (event) => {
-      if (event.detail > 0) {
-        // A click without a press of its own (assistive technology) is judged by its own time.
-        const counts = state.tapPending ? state.tapCounts : performance.now() - state.lastTapAt >= TAP_GUARD_MS;
-        if (!counts) return;
-      }
-      onConfirm();
-    });
+    this.armConfirm = guardTaps(page.querySelector('#menu-confirm-yes'), { shown, onPress: onConfirm }).arm;
   }
 
   /**
@@ -122,13 +162,16 @@ export class UiController {
     const music = this.elements.mainMenu.querySelector('#setting-music');
     const effects = this.elements.mainMenu.querySelector('#setting-effects');
     const autoRead = this.elements.mainMenu.querySelector('#setting-autoread');
+    const difficulty = this.elements.mainMenu.querySelector('#setting-difficulty');
     music.value = Math.round(settings.musicVolume * 100);
     effects.value = Math.round(settings.effectsVolume * 100);
     autoRead.checked = settings.autoRead;
+    difficulty.value = settings.difficulty;
     music.addEventListener('input', () => onChange({ musicVolume: music.value / 100 }));
     effects.addEventListener('input', () => onChange({ effectsVolume: effects.value / 100 }));
     effects.addEventListener('change', onEffectsSet);
     autoRead.addEventListener('change', () => onChange({ autoRead: autoRead.checked }));
+    difficulty.addEventListener('change', () => onChange({ difficulty: difficulty.value }));
     this.onSettingsOpen = onOpen;
   }
 

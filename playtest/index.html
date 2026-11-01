@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Zkušební nálet na bobry</title>
+    <meta name="robots" content="noindex" />
+    <!-- …/playtest/ is the address handed out; the page lives next to index.html, where its relative asset paths work (D4). -->
+    <script>
+      // From the folder's own path, every run of slashes collapsed first: a doubled slash anywhere (…/playtest//,
+      // …//playtest/) still lands next to it, and a target starting with // would name another host.
+      var path = location.pathname.replace(/\/{2,}/g, '/');
+      var page = path.replace(/\/playtest\/+(index\.html)?$/, '/playtest.html');
+      location.replace((page === path ? '../playtest.html' : page) + location.search + location.hash);
+    </script>
+  </head>
+  <body>
+    <a href="../playtest.html">Zkušební nálet na bobry</a>
+  </body>
+</html>

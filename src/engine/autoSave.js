@@ -1,6 +1,7 @@
 // Every setting and its default. A saved value is kept only if it has the default's type
 // (see load()); a setting with a range also needs a clamp there, like the volumes'.
-const DEFAULT_SETTINGS = { musicVolume: 0.75, effectsVolume: 0.75, autoRead: false };
+const DEFAULT_SETTINGS = { musicVolume: 0.75, effectsVolume: 0.75, autoRead: false, difficulty: 'normal' };
+const DIFFICULTIES = ['easy', 'normal', 'hard']; // the keys of the minigame's DEFAULTS.winPercent (D33)
 
 export class AutoSave {
   constructor(storyId) {
@@ -21,7 +22,7 @@ export class AutoSave {
     return this.data.readSceneIds;
   }
 
-  /** Nastavení: { musicVolume 0–1, effectsVolume 0–1, autoRead }. Kept across restarts. */
+  /** Nastavení: { musicVolume 0–1, effectsVolume 0–1, autoRead, difficulty }. Kept across restarts. */
   get settings() {
     return this.data.settings;
   }
@@ -76,6 +77,7 @@ export class AutoSave {
           ? Math.min(1, Math.max(0, settings[name]))
           : DEFAULT_SETTINGS[name];
       }
+      if (!DIFFICULTIES.includes(settings.difficulty)) settings.difficulty = DEFAULT_SETTINGS.difficulty;
       // Before the effects slider (D29), the music slider was the master: at 0 it silenced everything.
       if (!('effectsVolume' in saved) && saved.musicVolume === 0) settings.effectsVolume = 0;
       return {

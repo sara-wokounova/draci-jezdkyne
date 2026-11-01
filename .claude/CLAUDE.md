@@ -31,7 +31,7 @@ More docs in this directory (keep them current):
 
 ```bash
 npm install
-npm run dev            # Vite dev server
+npm run dev            # Vite dev server (the play-test page: /playtest.html)
 npm run build          # production build into dist/ (CI runs this)
 npm run preview        # serve dist/
 npm run clean-sprites  # strip baked checkerboard from character PNGs (in place; skips already-transparent files)
@@ -48,16 +48,26 @@ index.html                 DOM shell: #pixi-host canvas, #top-controls (← Back
                            #end-card, #main-menu (main page: Pokračovat / Nová hra / Nastavení / Galerie; pages:
                            Nová hra confirmation, Nastavení, Galerie);
                            #rotate-hint (portrait phones, outside #game-root); links public/manifest.webmanifest
+playtest.html              the play-test page (D33): #pixi-host, the slider panel #pt-panel, #rotate-hint; no manifest
+playtest/index.html        …/playtest/ (the address handed out): a redirect to ../playtest.html keeping the query
 src/main.js                wires DOM elements → startVisualNovel()
+src/playtest.js            the play-test page: 15 sliders (beavers, goal, flights, each dragon's speeds, Anna's thorn),
+                           the URL as its only state (+ field=WxH in the copied link), one round per "Hrát", the panel
+                           inert 500 ms after it; the game's saved volumes read, never written; window.__vn (the test
+                           hook, as in the game)
 src/engine/
-  startVisualNovel.js      game loop: showScene / advance / goBack / runMinigame; the menu (Pokračovat, Nová hra,
-                           Menu, Esc; the session rule and the 500 ms tap guard after it closes, D27)
+  startVisualNovel.js      game loop: showScene / advance / goBack / runMinigame (passes the difficulty); the menu
+                           (Pokračovat, Nová hra, Menu, Esc; the session rule, D27); the 500 ms story guard after the menu
+                           closes or a minigame ends (storyPausedAt, D27, D33)
   storyRepository.js       fetch + minimal validation of story.json, scene lookup
   autoSave.js              localStorage: current scene, back-history, readSceneIds, settings (musicVolume,
-                           effectsVolume, autoRead)
+                           effectsVolume, autoRead, difficulty: 'easy' | 'normal' | 'hard', D33)
   uiController.js          DOM dialogue text, speaker name, choice buttons, end card, main menu (pages, focus,
-                           Ano's tap guard, TAP_GUARD_MS) + gallery
-  inputController.js       click/tap anywhere = advance; keys: Space/Enter, 1-9, Backspace/←, Esc (menu)
+                           Nastavení incl. the minigame difficulty) + gallery; guardTaps (Ano's tap guard, also the
+                           minigame result's, with keys: D27, D33), TAP_GUARD_MS
+  inputController.js       click/tap anywhere = advance; keys: Space/Enter, 1-9, Backspace/←, Esc (menu); Space/Enter
+                           left to a focused button in the menu, end card or minigame result; a key held from a button
+                           never repeats into the story (D33); fullscreenOnTap (D16, also the play-test page)
   visualRenderer.js        Pixi: background (contain-fit), character sprites, placeholders, preload
   assetPath.js             resolveAssetPath (story paths → base URL) and backgroundImage (which backgrounds are files)
   pixiStage.js             Pixi Application + layers: background, characters, effects, minigame, overlay
@@ -70,15 +80,21 @@ src/engine/
                            safety limiter (a soft clipper after Howler's master gain, ceiling −3.2 dBFS, D31)
   effects/atmosphereEffects.js   sunsetGlow, wind, snow
   minigames/
-    minigameManager.js     registry; run(spec) → 'victory' | 'failure' (a throwing game → 'failure', D24;
+    minigameManager.js     registry; run(spec, { difficulty }) → 'victory' | 'failure' (a throwing game → 'failure', D24;
                            a throwing clean-up can't leave the HUD up, D27)
-    minigameHud.js         DOM overlay: title, score, skip menu, result dialog (Czech labels)
-    dragonAttack.js        the "Dračí nálet na bobry" minigame (all tunables in DEFAULTS, safety caps beside it, D24): Róza,
+    minigameHud.js         DOM overlay: title, score, skip menu, result dialog (Czech labels; the hits line; its
+                           Pokračovat behind guardTaps; the top bar hidden under it, D33)
+    dragonAttack.js        the "Dračí nálet na bobry" minigame (all tunables in DEFAULTS, exported for the play-test page;
+                           safety caps beside it, D24): 30 beavers in one line walking in from the left, coming round
+                           again, faster with every hit, their logs fading; all dragons from the right; win by the share
+                           hit when the flights run out (winPercent by difficulty, D33); Róza,
                            Emma and Anna animated from strips (D23, D32, D30), firing rules per dragon (maxShots, refireAfter); sounds: each dragon's
                            shot and hit, the beaver's cry and log, each file once per tick (D29); the beavers' padded
                            sheets, the hit 7 → 6 with the log landing after frame 7, the hint pill hidden after the
                            first attack (D31)
 src/styles/main.css        all styling (DOM UI is absolutely positioned over the canvas)
+src/styles/playtest.css    the play-test panel (over main.css)
+vite.config.js             base './'; three build inputs: index.html, playtest.html, playtest/index.html (D33)
 public/story/story.json    the whole story (fetched at runtime, not bundled)
 public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, minigames/dragon-attack/,
                            minigames/dragon-attack/sfx/ (the effects, mp3, ≤ 15 KB each), music/ (mp3, ~3.6–4.8 MB
@@ -101,7 +117,7 @@ click, tap or key, D22), draws the saved scene behind
 the menu (visuals only, no minigame) and preloads ahead of it (D20). Pokračovat (enabled when there is a
 game to continue) and Nová hra call `showScene` (D27); the Menu button and Esc open the menu from the game.
 While the menu is open (`menuOpen`) all story input is ignored, like during a minigame, and for 500 ms
-after it closes.
+after it closes or a minigame ends (D33).
 With autoread on (Nastavení), `showScene` ends by scheduling `advance()` (D19).
 Flow: `showScene(scene)` → save to localStorage → DOM text/choices → music (deliberately
 before the render's await, D21) → if `scene.minigame`, run it at once (its render goes on behind it,

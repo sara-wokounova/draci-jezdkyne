@@ -61,9 +61,10 @@ export class MinigameManager {
    * ```
    *
    * @param {object} spec
+   * @param {{ difficulty?: string }} [options] From Nastavení (D33).
    * @returns {Promise<'victory'|'failure'>}
    */
-  async run(spec) {
+  async run(spec, options = {}) {
     const factory = this.registry.get(spec.type);
 
     if (!factory) {
@@ -100,6 +101,7 @@ export class MinigameManager {
             layer: this.stage.layers.minigame,
             config: spec.config ?? {},
             hud,
+            difficulty: options.difficulty,
             // The game reports its natural end here; we show the result screen and
             // only settle once the player presses continue.
             onComplete: (result, details) => {

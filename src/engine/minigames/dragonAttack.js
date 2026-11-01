@@ -5,7 +5,7 @@ import { EFFECT_MIX, keepAudioAwake, playSound, resumeAudio, sound } from '../sf
 /**
  * Dragon attack minigame.
  *
- * Three dragons fly, one after another, above a line of moving beavers. A key
+ * Three dragons fly in, one after another, above a line of beavers walking in from the other side. A key
  * press, mouse click or screen touch makes the dragon in flight attack. Each
  * dragon has its own attack (launch angle, speed and gravity) and may have
  * `maxShots` of its own shots in the air at once; after a launch it waits
@@ -13,15 +13,16 @@ import { EFFECT_MIX, keepAudioAwake, playSound, resumeAudio, sound } from '../sf
  * only while its shot would start on the screen. Each dragon flies a
  * configurable number of flights.
  *
- * Win: every beaver has been hit.
- * Lose: all flights are used up, no shot is in the air, no beaver is still in its hit, and beavers remain.
+ * Win: every beaver has been hit, or when the flights are over (no shot in the air, no beaver still in its hit)
+ * at least `winPercent` of them were (by the difficulty chosen in Nastavení, D33).
+ * Lose: the flights are over and fewer were hit.
  *
  * Every number is configurable via the `config` object (see {@link DEFAULTS}).
  * Anything you omit falls back to the default. Art is optional: if a sprite or
  * animation strip is missing the entity is drawn with a simple vector
  * placeholder, so the minigame is fully playable before the art is dropped in.
  */
-const DEFAULTS = {
+export const DEFAULTS = { // also read by the play-test page (never written)
   // Screens shorter than this scale the whole game down uniformly, so every px
   // number below is in game pixels (D15).
   designHeight: 600,
@@ -31,18 +32,20 @@ const DEFAULTS = {
   background: { sprite: 'assets/minigames/dragon-attack/background.png' },
 
   beavers: {
-    count: 7,
+    count: 30,
     radius: 38, // collision radius in px
     laneY: 0.84, // vertical position as a fraction of screen height
-    speed: 90, // walking speed in px/second
+    speed: 90, // walking speed in px/second (the walk animation follows it: walkFps at WALK_DRAWN_AT, 90)
+    speedUp: 2, // the speed × this once every beaver is hit, in step with the share hit (D33)
     direction: 1, // 1 = moving right, -1 = moving left
-    spacingPx: 150, // gap between beavers along the lane
-    startXRatio: 0.08, // first beaver x as a fraction of screen width
+    spacingPx: 225, // gap between beavers along the lane, centre to centre
+    startXRatio: 0.08, // first beaver x as a fraction of screen width, counted from the side they walk in from;
+    // the others queue behind it, off the screen, and walk in
     bobAmplitude: 10, // vertical bob in px while walking
     bobSpeed: 2.4, // bob cycles per second (radians/sec multiplier)
 
-    // Sprite-sheet animation. Each beaver loads its own sheet via `sheetPattern`
-    // where `{n}` is replaced with 1..count (beaver1_frames.png … beaver7_frames.png,
+    // Sprite-sheet animation. Each beaver loads a sheet via `sheetPattern`
+    // where `{n}` is 1..sheetCount, in turn (beaver1_frames.png … beaver7_frames.png,
     // made by scripts/cleanBeavers.mjs, D31). The sheet is a `columns` x `rows`
     // grid; the frame index lists below pick which cells belong to each animation
     // (0-based, left-to-right, top-to-bottom):
@@ -51,6 +54,7 @@ const DEFAULTS = {
     //   log    — a single static "log on the ground" frame, left where the log landed
     //   scurry — looping run played while fleeing off-screen
     sheetPattern: 'assets/minigames/dragon-attack/beaver{n}_frames.png',
+    sheetCount: 7,
     sheet: {
       columns: 6,
       rows: 2,
@@ -69,6 +73,8 @@ const DEFAULTS = {
     scurryDirection: 'walk',
     flipForScurry: false, // mirror the sprite to face the scurry direction
     dropLogOnHit: true, // leave the "log" frame where the log landed
+    logSeconds: 3, // a lying log stays this long,
+    logFadeSeconds: 1, // then fades out over this and is gone
     // The cry on every hit, whoever shot (D29), its 150 ms delay as silence in its file; the log when it lands (D31).
     sounds: {
       cry: { src: 'assets/minigames/dragon-attack/sfx/beaver_cry.mp3', volume: EFFECT_MIX },
@@ -117,7 +123,7 @@ const DEFAULTS = {
       height: 96, // only for the fallbacks (vector, or a single-image sprite)
       flightY: 0.16, // fraction of screen height
       speed: 320, // horizontal flight speed in px/second
-      entryFrom: 'left', // 'left' or 'right'
+      entryFrom: 'right', // 'left' or 'right'
       animation: {
         fly: { src: 'assets/minigames/dragon-attack/roza_fly.png', frames: 6, anchor: [0.866, 0.608] },
         attack: { src: 'assets/minigames/dragon-attack/roza_attack.png', frames: 6, anchor: [0.725, 0.564] },
@@ -184,7 +190,7 @@ const DEFAULTS = {
       attack: {
         pattern: 'zigzag',
         launchFrom: 'head', // only without the fly strip (the vector fallback)
-        speed: 380, // downward descent speed
+        speed: 460, // downward descent speed
         gravity: 0, // constant fall so the zig-zag stays even
         zigzagAmplitude: 70, // sideways reach in px
         zigzagFrequency: 9, // weave speed (radians/second)
@@ -218,7 +224,7 @@ const DEFAULTS = {
       height: 96,
       flightY: 0.21, // below ~1070 px tall the HUD clamp (her raised wings) sets her height instead (D30)
       speed: 300,
-      entryFrom: 'left',
+      entryFrom: 'right',
       animation: {
         fly: { src: 'assets/minigames/dragon-attack/anna_fly.png', frames: 6, anchor: [0.907, 0.549] },
         attack: { src: 'assets/minigames/dragon-attack/anna_attack.png', frames: 6, anchor: [0.915, 0.613] },
@@ -234,13 +240,13 @@ const DEFAULTS = {
       attack: {
         pattern: 'ballistic',
         launchFrom: 'tail', // only without the fly strip (the vector fallback)
-        speed: 430,
-        angleDeg: -120, // launches backward and upward → gravity arcs it down
+        speed: 300,
+        angleDeg: -150, // launches up and a little backward → gravity arcs it down
         gravity: 760, // heavy pull for a pronounced arc
         radius: 16, // around the thorn's tip
         color: '#5ad0ff',
         maxShots: 3,
-        refireAfter: 1 / 3, // up to three thorns in the air
+        refireAfter: 0.33, // up to three thorns in the air (⅓ until D33: the play-test's slider can't hold 1/3)
         sound: { src: 'assets/minigames/dragon-attack/sfx/anna_shot.mp3', volume: EFFECT_MIX },
         hitSound: { src: 'assets/minigames/dragon-attack/sfx/anna_hit.mp3', volume: EFFECT_MIX },
         sprite: null,
@@ -259,6 +265,9 @@ const DEFAULTS = {
   ],
 
   flightsPerDragon: 5,
+  // The share of the beavers to hit by the end of the flights, by the difficulty in Nastavení (D33). Its keys are the levels:
+  // also autoSave.js's DIFFICULTIES and index.html's #setting-difficulty.
+  winPercent: { easy: 40, normal: 80, hard: 100 },
   flightGapMs: 450, // pause between consecutive flights
   // 'roundRobin' => d1,d2,d3,d1,d2,d3,...  'sequential' => d1,d1,...,d2,d2,...
   flightOrder: 'roundRobin',
@@ -275,7 +284,8 @@ const DEFAULTS = {
   },
 
   labels: {
-    status: 'Bobři: {alive}/{total} · Nálet: {flight}/{flights} · {dragon}',
+    // Also {alive}, {total}, {needed} and {dragon}.
+    status: 'Zásahy: {hit} · {percent} % (cíl {target} %) · Nálet: {flight}/{flights}',
   },
 };
 
@@ -284,6 +294,7 @@ const MAX_BEAVERS = 50; // a typo in beavers.count must not start thousands of s
 const MAX_FLIGHTS_PER_DRAGON = 100; // nor may flightsPerDragon build a queue of billions
 const MAX_FLIGHT_SECONDS = 30; // a flight ends by then even if the dragon never reaches the edge
 const MAX_HIT_SECONDS = 5; // a hit beaver runs by then even with a tiny hitFps (a lost round waits for it, D31)
+const WALK_DRAWN_AT = 90; // px/second the beaver sheets' walk cycle matches at walkFps (the feet don't slide, D33)
 
 export class DragonAttackMinigame {
   /**
@@ -293,8 +304,9 @@ export class DragonAttackMinigame {
    * @param {object} context.config Partial config overriding {@link DEFAULTS}.
    * @param {import('./minigameHud.js').MinigameHud} context.hud
    * @param {(outcome: 'victory'|'failure', details: object) => void} context.onComplete
+   * @param {string} [context.difficulty] 'easy' | 'normal' | 'hard' (anything else: 'normal').
    */
-  constructor({ app, layer, config, hud, onComplete }) {
+  constructor({ app, layer, config, hud, onComplete, difficulty }) {
     this.app = app;
     this.layer = layer;
     this.hud = hud;
@@ -325,6 +337,13 @@ export class DragonAttackMinigame {
       log: soundEntry(beaverSounds.log, 'beavers.sounds.log'),
     };
     this.playedThisTick = new Set(); // sound files, so two hits on one tick play each file once
+    // The share to hit: a story's winPercent value when it is a number from 0 to 100, else the level's default.
+    const level = Object.hasOwn(DEFAULTS.winPercent, difficulty) ? difficulty : 'normal';
+    const percent = isPlainObject(this.config.winPercent) ? this.config.winPercent[level] : undefined;
+    this.target = Number.isFinite(percent) && percent >= 0 && percent <= 100 ? percent : DEFAULTS.winPercent[level];
+    this.needed = 0; // of the beavers, set once they exist
+    this.hits = 0;
+    this.logs = []; // lying logs, { view, age }
     this.score = 0;
     this.time = 0;
     this.elapsedSinceFlight = 0;
@@ -370,6 +389,7 @@ export class DragonAttackMinigame {
     }
     this.dragonArt = dragonArt;
     this.spawnBeavers(beaverFrames, beaverTexture);
+    this.needed = Math.min(this.beavers.length, Math.ceil((this.beavers.length * this.target) / 100));
     this.buildFlightQueue();
     this.bindInput();
     this.updateHud();
@@ -384,7 +404,7 @@ export class DragonAttackMinigame {
    *  Called every tick, so resizes and rotations need no extra handling. */
   layout() {
     const { width, height } = this.app.screen;
-    const scale = Math.min(1, height / positive(this.config.designHeight, 600));
+    const scale = worldScale(height, this.config.designHeight);
     const size = { width: width / scale, height: height / scale, top: this.hud.coveredTop() / scale };
     this.root.scale.set(scale);
     if (this.background) {
@@ -420,7 +440,10 @@ export class DragonAttackMinigame {
         frameTimer: 0,
         scurryDir: cfg.direction,
         phase: Math.random() * Math.PI * 2,
-        x: width * cfg.startXRatio + index * cfg.spacingPx,
+        // One line behind the first beaver, the rest queued off the screen.
+        x: cfg.direction < 0
+          ? width * (1 - cfg.startXRatio) + index * cfg.spacingPx
+          : width * cfg.startXRatio - index * cfg.spacingPx,
       };
       // In its lane from the start, never at (0, 0) until the first tick.
       view.position.set(beaver.x, height * cfg.laneY);
@@ -438,7 +461,8 @@ export class DragonAttackMinigame {
   async loadBeaverFrames(cfg, index) {
     if (!cfg.sheetPattern || !cfg.sheet) return null;
 
-    const path = cfg.sheetPattern.replace('{n}', String(index + 1));
+    const sheets = Number.isInteger(cfg.sheetCount) && cfg.sheetCount >= 1 ? cfg.sheetCount : DEFAULTS.beavers.sheetCount;
+    const path = cfg.sheetPattern.replace('{n}', String((index % sheets) + 1));
     const base = await tryLoadTexture(path);
     if (!base) return null;
 
@@ -774,6 +798,24 @@ export class DragonAttackMinigame {
         this.impacts.splice(this.impacts.indexOf(impact), 1);
       }
     }
+    this.updateLogs(dt);
+  }
+
+  /** A lying log stays `logSeconds`, fades out over `logFadeSeconds` and is gone (D33). */
+  updateLogs(dt) {
+    const cfg = this.config.beavers;
+    const stay = nonNegative(cfg.logSeconds, DEFAULTS.beavers.logSeconds);
+    const fade = nonNegative(cfg.logFadeSeconds, DEFAULTS.beavers.logFadeSeconds);
+    for (const log of this.logs.slice()) {
+      log.age += dt;
+      const fading = log.age - stay;
+      if (fading >= fade) {
+        log.view.destroy();
+        this.logs.splice(this.logs.indexOf(log), 1);
+      } else if (fading > 0) {
+        log.view.alpha = 1 - fading / fade;
+      }
+    }
   }
 
   updateBeavers(dt, width, height) {
@@ -781,11 +823,14 @@ export class DragonAttackMinigame {
     const laneY = height * cfg.laneY;
     const margin = Math.max(cfg.radius * 2, cfg.spriteWidth ?? cfg.radius * 2.4);
     const walkers = () => this.beavers.filter((b) => b.state === 'walk').map((b) => b.x);
+    // One speed for every walker, so the gaps stay; faster with every hit (D33). The walk animation keeps step.
+    const speed = cfg.speed * (1 + (positive(cfg.speedUp, DEFAULTS.beavers.speedUp) - 1) * (this.hits / this.beavers.length));
+    const walkFps = (cfg.walkFps * speed) / WALK_DRAWN_AT;
 
     for (const beaver of this.beavers) {
       switch (beaver.state) {
         case 'walk': {
-          beaver.x += cfg.speed * cfg.direction * dt;
+          beaver.x += speed * cfg.direction * dt;
           // Off the far edge: re-enter behind the last walker, at least spacingPx back,
           // so beavers never stack, even on narrow screens or after a resize (D15).
           if (cfg.direction > 0 && beaver.x > width + margin) {
@@ -796,7 +841,7 @@ export class DragonAttackMinigame {
           }
           beaver.view.x = beaver.x;
           beaver.view.y = laneY + Math.sin(this.time * cfg.bobSpeed + beaver.phase) * cfg.bobAmplitude;
-          this.stepAnimation(beaver, beaver.frames?.walk, cfg.walkFps, true, dt);
+          this.stepAnimation(beaver, beaver.frames?.walk, walkFps, true, dt);
           break;
         }
 
@@ -913,6 +958,7 @@ export class DragonAttackMinigame {
     log.x = beaver.x;
     log.y = this.layout().height * this.config.beavers.laneY;
     this.logLayer.addChild(log);
+    this.logs.push({ view: log, age: 0 });
   }
 
   updateDragon(dt, size) {
@@ -1025,6 +1071,7 @@ export class DragonAttackMinigame {
     // The beaver is "eliminated" for scoring/win purposes the moment it is hit,
     // but it visually reels and scurries off-screen before it is fully gone.
     beaver.alive = false;
+    this.hits += 1;
     this.score += this.config.score.perHit;
     this.updateHud();
 
@@ -1056,8 +1103,8 @@ export class DragonAttackMinigame {
    * Settles the round once it is decided:
    *  - Victory only after every struck beaver has fully scurried off-screen, so
    *    the flee animation always plays out before the result screen.
-   *  - Failure once the flights run out, every shot has resolved, no beaver is
-   *    still in its hit (its log lands first), and at least one beaver was never hit.
+   *  - Once the flights run out, every shot has resolved and no beaver is still in its hit (its log lands
+   *    first), with a beaver never hit: victory if `needed` were hit, else failure (D33).
    */
   maybeFinish() {
     if (this.finished) return;
@@ -1070,7 +1117,8 @@ export class DragonAttackMinigame {
     const allHit = this.beavers.every((b) => !b.alive);
     const inHit = this.beavers.some((b) => b.state === 'hit');
     if (this.state === 'done' && this.projectiles.length === 0 && !allHit && !inHit) {
-      this.fail();
+      if (this.hits >= this.needed) this.win();
+      else this.fail();
     }
   }
 
@@ -1101,20 +1149,35 @@ export class DragonAttackMinigame {
     this.projectiles = [];
     this.impacts = [];
     if (this.currentDragon && this.currentDragon.attackTime !== null) endAttack(this.currentDragon);
-    this.onComplete(outcome, { score: this.score });
+    this.onComplete(outcome, { score: this.score, ...this.share() });
   }
 
   // ----------------------------------------------------------------- hud ---
 
+  /** The hits, the share of all beavers hit (rounded down: never the goal before it is reached) and the goal. */
+  share() {
+    const total = this.beavers.length;
+    return {
+      hits: this.hits,
+      total,
+      percent: total ? Math.floor((100 * this.hits) / total) : 0,
+      target: this.target,
+    };
+  }
+
   updateHud() {
     this.hud.setScore(this.score);
 
-    const total = this.beavers.length;
+    const { hits, total, percent, target } = this.share();
     const alive = this.beavers.filter((b) => b.alive).length;
     const flight = Math.min(this.queueIndex, this.flightQueue.length);
     const dragonName = this.currentDragon?.config.name ?? '—';
 
     const status = this.config.labels.status
+      .replace('{hit}', String(hits))
+      .replace('{percent}', String(percent))
+      .replace('{target}', String(target))
+      .replace('{needed}', String(this.needed))
       .replace('{alive}', String(alive))
       .replace('{total}', String(total))
       .replace('{flight}', String(flight))
@@ -1136,6 +1199,11 @@ export class DragonAttackMinigame {
 }
 
 // ============================================================ helpers =======
+
+/** The game's scale for a screen height: 1, or smaller below `designHeight` (D15; the play-test's field size too). */
+export function worldScale(height, designHeight = DEFAULTS.designHeight) {
+  return Math.min(1, height / positive(designHeight, 600));
+}
 
 function mergeConfig(defaults, override) {
   // Arrays are replaced wholesale (so a custom `dragons` list fully overrides

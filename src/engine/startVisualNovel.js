@@ -26,7 +26,7 @@ export async function startVisualNovel(config) {
   let minigameActive = false;
   let menuOpen = true;
   let menuFromGame = false; // the menu was opened from the game: Esc on its main page goes back there
-  let menuClosedAt = -Infinity;
+  let storyPausedAt = -Infinity; // the menu closed or a minigame ended
   let started = false; // Pokračovat or Nová hra pressed in this page visit, until "Zpět na začátek"
   let autoReadTimer = 0;
   let history = save.history.filter((sceneId) => story.hasScene(sceneId));
@@ -89,9 +89,10 @@ export async function startVisualNovel(config) {
     minigameActive = true;
     ui.setBackAvailable(false);
 
-    const outcome = await minigames.run(scene.minigame);
+    const outcome = await minigames.run(scene.minigame, { difficulty: save.settings.difficulty });
 
     minigameActive = false;
+    storyPausedAt = performance.now();
     // Back on now, not only by the next scene: a typo in onVictory/onFailure shows none (Menu works too).
     ui.setBackAvailable(history.length > 0);
 
@@ -105,10 +106,10 @@ export async function startVisualNovel(config) {
     }
   }
 
-  // Story input waits while a minigame or the menu is up, and just after the menu closes: the rest of a
-  // double tap on Pokračovat must not skip a line or pick the choice under the button (D27).
+  // Story input waits while a minigame or the menu is up, and just after the menu closes or a minigame ends:
+  // the rest of a double tap on Pokračovat must not skip a line or pick the choice under the button (D27, D33).
   function inputBlocked() {
-    return minigameActive || menuOpen || performance.now() - menuClosedAt < TAP_GUARD_MS;
+    return minigameActive || menuOpen || performance.now() - storyPausedAt < TAP_GUARD_MS;
   }
 
   function goToScene(sceneId) {
@@ -176,7 +177,7 @@ export async function startVisualNovel(config) {
   function startGame() {
     started = true;
     menuOpen = false;
-    menuClosedAt = performance.now();
+    storyPausedAt = performance.now();
     ui.showMenu(false);
     showScene(currentScene, { addToHistory: false });
   }

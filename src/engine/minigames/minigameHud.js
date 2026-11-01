@@ -10,7 +10,7 @@
  * The HUD is intentionally framework-free (plain DOM) so it matches the rest of
  * the engine's UI layer, which is also plain DOM on top of the Pixi canvas.
  */
-import { storyText } from '../uiController.js';
+import { guardTaps, storyText } from '../uiController.js';
 
 export class MinigameHud {
   /**
@@ -35,6 +35,7 @@ export class MinigameHud {
       resultWin: 'Vítězství!',
       resultLose: 'Porážka',
       continue: 'Pokračovat',
+      resultHits: 'Zásahy: {hit} z {total} · {percent} % (cíl {target} %)',
       instructions: 'Klikni, klepni nebo zmáčkni klávesu pro útok!',
     };
     // Labels from the story override the defaults only with text (a typo must not break the HUD).
@@ -67,6 +68,7 @@ export class MinigameHud {
       <div class="mg-result glass-panel hidden" role="dialog" aria-modal="true">
         <h2 class="mg-result-title"></h2>
         <p class="mg-result-score"></p>
+        <p class="mg-result-hits"></p>
         <button class="mg-result-continue choice-button" type="button"></button>
       </div>
 
@@ -97,6 +99,7 @@ export class MinigameHud {
     this.resultEl = el.querySelector('.mg-result');
     this.resultTitle = el.querySelector('.mg-result-title');
     this.resultScore = el.querySelector('.mg-result-score');
+    this.resultHits = el.querySelector('.mg-result-hits');
     this.resultContinue = el.querySelector('.mg-result-continue');
     this.instructionsEl = el.querySelector('.mg-instructions');
 
@@ -104,6 +107,14 @@ export class MinigameHud {
     el.querySelector('.mg-skip-cancel')?.addEventListener('click', () => this.toggleSkipMenu(false));
     el.querySelectorAll('.mg-skip-menu [data-outcome]').forEach((button) => {
       button.addEventListener('click', () => this.skipHandler?.(button.dataset.outcome));
+    });
+
+    // The round ends while a child may still be tapping or pressing keys to attack, and the button sits mid-screen
+    // and takes the focus: it waits for a quiet moment, as Ano does (D27, D33).
+    this.resultGuard = guardTaps(this.resultContinue, {
+      shown: () => !this.resultEl.classList.contains('hidden'),
+      onPress: () => this.onContinue?.(),
+      keys: true,
     });
 
     root.appendChild(el);
@@ -144,6 +155,7 @@ export class MinigameHud {
    * @param {'victory'|'failure'} outcome
    * @param {object} [details]
    * @param {number} [details.score]
+   * @param {number} [details.hits] With total, percent and target: the hits line (D33).
    * @param {function} onContinue Called when the player presses continue.
    */
   showResult(outcome, details, onContinue) {
@@ -157,13 +169,23 @@ export class MinigameHud {
     this.resultTitle.textContent = isVictory ? this.labels.resultWin : this.labels.resultLose;
     this.resultScore.textContent =
       typeof details?.score === 'number' ? `${this.labels.score}: ${details.score}` : '';
+    const { hits, total, percent, target } = details ?? {};
+    this.resultHits.textContent = [hits, total, percent, target].every((value) => typeof value === 'number')
+      ? this.labels.resultHits
+        .replace('{hit}', String(hits))
+        .replace('{total}', String(total))
+        .replace('{percent}', String(percent))
+        .replace('{target}', String(target))
+      : '';
 
+    this.onContinue = onContinue;
     this.resultEl.classList.remove('hidden');
+    this.resultGuard.arm();
     this.resultContinue.focus?.();
-    this.resultContinue.onclick = () => onContinue?.();
   }
 
   destroy() {
+    this.resultGuard.dispose();
     this.el.remove();
   }
 }

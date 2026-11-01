@@ -732,3 +732,116 @@ more, up to 43 ms per 6 shots; `sfx.test.mjs` prints her stacks without a budget
 5.0–5.5 dB, 26–33 ms per 6 shots at her 0.267 and 0.657 s flights); nothing passes the ceiling; the gameplay change
 re-measures them. ~0.7 MB more to download. `emma_attack.png` in `public/` has the same name as its source in `art/` (as
 Anna's). The head check on her poses accepts NCC ≥ 0.5 (01 reaches 0.54: its raised near wing crosses the window).
+
+## D33 — The beaver line, win by share, difficulty in Nastavení, and a play-test page (2026-11-01) — Accepted
+Supersedes: D23's and D31's lose rule (the flights out with beavers left: now judged by the share hit); D23's "near
+the left edge Anna's backward arrows leave in under a second" (she flies left now); D30's Anna thorn numbers (430 /
+−120°); D23's and D30's ⅓ for Anna's `refireAfter` (now 0.33); D32's Emma bolt speed (380 → 460), its bolts-per-flight
+list and its lean (~59° → ~54°); D27's story guard after the menu (now also after a minigame) and its "a held key
+presses a focused button only once" (now: its repeats never reach the story either); D19's and D29's settings list (+
+`difficulty`); D16's listener (now `fullscreenOnTap()` in inputController.js, also on the play-test page); D15's
+"beavers that start … past the edge on a narrow screen queue up off-screen" (now every beaver but the first does).
+Decision: the dragonAttack minigame has 30 beavers (`beavers.count`) in one line 225 px apart (`spacingPx`, 1.5 × 150),
+centre to centre: the first at `startXRatio` (0.08) of the width, the others queued behind it off the screen
+(`x = width × startXRatio − i × spacingPx`; walking left mirrored: `width × (1 − startXRatio) + i × spacingPx`), so a new
+beaver walks in every 225 px. D15's re-entry is unchanged: a beaver that walks off the far edge rejoins the back of the
+line, at least 225 px behind the last walker, so nothing escapes and the beavers waiting off the screen stay 225 apart:
+a hit beaver's gap is seen only while it crosses the screen (the beavers behind it don't hurry) and is gone the next
+time round. All walkers share one speed, `speed × (1 + (speedUp − 1) × hits / beavers)` (`speedUp` 2: 1.8× once 24 of 30
+are hit), and the walk animation runs at `walkFps × speed ÷ 90` (`WALK_DRAWN_AT`, a constant: the speed the sheets'
+8 fps walk was drawn for, not the tunable `speed`; `speed: 0` still parks them). The 7 sheets are shared in turn (`sheetCount` 7: beaver i on sheet `i % 7 + 1`; Pixi loads each URL once).
+A lying log stays `logSeconds` (3), fades out over `logFadeSeconds` (1) and is removed (`this.logs`; at the round's end
+the logs stay as they are). All three dragons enter from the right (`entryFrom: 'right'`), in turns, 5 flights each
+(15), as before. Emma's bolt falls at 460 px/s; Anna's thorn leaves at 300 px/s, −150° (gravity 760), so it lands ~200
+px behind her launch point at 1280×720 instead of ~480 (Sára's "the thorn falling arch is too big"); her wait is 0.33 of
+the last thorn's on-screen time. A round still ends when the flights are over, no shot is in the air and no beaver is
+in its hit: victory if at least `needed = ⌈beavers × target / 100⌉` were hit (`beavers`: how many there
+are, `count` capped at 50), else defeat; the target
+is `winPercent[difficulty]` (`{ easy: 40, normal: 80, hard: 100 }`, whose keys are the levels; a story value that isn't a
+number from 0 to 100, or a `winPercent` that isn't an object, gives that level's default). Hitting every beaver still wins at once with the
+bonus per unused flight; reaching the goal early doesn't end the round (more hits, more score); a win by share gets the
+same `winBonus`. The difficulty is a Nastavení setting, "Obtížnost minihry" (a `<select>`: Lehká / Normální / Těžká,
+default Normální), saved with the others (`AutoSave` keeps only 'easy', 'normal' or 'hard') and passed to the game by
+`MinigameManager.run(spec, { difficulty })`. The HUD status is "Zásahy: {hit} · {percent} % (cíl {target} %) · Nálet:
+{flight}/{flights}" (the share rounded down, so it never shows the goal before it is reached; `{needed}` too; the old
+placeholders still work); the result dialog adds "Zásahy: {hit} z {total} · {percent} % (cíl {target} %)"
+(`labels.resultHits`, text), and the top bar hides while it shows. The result's Pokračovat uses Ano's tap guard (D27),
+moved into `guardTaps(button, { shown, onPress, keys })` in uiController.js: with `keys` a key press is judged like a
+tap (its repeats move the 500 ms on without changing their own press's verdict; a click without a press of its own is
+judged by its own time), and the HUD disposes its listeners. Space and Enter now press the result's focused button
+(`.mg-result` joins inputController's list). Story input waits `TAP_GUARD_MS` after a minigame ends, as after the menu
+closes (`menuClosedAt` → `storyPausedAt`), and a key whose press landed on a button has its repeats dropped until its
+keyup, wherever the focus is by then (each fresh press sets that key again). The play-test page: `playtest.html` at the
+root (a third Vite entry; the game's relative asset paths need the page's folder, D4), handed out as `…/playtest/` (a
+redirect page, `playtest/index.html`, another entry, that keeps the query). It draws the dam as the game does behind the
+battle (`VisualRenderer`), plays the battle music for the whole visit at the game's saved volumes (read, never written),
+and has 15 sliders in five groups (the beavers' count, spacing, speed, speed-up; the goal in % and the flights per
+dragon; each dragon's flight and shot speed; Anna's thorn angle, gravity and wait, `annaWait`, % of the last thorn's
+on-screen time). "Hrát" hides the panel and runs one round with those values (the game's title; `DEFAULTS` copied, never
+written); back after it the panel is inert until 500 ms pass without a tap or key, then Hrát has the focus (without
+scrolling). The URL is the only state: all 15 values written into it when a slider is let go (`change`, in a try/catch)
+and into a read-only link field built from the sliders, which also carries `field=WxH` (the game's world in game px,
+computed in the frame after a resize, information for Sára, never read back, never in the address bar); "Kopírovat
+odkaz" copies it (else the field is selected for copying by hand); a link fills the sliders (missing, blank or not a
+number: the default; 0 is a value; the slider clamps and rounds to its step itself). Nothing is sent anywhere.
+`DEFAULTS` is exported for the page.
+Why: asked for by Sára ("the thorn falling arch is too big …, there would be like thirty beavers. going from left in
+steady intervals and you would win if you clear 80% of them on standard settings, 100% on hard settings, 40% on easy
+settings. Settings for minigame toughness should be in menu. and where there is less beavers remaining, they would
+speed up. all the dragons would fly in from the right … the distance between beavers 1.5 bigger … a test game, where I
+can tweak some variables … in some subdirectory … With the slider"), with her answers on the plan: beavers come round
+rather than escape (more beavers than shots: escapes would make a round unwinnable); "steady rate" = no gap where a hit
+beaver was, and no hurrying to close one; a fixed number of flights; the speed-up counts hits only; dragon and shot
+speeds as sliders, Emma's lightning a little faster; the HUD shows the hits and the share; logs fade; steady distance;
+screens may play a little differently ("this is a minigame"); the flights slider kept for now; the texts fine; "keep it
+for playtesting, but make it adjustable" (Emma's 460 and Anna's arc as starting values: their sliders, and Anna's wait
+as one more, so her thorns per flight have a knob of their own). The choices made for her: the speed-up linear in the
+share hit up to `speedUp` 2; the line behind the first rather than ahead (beavers walk in; ahead, 30 beavers would start
+spread over 6500 px to the right and come round at once); D15's re-entry for the gap rather than a catch-up walk; the
+dragon's name out of the HUD status (with it the top bar took two lines at 568×270: 52 → 63 px, which moves the dragons
+down by D15's clamp); logs 3 s + 1 s; the top bar hidden under the result (the taller dialog covered 25 px of it and its
+Přeskočit at 568×270). The result's guard: the round ends the moment the flights run out or the last beaver is hit,
+often while a child is still tapping (or pressing keys: the HUD invites them, and the dialog focuses Pokračovat), and the
+button sits mid-screen. Keyboard players were stuck on the result (Enter was cancelled during a minigame, Esc is too),
+and a double tap or a held Enter on Pokračovat ran on into the story (`beaver_battle_win` … `_07` in ~1.2 s with Enter
+working). Anna's 0.33 rather than ⅓: a slider can't hold 1/3, and the play-test's default must be the game's (with 1/3
+the page's 0.33 gave a fast tapper one more thorn at the end of a flight at 1280×720). One goal slider instead of three
+difficulties (a tester says "70 % felt right"; the page plays as "normal"). `playtest.html` at the root rather than in
+the folder: one folder deeper every relative asset path breaks; a file in `public/` would be answered with the game's
+index.html by Vite's dev server. The world kept as D15 has it (it only scales down): making a flight take the same time
+on every screen (planned, then dropped) only swapped the width bias for a height bias.
+Consequences: the game plays somewhat differently by screen, as it did (measured with the new defaults, a tap on every
+10 ms tick, Róza / Emma / Anna per flight with the shot ending at the lane's centre / where a hit would end it; per round
+= 5 × their sum): 1024×768 (iPad-like) 5/3/6 / 5/4/6, 70 / 75 shots, 69 s; 640×360 7/5/7 / 8/6/7, 95 / 105, 71 s;
+1280×720 6/4/7–8 / 7/5/7, 85–90 / 95, 81 s; 844×390 8/6/8 / 9/7/8, 110 / 120, 82 s; 1366×768 6/4/8 / 7/5/8, 90 / 100,
+85 s (1440×900 89 s); 1920×1080 6/4/10 / 7/4/10, 100 / 105, 110 s; Anna's 0.33 adds up to one thorn per flight (1280×720
+at 10 ms ticks 8 against 7–8; 1920×1080 at 60 fps 10 against 9). Longer rounds also let more of the 30 walk on (at 1920
+~55 % more than on the 640×360 phone). On an iPad-like screen Těžká needs near-perfect play: the 30th beaver would first
+be in reach after ~71 s against a 69 s round, only the speed-up of early hits brings it sooner. The play-test link
+records each tester's field size, so their numbers can be compared like with like; the real fix is one world size on
+every screen (issue P3 "Flights take longer on taller windows"). Anna's thorns land in about `[200, width]` flying left
+(the left ~200 px out of her reach; Róza and Emma cover it); Róza's reach is about `[−100, width − 100]`. At the start
+only the first beaver is on the screen; the second is in reach after 0.86 s, then one every 2.5 s. With every dragon
+flying left Anna's first thorn of a flight comes a little after Róza's first fireball would (her tail enters last). A won
+round that ends when the flights run out leaves the walking beavers frozen under the dialog (as D31 noted for a lost
+one). Thorns per Anna flight: 9 → 7–8 at 1280×720 (her new thorn stays on the screen longer and she waits 0.33 of
+that); `annaWait` measured at 1280×720: 0 % 9–11, 25 % 9, 33 % 8, 50 % 6, 100 % 3 (below ~25 % her 3-thorn cap decides,
+and her thorns come in bursts ~0.11 s apart: play-test only, the limiter squeezes harder, nothing passes its ceiling).
+Emma's bolt hits 0.556 s after it leaves at 1280×720 (D32: 0.657) and 0.221 s on the shortest screen (0.267); her
+stacks (printed by `sfx.test.mjs`): a single hit cut by 3.8–4.7 dB (2.3–2.6 ms above the knee), 6 fast shots 4.9–5.3 dB,
+28–35 ms; over the battle music (`emma-fullscale.mjs`) never past full scale at the default music volume or at 85, at
+file level a single hit 0.3–0.8 % of the time, fast tapping 9.0–11.3 % (Bezzubka's 0.8 % and 12.3 %). Anna's stacks
+(her thorns 0.6–0.644 s apart, each hitting 1.19–1.34 s after it left) stay inside D31's budget (3.8 dB, 3.7 ms at
+844×390). For up to ~10 minutes after the deploy an old cached tab's `AutoSave.load()` drops the unknown `difficulty`,
+and its next save (its first scene change: `persist()` writes the whole save) writes the save without it, so that
+player's choice falls back to Normální (the class D29 noted for `effectsVolume`). `startXRatio` is now mirrored for
+`direction: -1` (a change for a story that sets both). D24's normalisation list gains `speedUp` (`positive`),
+`sheetCount` (a whole number ≥ 1; a fraction too falls back, unlike `maxShots`, which is floored), `logSeconds` and `logFadeSeconds` (`nonNegative`), each else its DEFAULTS value, and
+the `winPercent` values; none is written into the config. `worldScale()` (dragonAttack.js) is the one formula for the
+game's scale, used by the play-test page's field size too. Enter on a focused Přeskočit during the round stays cancelled (the
+skip menu is reachable by pointer only: issues.md; during a round Enter and Space are attacks). The play-test page is
+reachable by anyone with its link, as the game is; it is to be removed when Sára says. It hard-codes the story's id (for
+the saved volumes), `battle.mp3` and `dam_02.png`: a renamed file or story id needs it updated (issues.md). Its copied link
+carries the tester's window size in game px (its intro says so). The older mutation runners
+(`sfx-`, `anna-`, `beaver-`, `emma-`, `menu-mutate.mjs`) run snapshots of the shared checks taken before this change
+(`minigame-roza.d32.mjs`, `menu.d32.mjs`, `as-test/autosave.test.d32.mjs`, `as-test/sfx.test.d32.mjs`).

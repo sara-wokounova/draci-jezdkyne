@@ -305,11 +305,25 @@ button {
   color: #e08b8b;
 }
 
-.mg-result-score {
-  margin: 0 0 1.2rem;
+.mg-result-score,
+.mg-result-hits {
+  margin: 0 0 0.4rem;
   color: #fff8e8;
   font-size: clamp(1.05rem, 2vw, 1.4rem);
   font-variant-numeric: tabular-nums;
+}
+
+.mg-result-hits:empty {
+  display: none;
+}
+
+.mg-result-continue {
+  margin-top: 0.8rem;
+}
+
+/* Nothing in the top bar is needed under the result, and on short phones the dialog would cover it (D33). */
+.minigame-hud:is(.mg-result-victory, .mg-result-failure) .mg-topbar {
+  visibility: hidden;
 }
 
 .mg-instructions {
@@ -421,8 +435,9 @@ button {
   opacity: 0.45;
 }
 
-/* Ano while it would ignore a tap (D27). */
-#menu-confirm-yes.waiting {
+/* Ano and the minigame result's Pokračovat while they would ignore a tap (D27, D33). */
+#menu-confirm-yes.waiting,
+.mg-result-continue.waiting {
   opacity: 0.45;
 }
 
@@ -445,7 +460,7 @@ button {
 }
 
 #menu-settings {
-  overflow-y: auto; /* two sliders and a checkbox: on a very short screen the page scrolls */
+  overflow-y: auto; /* two sliders, a checkbox and a select: on a very short screen the page scrolls */
 }
 
 .setting {
@@ -467,6 +482,15 @@ button {
 
 .setting input[type='range'] {
   width: min(14rem, 45%);
+}
+
+/* font: inherit, so below 16 px iOS doesn't zoom on focus; the popup dark like the page. */
+.setting select {
+  min-height: 2.5rem; /* a finger-sized target on phones */
+  font: inherit;
+  accent-color: var(--gold);
+  color-scheme: dark;
+  cursor: pointer;
 }
 
 .setting input[type='checkbox'] {
