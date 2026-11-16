@@ -173,7 +173,19 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
 ## Assets
 
 - Backgrounds: 1672×941 PNG (~16:9, ~3.3 MB each). Displayed contain-fit (letterboxed).
-- Characters: 1024×1536 RGBA PNG (~2 MB each), 6 poses per character.
+  Act 2a's nine (2026-11-15: `forest_path`, `badger_burrow`, `forest_herbs`, `forest_night_meadow`, `vedma_hut`,
+  `forest_clearing`, `vily_meadow`, `tesak_lair`, `sacred_grove`) were made with Runway's GPT Image model (the style of
+  Sára's ChatGPT originals; `forest_dragon_flight.png` as the style reference; prompts in her words: "manga water color
+  style with wide brush, bright colours and warm light"); the full-size originals (2560×1440) are kept in
+  `art/backgrounds/` (Sára: ready for reuse), the deployed files scaled with
+  `ffmpeg -i art/backgrounds/X.png -vf scale=1672:941:flags=lanczos -pix_fmt rgb24 public/assets/backgrounds/X.png`.
+- Characters: 1024×1536 RGBA PNG (~2 MB each), 6 poses for the riders; other characters only the poses their lines use
+  (Sára; a missing pose falls back to `neutral`): Soňa 4, the vědma 3 (2026-11-15, Runway's GPT Image model with a
+  transparent background, `emma_neutral.png` as the style reference, each other pose made from the neutral one;
+  originals 1280×1920 in `art/characters/<id>/`, scaled with ffmpeg lanczos to 1024×1536, `-pix_fmt rgba`). The Act 2a
+  creatures (jezevec, liska, srnce, srna, zubr, vila, hejkal; 1–2 poses each, any aspect ratio) the same way from
+  1920×1280 / 1920×1920 / 1280×1920 originals, but first cropped to the figure (alpha > 10, feet on the bottom edge) and
+  scaled to fit 1536×1536.
 - Beaver sheets: `beaver{n}_frames.png` (n = 1…7), 1326×544, a 6×2 grid of 221×272 cells padded 50 px a side
   (walk 0–5, hit 7 then 6, log 8, scurry 9–11), made by `node scripts/cleanBeavers.mjs` from
   `art/minigames/dragon-attack/beaver{n}.png` (1448×1086, already cleaned of their checkerboard on 2026-10-17, unlike

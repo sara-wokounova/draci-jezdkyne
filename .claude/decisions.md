@@ -845,3 +845,20 @@ the saved volumes), `battle.mp3` and `dam_02.png`: a renamed file or story id ne
 carries the tester's window size in game px (its intro says so). The older mutation runners
 (`sfx-`, `anna-`, `beaver-`, `emma-`, `menu-mutate.mjs`) run snapshots of the shared checks taken before this change
 (`minigame-roza.d32.mjs`, `menu.d32.mjs`, `as-test/autosave.test.d32.mjs`, `as-test/sfx.test.d32.mjs`).
+
+## D34 — The story is set among the Slavs of the 10th century (2026-11-15) — Accepted
+Decision: the story takes place among the Slavs in the 10th century and stays historically accurate in everything
+except the magic and the dragons: no castles, towns, knights, fishponds or other later things; settlements are a
+village (ves, osada) and a gord (hradiště: wood and earth ramparts); the people around the riders are a prince (kníže),
+his family and nobles (velmoži), farmers and craftsmen. The sorceress's scarlet dress (`beaver_after_battle_win_07`) marks
+her as someone from a princely or noble family (imported dyed cloth was a luxury of the elite).
+Why: decided by Sára ("nemůže tu být zámek, má to odpovídat desátému století, Slované, chceme to držet až na tu
+magii a draky v rámci historické přesnosti").
+Consequences: new scenes, places and background art follow the period (wooden houses, ramparts, sacred groves, fords,
+trade paths). Words already in the story that don't fit are listed in issues.md ("Anachronisms in story.json").
+
+## D35 — Names are an exception to the period accuracy (2026-11-15) — Accepted
+Decision: characters' names don't have to be period names (D34): Róza, Emma, Anna, Soňa, Rubínka stay as they are.
+Mythological and fantastic creatures fall under the magic exception too.
+Why: decided by Sára ("Jména jsou výjimka z dobové přesnosti"), asked after Claude noted that Soňa (the Russian form of
+Sofia) reached Czech much later; Róza isn't a period name either.

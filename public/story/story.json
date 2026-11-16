@@ -2,7 +2,9 @@
   "id": "draci-jezdkyne-z-vlpu",
   "start": "forest_flight_01",
   "menuMusic": "village_day",
-  "resumeMusic": ["battle"],
+  "resumeMusic": [
+    "battle"
+  ],
   "assets": {
     "music": {
       "village_day": "assets/music/village_day.mp3",
@@ -50,6 +52,88 @@
         "nervous": "assets/characters/roza/roza_nervous.png",
         "talking": "assets/characters/roza/roza_talking.png"
       }
+    },
+    "sona": {
+      "displayName": "Soňa",
+      "color": "#5f8f4e",
+      "hair": "#8a5a2b",
+      "sprites": {
+        "neutral": "assets/characters/sona/sona_neutral.png",
+        "happy": "assets/characters/sona/sona_happy.png",
+        "sad": "assets/characters/sona/sona_sad.png",
+        "nervous": "assets/characters/sona/sona_nervous.png"
+      }
+    },
+    "vedma": {
+      "displayName": "Vědma",
+      "color": "#6b5b7a",
+      "hair": "#cfcfcf",
+      "sprites": {
+        "neutral": "assets/characters/vedma/vedma_neutral.png",
+        "sad": "assets/characters/vedma/vedma_sad.png",
+        "happy": "assets/characters/vedma/vedma_happy.png"
+      }
+    },
+    "jezevec": {
+      "displayName": "Jezevec",
+      "color": "#7a7a7a",
+      "hair": "#2b2b2b",
+      "sprites": {
+        "neutral": "assets/characters/jezevec/jezevec_neutral.png",
+        "happy": "assets/characters/jezevec/jezevec_happy.png"
+      }
+    },
+    "liska": {
+      "displayName": "Liška",
+      "color": "#d9772b",
+      "hair": "#b85a1a",
+      "sprites": {
+        "neutral": "assets/characters/liska/liska_neutral.png",
+        "happy": "assets/characters/liska/liska_happy.png"
+      }
+    },
+    "srnce": {
+      "displayName": "Srnče",
+      "color": "#a8774a",
+      "hair": "#7a5230",
+      "sprites": {
+        "neutral": "assets/characters/srnce/srnce_neutral.png"
+      }
+    },
+    "srna": {
+      "displayName": "Srna",
+      "color": "#a8774a",
+      "hair": "#7a5230",
+      "sprites": {
+        "happy": "assets/characters/srna/srna_happy.png"
+      }
+    },
+    "zubr": {
+      "displayName": "Zubr",
+      "color": "#5a3d24",
+      "hair": "#3a2614",
+      "sprites": {
+        "neutral": "assets/characters/zubr/zubr_neutral.png",
+        "happy": "assets/characters/zubr/zubr_happy.png"
+      }
+    },
+    "vila": {
+      "displayName": "Víla",
+      "color": "#f2efe6",
+      "hair": "#e8d9a0",
+      "sprites": {
+        "neutral": "assets/characters/vila/vila_neutral.png",
+        "happy": "assets/characters/vila/vila_happy.png"
+      }
+    },
+    "hejkal": {
+      "displayName": "Hejkal",
+      "color": "#5d6b3a",
+      "hair": "#3f4a22",
+      "sprites": {
+        "neutral": "assets/characters/hejkal/hejkal_neutral.png",
+        "happy": "assets/characters/hejkal/hejkal_happy.png"
+      }
     }
   },
   "scenes": [
@@ -63,7 +147,70 @@
         "wind"
       ],
       "characters": [],
-      "text": "Bylo, nebylo. Byly tři dračí jezdkyně - Róza, Emma a Anna. Byly to kamarádky a každý den dohlížely na svoji část lesa, aby se zvířátka žijící v lesa moc nežraly navzájem.",
+      "text": "Bylo, nebylo. Byly tři dračí jezdkyně - Róza, Emma a Anna. Byly to kamarádky a každý den dohlížely na svoji část lesa, aby se zvířátka žijící v lese moc nežrala navzájem.",
+      "next": "forest_flight_01a",
+      "music": "dragon_flight"
+    },
+    {
+      "id": "forest_flight_01a",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "center",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Běsko, ne tak rychle! Anna s Buřinohou za námi nestačí.",
+      "next": "forest_flight_01b",
+      "music": "dragon_flight"
+    },
+    {
+      "id": "forest_flight_01b",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "center",
+          "pose": "excited"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Že nestačíme? Buřinoho, ukažme jim to! Kdo bude první u řeky, vyhrává!",
+      "next": "forest_flight_01c",
+      "music": "dragon_flight"
+    },
+    {
+      "id": "forest_flight_01c",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "center",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Bezzubka vás obě předběhne! Podél řeky to máme domů na hradiště kousek, stihneme to i na oběd.",
       "next": "forest_flight_02",
       "music": "dragon_flight"
     },
@@ -240,7 +387,7 @@
         }
       ],
       "speaker": "roza",
-      "text": "Jsou moc velcí, přeprat by je by nemuselo dopadnout dobře. Mohly bychom přitom poškodit přehradu a způsobit povodeň.",
+      "text": "Jsou moc velcí, přeprat je by nemuselo dopadnout dobře. Mohly bychom přitom poškodit přehradu a způsobit povodeň.",
       "next": "dam_with_beavers_persuade_01",
       "music": "forest_ground"
     },
@@ -259,7 +406,7 @@
         }
       ],
       "speaker": "emma",
-      "text": "Co by bychom mohly udělat, abyste zmenšili přehradu?",
+      "text": "Co bychom mohly udělat, abyste zmenšili přehradu?",
       "next": "dam_with_beavers_persuade_02",
       "music": "forest_ground"
     },
@@ -316,8 +463,46 @@
         }
       ],
       "speaker": "Velký bobr",
-      "text": "Přišla sem čarodějnice, mávla kouzelnou hůlkou a byly z nám obří bobři.",
+      "text": "Přišla sem čarodějnice, pronesla zaříkávání a byli z nás obří bobři.",
       "next": "dam_with_beavers_persuade_05",
+      "music": "forest_ground"
+    },
+    {
+      "id": "dam_with_beavers_persuade_05",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Ale proč by to dělala? Co jste jí udělali?",
+      "next": "dam_with_beavers_persuade_06",
+      "music": "forest_ground"
+    },
+    {
+      "id": "dam_with_beavers_persuade_06",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "Velký bobr",
+      "text": "Nic jsme jí neudělali a nevíme, proč to udělala. Měla zrzavé vlasy, bledou pleť plnou pih a šarlatové šaty, jaké nosí jen velmožky. Byla vysoká a silná jako bojovnice, takovou nepřehlédnete.",
+      "next": "dam_deal_01",
       "music": "forest_ground"
     },
     {
@@ -428,7 +613,7 @@
         }
       ],
       "speaker": "Velký bobr",
-      "text": "Přišla sem čarodějnice, mávla kouzelnou hůlkou a byly z nám obří bobři.",
+      "text": "Přišla sem čarodějnice, pronesla zaříkávání a byli z nás obří bobři.",
       "next": "beaver_after_battle_win_04",
       "music": "forest_ground"
     },
@@ -504,8 +689,3596 @@
         }
       ],
       "speaker": "Velký bobr",
-      "text": "Měla zrzavé vlasy, hodně bledou pleť a hodně pih. Taky byla hodně vysoká a vysportovaná, ale měla šarlatové šaty šlechtičny. Kam se poděla těžko říct, ale je nepřehlédnutelná, můžete se zkusit poptat.",
-      "next": "beaver_after_battle_win_07",
+      "text": "Měla zrzavé vlasy, bledou pleť a spoustu pih. Byla vysoká a silná jako bojovnice, ale nosila šarlatové šaty, jaké mají jen velmožky.",
+      "next": "dam_deal_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "dam_deal_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "Velký bobr",
+      "text": "Kam šla, nevíme. Ale když zaříkávala, pořád opakovala něco o velké vodě a o nejkratší noci.",
+      "next": "dam_deal_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "dam_deal_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Nejkratší noc je o slunovratu, a to je za tři dny! Kdyby se přehrada protrhla, voda by se přivalila rovnou na naše hradiště.",
+      "next": "dam_deal_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "dam_deal_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Tak se dohodneme. Vy přehradu do slunovratu udržíte a my tu čarodějnici najdeme a přinutíme ji, aby vás zase zmenšila.",
+      "next": "dam_deal_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "dam_deal_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "neutral"
+        }
+      ],
+      "speaker": "Velký bobr",
+      "text": "Platí. Do slunovratu přehrada vydrží. Ale pospěšte si, voda pořád stoupá.",
+      "next": "dam_deal_05",
+      "music": "forest_ground"
+    },
+    {
+      "id": "dam_deal_05",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Jenže kde ji máme hledat? Les je velký a hory ještě větší.",
+      "next": "dam_deal_06",
+      "music": "forest_ground"
+    },
+    {
+      "id": "dam_deal_06",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Poptáme se v lese. Takovou čarodějnici si přece musel někdo všimnout.",
+      "next": "act1_end",
+      "music": "forest_ground"
+    },
+    {
+      "id": "act1_end",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [],
+      "text": "A tak se tři jezdkyně se svými draky vydaly do lesa hledat zrzavou čarodějnici. Do slunovratu zbývaly tři dny.",
+      "next": "a2_fox_01",
+      "music": "dragon_flight"
+    },
+    {
+      "id": "a2_fox_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "liska",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "text": "Sotva přistály na lesní pěšině, z kapradí se ozvalo žalostné kňučení.",
+      "next": "a2_fox_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fox_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "liska",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "excited"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Podívejte, liščátko! Je úplně samo.",
+      "next": "a2_fox_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fox_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "liska",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Asi se ztratilo. Liščí nora bude někde blízko, ale kde?",
+      "next": "a2_fox_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fox_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "liska",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Bezzubka má nejlepší čich v celém lese. Bezzubko, hledej!",
+      "next": "a2_fox_05",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fox_05",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "liska",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "text": "Bezzubka zavětřila, zafuněla a vykročila k vývratu starého buku. Liščátko za ní cupitalo jako za mámou.",
+      "next": "a2_fox_06",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fox_06",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "text": "U vývratu vykoukla stará liška, popadla liščátko za kůži na krku a zmizela s ním v noře.",
+      "next": "a2_fox_07",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fox_07",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Ani nepoděkovala! Ale stejně to bylo hezké.",
+      "next": "a2_fox_08",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fox_08",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Tak, a teď ta čarodějnice. Někdo v lese ji musel vidět.",
+      "next": "a2_badger_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_badger_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_burrow.png"
+      },
+      "effects": [],
+      "characters": [],
+      "text": "Cestou podél řeky si jezdkyně všimly, že voda za bobří přehradou stoupá. Zaplavovala už i břeh pod starými duby.",
+      "next": "a2_badger_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_badger_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_burrow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "jezevec",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "text": "Na břehu pobíhal jezevec. Zoufale hrabal v blátě a pořád se vracel k noře, do které natékala voda.",
+      "next": "a2_badger_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_badger_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_burrow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "jezevec",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Má v noře mláďata! Voda jim teče přímo do pelíšku.",
+      "next": "a2_badger_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_badger_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_burrow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "jezevec",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "jezevec",
+      "text": "Moje děti! Nemůžu je vynést všechny najednou a voda pořád stoupá!",
+      "next": "a2_badger_choice",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_badger_choice",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_burrow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "jezevec",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Holky, jestli mu pomůžeme, přijdeme o kus dne. Ale jestli ne…",
+      "choices": [
+        {
+          "text": "Pomůžeme jezevcovi zachránit mláďata.",
+          "next": "a2_badger_help_01"
+        },
+        {
+          "text": "Nemáme čas, musíme dál.",
+          "next": "a2_badger_skip_01"
+        }
+      ],
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_badger_help_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_burrow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "jezevec",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "text": "Draci roztáhli křídla nad vodou a holky jedno po druhém vynášely mokrá jezevčata z nory.",
+      "next": "a2_badger_help_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_badger_help_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_burrow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "jezevec",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Poslední! Je celé zablácené, ale živé.",
+      "next": "a2_badger_help_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_badger_help_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_burrow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "jezevec",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "text": "Draci pak jezevcovi pomohli vyhrabat novou noru výš na stráni, kam voda nedosáhne.",
+      "next": "a2_badger_help_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_badger_help_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_burrow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "jezevec",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "jezevec",
+      "text": "Nevím, jak vám poděkovat. Kdybyste kdy potřebovaly něco podhrabat, zavolejte. Jezevci kopou líp než kdokoli v lese.",
+      "next": "a2_badger_help_05",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_badger_help_05",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_burrow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "jezevec",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Budeme si to pamatovat!",
+      "next": "a2_sona_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_badger_skip_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_burrow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "jezevec",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "jezevec",
+      "text": "Rozumím… Nějak to zvládnu sám. Snad.",
+      "next": "a2_badger_skip_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_badger_skip_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_burrow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "jezevec",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "sad"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Je mi ho líto. Ale čarodějnice na nás nepočká.",
+      "next": "a2_sona_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_sona_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "text": "Když se slunce sklánělo k obzoru, uviděly jezdkyně na kraji lesa dívku s košíkem, jak se sklání mezi bylinami.",
+      "next": "a2_sona_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_sona_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Soňo! Co ty tady děláš tak daleko od hradiště?",
+      "next": "a2_sona_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_sona_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "sona",
+      "text": "Holky! Vy jste mě vylekaly. Hledám stříbrnou třezalku pro vědmu.",
+      "next": "a2_sona_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_sona_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Stříbrnou? Takovou jsem nikdy neviděla.",
+      "next": "a2_sona_05",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_sona_05",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "talking"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "sona",
+      "text": "Kvete jen v noci, pár dní před slunovratem. A každý rok jinde, takže ji hledám už od rána.",
+      "next": "a2_sona_06",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_sona_06",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "talking"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "sona",
+      "text": "Kdo ji utrhne včas, má v ní velkou moc. Vědma z ní dělá amulety, které chrání před zlými kouzly.",
+      "next": "a2_sona_07",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_sona_07",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "talking"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Soňo, neviděla jsi tu zrzavou ženu v šarlatových šatech? Hledáme ji.",
+      "next": "a2_sona_08",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_sona_08",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "nervous"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "sona",
+      "text": "Viděla! Před pár dny přišla k vědmě. Vědma byla potom celý den zamlklá a nechtěla o tom mluvit.",
+      "next": "a2_sona_09",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_sona_09",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "nervous"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Tak to musíme za vědmou. Ale dnes už na hradiště nedoletíme.",
+      "next": "a2_sona_10",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_sona_10",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "sona",
+      "text": "Já tu třezalku sama nikdy nenajdu. Les je tak velký a do slunovratu zbývá tak málo času…",
+      "next": "a2_sona_choice",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_sona_choice",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Holky, co kdybychom jí s draky pomohly hledat? Z výšky uvidíme mnohem víc.",
+      "choices": [
+        {
+          "text": "Pomůžeme Soně hledat třezalku.",
+          "next": "a2_herb_01"
+        },
+        {
+          "text": "Promiň, Soňo, musíme si odpočinout a ráno spěchat dál.",
+          "next": "a2_sona_skip_01"
+        }
+      ],
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_sona_skip_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "sona",
+      "text": "Rozumím. Hodně štěstí, holky. A dávejte na sebe pozor.",
+      "next": "a2_sona_skip_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_sona_skip_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "sad"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Příště ti pomůžeme, slibuju.",
+      "next": "a2_day2_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_herb_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "text": "Když se setmělo, vznesly se jezdkyně se Soňou nad les. Pod nimi byla tma, jen tu a tam se zatřpytila tůňka.",
+      "next": "a2_herb_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_herb_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Rozdělíme se. Každá proletí kus lesa, a kdo uvidí stříbrné světlo, zavolá.",
+      "next": "a2_herb_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_herb_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "excited"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Tamhle! U bažiny něco svítí! A tamhle taky… a tamhle!",
+      "next": "a2_herb_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_herb_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "nervous"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "excited"
+        }
+      ],
+      "speaker": "sona",
+      "text": "Pozor, to můžou být bludičky. Lákají lidi do bažiny. Pravá třezalka nesvítí, jen se stříbrně třpytí ve svitu měsíce.",
+      "next": "a2_herb_choice",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_herb_choice",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "nervous"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Tak které světlo je to pravé?",
+      "choices": [
+        {
+          "text": "Světla, která tančí nad bažinou.",
+          "next": "a2_herb_wisp_01"
+        },
+        {
+          "text": "Tiché třpytivé světlo na pasece.",
+          "next": "a2_herb_found_01"
+        }
+      ],
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_herb_wisp_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "nervous"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "text": "Jezdkyně se snesly k tančícím světýlkům. Ta se zachichotala a odletěla dál a ještě dál, až byly všechny po kotníky v bahně.",
+      "next": "a2_herb_wisp_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_herb_wisp_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "nervous"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "sad"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Fuj! To byly bludičky. Teď jsme ztratily spoustu času.",
+      "next": "a2_herb_wisp_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_herb_wisp_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "talking"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "sad"
+        }
+      ],
+      "speaker": "sona",
+      "text": "Nevadí. Tamhle na pasece, vidíte? To světlo se nehýbe.",
+      "next": "a2_herb_found_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_herb_found_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "talking"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "sad"
+        }
+      ],
+      "text": "Na malé pasece mezi kořeny stál drobný kvítek. Jeho lístky se ve svitu měsíce třpytily jako stříbro.",
+      "next": "a2_herb_found_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_herb_found_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "sad"
+        }
+      ],
+      "speaker": "sona",
+      "text": "Stříbrná třezalka! Našly jste ji! Bez vás bych ji do slunovratu nikdy nenašla.",
+      "next": "a2_herb_found_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_herb_found_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "sad"
+        }
+      ],
+      "speaker": "sona",
+      "text": "Na oplátku vám udělám amulety. Ať vás na cestě chrání před zlými kouzly.",
+      "next": "a2_herb_found_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_herb_found_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "sad"
+        }
+      ],
+      "text": "Než se rozednilo, upletla Soňa z třezalky tři malé amulety a každé jezdkyni jeden pověsila na krk.",
+      "next": "a2_herb_found_05",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_herb_found_05",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Děkujeme, Soňo. Ráno poletíme za vědmou.",
+      "next": "a2_day2_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_day2_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [],
+      "text": "Druhý den ráno se jezdkyně vznesly nad les a zamířily k hradišti. Do slunovratu zbývaly dva dny.",
+      "next": "a2_vedma_01",
+      "music": "dragon_flight"
+    },
+    {
+      "id": "a2_vedma_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "text": "Vědma bydlela v chýši kousek za valem hradiště. Ze střechy visely svazky sušených bylin a z komína stoupal dým.",
+      "next": "a2_vedma_02",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "speaker": "vedma",
+      "text": "Jezdkyně? Co vás ke mně přivádí tak brzy ráno?",
+      "next": "a2_vedma_03",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Hledáme zrzavou ženu v šarlatových šatech. Soňa říkala, že u vás byla.",
+      "next": "a2_vedma_04",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "text": "Vědma zbledla a dlouho mlčela.",
+      "next": "a2_vedma_05",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_05",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "vedma",
+      "text": "Jmenuje se Rubínka. Bývala dračí jezdkyně, jako vy. Jejím drakem byl Tesák, rudý jako oheň.",
+      "next": "a2_vedma_06",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_06",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "talking"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "vedma",
+      "text": "Loni Tesák onemocněl popelavkou. Drak přichází o oheň, šupiny mu šednou jako popel, až nakonec úplně vyhasne.",
+      "next": "a2_vedma_07",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_07",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "talking"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "anna",
+      "text": "O popelavce jsem slyšela. Prý přechází z draka na draka.",
+      "next": "a2_vedma_08",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_08",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "vedma",
+      "text": "Právě proto. Rubínka sem s Tesákem přiletěla prosit o pomoc. Ale lidé z hradiště se báli o své draky a zavřeli bránu.",
+      "next": "a2_vedma_09",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_09",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "vedma",
+      "text": "A já jsem za nimi mohla vyjít. Jenže jsem se neodvážila jít proti všem. Tesák tu noc umřel.",
+      "next": "a2_vedma_choice",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_choice",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "text": "Jezdkyně se na sebe podívaly.",
+      "choices": [
+        {
+          "text": "„Jak jste jí mohla nepomoct?!“",
+          "next": "a2_vedma_angry_01"
+        },
+        {
+          "text": "„Bála jste se. To se může stát každému.“",
+          "next": "a2_vedma_kind_01"
+        }
+      ],
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_angry_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Jak jste jí mohla nepomoct?! Vždyť Tesák umřel!",
+      "next": "a2_vedma_angry_02",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_angry_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "vedma",
+      "text": "Máš pravdu. Nemám se čím omlouvat.",
+      "next": "a2_vedma_angry_03",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_angry_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "text": "Vědma se odvrátila a chvíli jen mlčky míchala byliny v hrnci.",
+      "next": "a2_vedma_water_01",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_kind_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Bála jste se. To se může stát každému.",
+      "next": "a2_vedma_kind_02",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_kind_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "vedma",
+      "text": "Děkuju, děvče. Celý rok mě to tíží. Kdybyste někdy potřebovaly mou pomoc, přijďte. Pomůžu vám, jak jen budu umět.",
+      "next": "a2_vedma_water_01",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_water_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "A proč za vámi Rubínka přišla teď?",
+      "next": "a2_vedma_water_02",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_water_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "talking"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "vedma",
+      "text": "Ptala se, kde najde mrtvou vodu. Takovou, co hojí rány, ale nikoho neoživí.",
+      "next": "a2_vedma_water_03",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_water_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "vedma",
+      "text": "Mrtvá voda vyvěrá jen tam, kde se náš svět dotýká Navi, říše mrtvých. Bojím se, co to znamená.",
+      "next": "a2_vedma_water_04",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_water_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Velká voda za přehradou… nejkratší noc… a mrtvá voda. Myslíte, že chce otevřít bránu do Navi?",
+      "next": "a2_vedma_water_05",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_water_05",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "vedma",
+      "text": "Aby získala Tesáka zpátky. Toho se bojím. Víc o Navi ví jen Triglav v posvátném háji. Jeho tři hlavy vidí do nebe, na zem i pod zem.",
+      "next": "a2_vedma_water_06",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_vedma_water_06",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "sad"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Tak poletíme do posvátného háje.",
+      "next": "a2_hejkal_01",
+      "music": "village_day"
+    },
+    {
+      "id": "a2_hejkal_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [],
+      "text": "Cesta do posvátného háje vedla hlubokým lesem. Jezdkyně zrovna přistály u potoka, aby se draci napili, když se z houští ozvalo: „Hej! Hej!“",
+      "next": "a2_hejkal_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_hejkal_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Slyšely jste to? Někdo na nás volá.",
+      "next": "a2_hejkal_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_hejkal_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "emma",
+      "text": "To bude hejkal. Prý mate poutníky, dokud nezabloudí.",
+      "next": "a2_hejkal_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_hejkal_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "hejkal",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "hejkal",
+      "text": "Hej! Hej, jezdkyně! Kam tak spěcháte?",
+      "next": "a2_hejkal_05",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_hejkal_05",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "hejkal",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Do posvátného háje. A ty nás nezmateš!",
+      "next": "a2_hejkal_06",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_hejkal_06",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "hejkal",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "hejkal",
+      "text": "Zmást? Já? Kdepak. Mně je tady jen hrozně dlouhá chvíle. Sto let sedím na pařezu a nikdo si se mnou nepovídá.",
+      "next": "a2_hejkal_07",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_hejkal_07",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "hejkal",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "anna",
+      "text": "To musí být smutné. Chceš slyšet hádanku?",
+      "next": "a2_hejkal_08",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_hejkal_08",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "hejkal",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "text": "Hejkal se rozzářil. Hádal a hádal, a když konečně uhodl, zahejkal radostí tak, že ze tří smrků popadaly šišky.",
+      "next": "a2_hejkal_09",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_hejkal_09",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "hejkal",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "hejkal",
+      "text": "Děkuju, děvčata! Do háje je to rovně za sluncem. A kdyby vás někdo zlobil, zahejkám na něj!",
+      "next": "a2_fawn_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fawn_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_clearing.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "srnce",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "text": "Na mýtině stálo malé srnče s bílými tečkami na hřbetě a třáslo se strachy.",
+      "next": "a2_fawn_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fawn_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_clearing.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "srnce",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Ztratilo maminku. Samo ji nenajde, les je moc velký.",
+      "next": "a2_fawn_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fawn_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_clearing.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "srnce",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Z dračích hřbetů bychom ji našly rychle. Ale zase přijdeme o čas.",
+      "next": "a2_fawn_choice",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fawn_choice",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_clearing.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "srnce",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Co uděláme?",
+      "choices": [
+        {
+          "text": "Najdeme srnčeti maminku.",
+          "next": "a2_fawn_help_01"
+        },
+        {
+          "text": "Nemůžeme se zdržovat.",
+          "next": "a2_fawn_skip_01"
+        }
+      ],
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fawn_help_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_clearing.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "text": "Jezdkyně kroužily nad lesem, dokud Emma nezahlédla srnu, jak úzkostlivě pobíhá po kraji paseky.",
+      "next": "a2_fawn_help_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fawn_help_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_clearing.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "srna",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "text": "Srnče k ní radostně přiskákalo a srna ho olízala od uší až po ocásek.",
+      "next": "a2_fawn_help_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fawn_help_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_clearing.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "srna",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "srna",
+      "text": "Děkuju vám. Vím, kam letíte. Znám stezku přes bažiny, kterou neznají ani lidé. Ušetří vám půl dne cesty.",
+      "next": "a2_fawn_help_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fawn_help_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_clearing.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "srna",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Takže jsme čas vlastně ani neztratily!",
+      "next": "a2_day3_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fawn_skip_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_clearing.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "srnce",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "text": "Jezdkyně nechaly srnče na mýtině a ještě dlouho se za ním ohlížely.",
+      "next": "a2_fawn_skip_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_fawn_skip_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_clearing.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "srnce",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "sad"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Snad ho maminka brzy najde.",
+      "next": "a2_day3_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_day3_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [],
+      "text": "Třetí den se jezdkyně vydaly k posvátnému háji. Zítra v noci bude slunovrat.",
+      "next": "a2_wisent_01",
+      "music": "dragon_flight"
+    },
+    {
+      "id": "a2_wisent_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "text": "Na stezce stál obrovský zubr. Nehýbal se, jen tupě zíral před sebe a oči měl zakalené jako mlhou.",
+      "next": "a2_wisent_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_wisent_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Něco s ním není v pořádku. Vypadá, jako by spal s otevřenýma očima.",
+      "next": "a2_wisent_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_wisent_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "text": "Když se Buřinoha přiblížila, zubr zafuněl a ohnal se rohy, až se zachvěly stromy.",
+      "next": "a2_wisent_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_wisent_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Je omámený. To je čarodějné kouzlo!",
+      "next": "a2_wisent_choice",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_wisent_choice",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Můžeme ho obletět. Nebo ho zkusit probudit…",
+      "choices": [
+        {
+          "text": "Zkusíme zubra probudit.",
+          "next": "a2_wisent_help_01"
+        },
+        {
+          "text": "Obletíme ho.",
+          "next": "a2_wisent_skip_01"
+        }
+      ],
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_wisent_help_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "excited"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Hej, zubře! Probuď se!",
+      "next": "a2_wisent_help_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_wisent_help_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "excited"
+        }
+      ],
+      "text": "Zubr zařval a vyrazil proti Róze. Bezzubka ji jen tak tak vytáhla do vzduchu.",
+      "next": "a2_wisent_help_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_wisent_help_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Křikem to nepůjde. Zkus to potichu, Rózo. Jako když konejšíš Bezzubku.",
+      "next": "a2_wisent_help_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_wisent_help_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "text": "Róza slezla z dračice, pomalu přistoupila k zubrovi a tiše na něj promlouvala. Zubr přestal funět, zamrkal a mlha z jeho očí zmizela.",
+      "next": "a2_wisent_help_05",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_wisent_help_05",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "zubr",
+      "text": "Kde to jsem? Pamatuju si jen zrzavou ženu a její zpěv… a pak nic.",
+      "next": "a2_wisent_help_06",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_wisent_help_06",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "zubr",
+      "text": "Vrátily jste mi rozum, jezdkyně. Kdybyste někdy potřebovaly něco rozrazit, zubří stádo přijde.",
+      "next": "a2_wisent_help_07",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_wisent_help_07",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Klidné slovo dokázalo víc než křik. To si zapamatuju.",
+      "next": "a2_vily_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_wisent_skip_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "text": "Jezdkyně zubra obletěly velkým obloukem a ještě dlouho pod sebou slyšely jeho zmatené funění.",
+      "next": "a2_vily_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_vily_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vily_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vila",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "text": "Na louce u řeky se v ranní mlze vznášely víly v bílých šatech. Netančily ale, jen smutně stály po kotníky ve vodě.",
+      "next": "a2_vily_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_vily_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vily_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vila",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "vila",
+      "text": "Jezdkyně! Voda od bobří přehrady nám zaplavila louku. Kde budeme o slunovratu tančit?",
+      "next": "a2_vily_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_vily_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vily_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vila",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Draci by mohli vyhloubit odtok, aby voda stekla zpátky do řeky. Ale bude to chvíli trvat.",
+      "next": "a2_vily_choice",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_vily_choice",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vily_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vila",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Pomůžeme jim?",
+      "choices": [
+        {
+          "text": "Vyhloubíme vílám odtok.",
+          "next": "a2_vily_help_01"
+        },
+        {
+          "text": "Musíme do háje.",
+          "next": "a2_vily_skip_01"
+        }
+      ],
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_vily_help_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vily_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vila",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "text": "Draci hrabali drápy a holky odnášely kameny, dokud voda s bubláním nestekla zpátky do řeky.",
+      "next": "a2_vily_help_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_vily_help_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vily_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vila",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "vila",
+      "text": "Naše louka! Děkujeme. Až budete nejvíc potřebovat čas, zavolejte nás. Kdo se zadívá na náš tanec, zapomene na všechno ostatní.",
+      "next": "a2_vily_help_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_vily_help_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vily_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vila",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "roza",
+      "text": "To zní jako dobrý plán na jednu zrzavou čarodějnici.",
+      "next": "a2_lair_smell_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_vily_skip_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vily_meadow.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "vila",
+          "position": "left",
+          "pose": "neutral"
+        },
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "vila",
+      "text": "Tak leťte. Snad louka do slunovratu sama vyschne.",
+      "next": "a2_lair_smell_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_lair_smell_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [],
+      "text": "Cestou k háji začala být Bezzubka neklidná. Větřila, mručela a pořád stáčela let k horám.",
+      "next": "a2_lair_smell_02",
+      "music": "dragon_flight"
+    },
+    {
+      "id": "a2_lair_smell_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "center",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Bezzubko, co se děje? Háj je přece tamtudy.",
+      "next": "a2_lair_smell_03",
+      "music": "dragon_flight"
+    },
+    {
+      "id": "a2_lair_smell_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "center",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Něco cítí. Snad nějakého draka? Ale v těchhle horách přece žádní draci nežijí.",
+      "next": "a2_lair_choice",
+      "music": "dragon_flight"
+    },
+    {
+      "id": "a2_lair_choice",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "center",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Co uděláme?",
+      "choices": [
+        {
+          "text": "Necháme Bezzubku vést.",
+          "next": "a2_lair_01"
+        },
+        {
+          "text": "Teď ne, musíme do háje.",
+          "next": "a2_foxfam_01"
+        }
+      ],
+      "music": "dragon_flight"
+    },
+    {
+      "id": "a2_lair_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/tesak_lair.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "text": "Bezzubka je dovedla k jeskyni vysoko ve skalách. Na zemi se leskly rudé šupiny, staré a zaprášené.",
+      "next": "a2_lair_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_lair_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/tesak_lair.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Rudé šupiny… Tohle bylo Tesákovo doupě.",
+      "next": "a2_lair_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_lair_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/tesak_lair.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "text": "Uprostřed jeskyně leželo prázdné hnízdo z větví. Bezzubka ho obešla a začala čenichat u úzké pukliny ve skále.",
+      "next": "a2_lair_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_lair_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/tesak_lair.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Je tam něco schovaného. Rózo, posviť si.",
+      "next": "a2_lair_05",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_lair_05",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/tesak_lair.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "text": "Hluboko v puklině leželo vejce. Velké, šedé a studené jako kámen.",
+      "next": "a2_lair_06",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_lair_06",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/tesak_lair.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "excited"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Dračí vejce! Tesák ho tu musel schovat, než umřel!",
+      "next": "a2_lair_07",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_lair_07",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/tesak_lair.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "sad"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Je úplně studené. Myslíte, že je ještě živé?",
+      "next": "a2_lair_08",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_lair_08",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/tesak_lair.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Dračí vejce prý může spát celé roky, dokud ho nezahřeje dračí oheň.",
+      "next": "a2_lair_09",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_lair_09",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/tesak_lair.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "text": "Bezzubka se nad vejcem sklonila a jemně na něj dýchla plamenem. Skořápka zrudla, zazářila… a zevnitř se ozvalo tiché ťuknutí.",
+      "next": "a2_lair_10",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_lair_10",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/tesak_lair.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Je živé! A Rubínka o něm vůbec neví.",
+      "next": "a2_lair_11",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_lair_11",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/tesak_lair.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Vezmeme ho s sebou. Opatrně.",
+      "next": "a2_foxfam_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_foxfam_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "liska",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "excited"
+        }
+      ],
+      "text": "Když se jezdkyně snesly na pěšinu kousek od háje, z kapradí vykoukl známý zrzavý ocásek.",
+      "next": "a2_foxfam_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_foxfam_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "liska",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "excited"
+        }
+      ],
+      "speaker": "anna",
+      "text": "To je naše liščátko! A má s sebou celou rodinu!",
+      "next": "a2_foxfam_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_foxfam_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "liska",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "excited"
+        }
+      ],
+      "text": "Liščata se přikutálela k drakům, tahala Buřinohu za ocas a jedno vylezlo Běsce až na hlavu.",
+      "next": "a2_foxfam_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_foxfam_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "liska",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Běsko, nehýbej se! Vždyť ho shodíš.",
+      "next": "a2_foxfam_05",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_foxfam_05",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "liska",
+          "position": "left",
+          "pose": "happy"
+        },
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "text": "Stará liška tentokrát kývla hlavou, jako by děkovala. Pak celou rodinu odvedla zpátky do lesa.",
+      "next": "a2_foxfam_06",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_foxfam_06",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Tak, a teď do háje. Triglav na nás čeká.",
+      "next": "a2_grove_01",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "happy"
+        }
+      ],
+      "text": "Posvátný háj tvořily obrovské staré duby. Mezi nimi na kamenném návrší stála dřevěná socha boha se třemi hlavami.",
+      "next": "a2_grove_02",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_02",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Triglav. Draci musí zůstat venku, do háje smějí jen lidé.",
+      "next": "a2_grove_03",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_03",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Bezzubko, počkej tady s Běskou a Buřinohou. Hned jsme zpátky.",
+      "next": "a2_grove_04",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_04",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "text": "Jezdkyně tiše vstoupily mezi duby. Všechny tři hlavy Triglava měly přes oči zlatou pásku.",
+      "next": "a2_grove_05",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_05",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Má zavázané oči. Prý aby neviděl, co zlého lidé dělají.",
+      "next": "a2_grove_06",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_06",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "text": "Emma se uctivě uklonila a opatrně odhrnula zlatou pásku z první hlavy.",
+      "next": "a2_grove_07",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_07",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "Hlava nebe",
+      "text": "Vidím všechno, co je pod nebem. Ptejte se, jezdkyně.",
+      "next": "a2_grove_08",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_08",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Kde je Rubínka? Čarodějka se zrzavými vlasy.",
+      "next": "a2_grove_09",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_09",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "Hlava nebe",
+      "text": "Je blíž, než si myslíte. Celou cestu vás sleduje z oblak. Hlídejte svou ohnivou dračici.",
+      "next": "a2_grove_10",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_10",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Bezzubku? Proč zrovna ji?",
+      "next": "a2_grove_11",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_11",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "text": "Ale první hlava už mlčela. Anna odhrnula pásku z druhé hlavy.",
+      "next": "a2_grove_12",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_12",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "Hlava země",
+      "text": "Znám všechno, co žije na zemi. Na co se ptáš, dítě?",
+      "next": "a2_grove_13",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_13",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Čarodějka omámila zubra. Jak se dá omámení zlomit?",
+      "next": "a2_grove_14",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_14",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "Hlava země",
+      "text": "Omámení zlomí jen hlas toho, koho omámený miluje. Klidný hlas, ne křik.",
+      "next": "a2_grove_15",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_15",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "text": "Nakonec Róza sáhla po pásce třetí hlavy. Ta promluvila šeptem, ze kterého běhal mráz po zádech.",
+      "next": "a2_grove_16",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_16",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "speaker": "Hlava podsvětí",
+      "text": "Znám Nav, říši mrtvých. Ptejte se, ale odpověď se vám nebude líbit.",
+      "next": "a2_grove_17",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_17",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "emma",
+      "text": "Chce Rubínka otevřít bránu do Navi?",
+      "next": "a2_grove_18",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_18",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "Hlava podsvětí",
+      "text": "Bránu otevře velká voda v nejkratší noci, mrtvá voda a oheň živého draka.",
+      "next": "a2_grove_19",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_19",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "emma",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "Hlava podsvětí",
+      "text": "Ale kdo bránou projde, už se nevrátí. Mrtví se nevracejí. Jen živí odcházejí za nimi.",
+      "next": "a2_grove_20",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_20",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "sad"
+        }
+      ],
+      "speaker": "anna",
+      "text": "Takže Rubínka… by v Navi zůstala navždy.",
+      "next": "a2_grove_21",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_21",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Počkat. Oheň živého draka? Hlídejte svou ohnivou dračici…",
+      "next": "a2_grove_22",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_22",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "text": "Venku se ozval řev. Bezzubčin řev.",
+      "next": "a2_grove_23",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_23",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "text": "Jezdkyně vyběhly z háje. Běska a Buřinoha zmateně pobíhaly mezi stromy. Bezzubka byla pryč.",
+      "next": "a2_grove_24",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_24",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "text": "Vysoko na nebi se mihla šarlatová skvrna a zmizela v oblacích. Vítr k nim donesl tichý, krutý smích.",
+      "next": "a2_grove_25",
+      "music": "forest_ground"
+    },
+    {
+      "id": "a2_grove_25",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "effects": [],
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "sad"
+        }
+      ],
+      "speaker": "roza",
+      "text": "Bezzubko!",
+      "next": "act2a_end",
+      "music": "forest_ground"
+    },
+    {
+      "id": "act2a_end",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "characters": [],
+      "text": "Rubínka unesla Bezzubku a do slunovratu zbýval jediný den. (Pokračování se teprve píše.)",
       "music": "forest_ground"
     },
     {
@@ -579,11 +4352,11 @@
       "effects": [
         "wind"
       ],
-      "text": "Zatímco dračí jezdkyně jedly kaši, na město se přiřítila povodeň a zaplavila ho.",
+      "text": "Zatímco dračí jezdkyně jedly kaši, na hradiště se přiřítila povodeň a zaplavila ho.",
       "end": {
         "good": false,
-        "title": "Zaplavené město",
-        "text": "Jezdkyně se nešly podívat, co se v lese leskne. Obří bobří přehrada se protrhla a voda zaplavila město. Příště to zkus prozkoumat!"
+        "title": "Zaplavené hradiště",
+        "text": "Jezdkyně se nešly podívat, co se v lese leskne. Obří bobří přehrada se protrhla a voda zaplavila hradiště. Příště to zkus prozkoumat!"
       },
       "music": "village_day"
     }

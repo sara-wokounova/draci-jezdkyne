@@ -18,10 +18,6 @@ in Firefox. Since D31 the sheets are the smaller part (~1.7 MB), so on a slow li
 resumed battle (D26) buffers at its position first (a range request): in Chrome on a slow link ~3–4 s instead of ~1 s.
 Rest of the fix: preload the sheets (and start the battle music's download) from the scenes before `beaver_battle`.
 
-### P1 — Persuade branch crashes at `dam_with_beavers_persuade_04` (verified 2026-10-17)
-`next: "dam_with_beavers_persuade_05"` doesn't exist. Tapping throws
-"Unknown scene id" and the player is stuck (Back still works). Needs story text.
-
 ### P2 — Minigame art missing → 404s (verified 2026-10-17; partly fixed 2026-10-28, 2026-10-30 and 2026-10-31 in `57d6432`, verified live)
 DEFAULTS in `dragonAttack.js` pointed to `background.png`, `dragon_{roza,emma,anna}.png`,
 `flame_roza.png`, `flash_emma.png`, `arrow_anna.png` — none exist. Since D23 Róza, since D30
@@ -50,11 +46,6 @@ Re-measured with D33 (her bolt falls at 460 px/s: it hits 0.556 s after it leave
 screen): a single hit cut by 3.8–4.7 dB (2.3–2.6 ms above the knee), 6 fast shots 4.9–5.3 dB, 28–35 ms; over the battle
 music never past full scale at the default music volume. Trimming the tail of `emma_shot.mp3` would ease it.
 
-### P2 — The fight branch's victory has no way on (verified 2026-10-28)
-`beaver_battle_win` → `beaver_after_battle_win_01` … `_07` (being written by Sára), and
-`_07` → `_06` → `_07` loops forever (with autoread on it ping-pongs by itself). Until
-2026-10-28 it looped back to `forest_flight_01` instead. Needs story text, or an ending (D18).
-
 ### P3 — The minigame's skip menu can't be opened by keyboard (found in planning D33, 2026-11-01)
 During a round Enter and Space are attacks, so `inputController` cancels them even on a focused Přeskočit (and its
 menu's buttons); Esc is blocked during a minigame (D27). A keyboard-only player can't skip; the result dialog's
@@ -73,12 +64,6 @@ goes, `export` on dragonAttack.js's `DEFAULTS` and `worldScale` has no other use
 `index.html` has `lang="en"` and title "Visual Novel Starter"; the "← Back" button
 (the menu, Menu and Nová hra are Czech since D27); hint "Click, tap, Space, or Enter to continue"; save status shows
 internal scene ids ("Autosaved • river_dam"). Minigame HUD is already Czech.
-
-### P3 — Czech typos in `story.json`
-- `forest_flight_01`: "v lesa" → "v lese"; "nežraly" → "nežrala"
-- `dam_with_beavers_persuade`: "přeprat by je by nemuselo" (double "by")
-- `dam_with_beavers_persuade_01`: "Co by bychom mohly" → "Co bychom mohly"
-- `dam_with_beavers_persuade_04`: "byly z nám obří bobři" → "byli z nás obří bobři"; trailing space
 
 ### P3 — Heavy assets for mobile data
 Backgrounds ~3.3 MB, character poses ~2 MB, beaver sheets ~250 KB each since D31 (~1.5 MB before), Emma's three
@@ -207,12 +192,30 @@ the volume: there it can sound for up to ~400 ms. Check that it stays silent els
 
 ## Fixed
 
-### P2 — Keyboard players were stuck on the minigame's result (found in planning D33, 2026-11-01) — fixed 2026-11-01 in D33, not yet live
+### P1 — Persuade branch crashed at `dam_with_beavers_persuade_04` (verified 2026-10-17) — fixed 2026-11-15, not yet live
+`next: "dam_with_beavers_persuade_05"` didn't exist: tapping threw "Unknown scene id". Fix: Act 1's new scenes (story.md →
+Structure): `_05`, `_06`, then the shared deal `dam_deal_01` … `_06` and `act1_end`.
+
+### P2 — The fight branch's victory had no way on (verified 2026-10-28) — fixed 2026-11-15, not yet live
+`beaver_after_battle_win_07` looped to itself. Fix: it goes on to the shared deal (`dam_deal_01`). Both branches now
+go on to Act 2a, which ends on `act2a_end`, the temporary end of the written story (no `next`: a tap does nothing;
+not an ending).
+
+### P3 — Czech typos in `story.json` — fixed 2026-11-15, not yet live
+"v lesa", "nežraly" (`forest_flight_01`), "přeprat by je by" (`dam_with_beavers_persuade`), "Co by bychom"
+(`_01`), "byly z nám" (`_04`, fixed with the incantation, D34).
+
+### P3 — Anachronisms in story.json (D34, 2026-11-15) — fixed 2026-11-15, not yet live
+The story is set in the 10th century (D34). `flooded_town` and its end card said "město" (now "hradiště", the title
+"Zaplavené hradiště"); the beaver said the sorceress "mávla kouzelnou hůlkou" (a modern fairy-tale prop; now she "pronesla
+zaříkávání", in `dam_with_beavers_persuade_04` and `beaver_after_battle_win_03`, with the typo "byly z nám" → "byli z nás").
+
+### P2 — Keyboard players were stuck on the minigame's result (found in planning D33, 2026-11-01) — fixed 2026-11-01 in `d503408` (D33), verified live
 `inputController` cancelled Space and Enter during a minigame unless the focus was in the menu or the end card, so Enter
 on the focused Pokračovat did nothing, and Esc is blocked during a minigame (D27). Fix: `.mg-result` joins the list;
 its Pokračovat takes a key only after 500 ms without a tap or key (D33's guard). Check: `minigame-roza.mjs` 33j.
 
-### P3 — A double tap or a held Enter on the minigame's Pokračovat ran on into the story (found in planning D33, 2026-11-01) — fixed 2026-11-01 in D33, not yet live
+### P3 — A double tap or a held Enter on the minigame's Pokračovat ran on into the story (found in planning D33, 2026-11-01) — fixed 2026-11-01 in `d503408` (D33), verified live
 The second tap of a double tap on Pokračovat landed on the next scene and skipped its line (`beaver_battle_win` →
 `_01`), and with Enter working a held Enter's repeats ran through `beaver_battle_win` … `_07` in ~1.2 s (the menu's
 Pokračovat had the same path for a held Enter). Fix (D33): story input waits 500 ms after a minigame ends, and a key held
