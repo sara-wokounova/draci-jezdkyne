@@ -112,6 +112,48 @@ button {
   border-radius: 1rem;
 }
 
+/* The buttons' grid (D37): one DOM for the corner panel and the centred one; the panel's gap is the list's. */
+.choice-list {
+  display: grid;
+  gap: inherit;
+}
+
+.choice-heading {
+  display: none;
+}
+
+/* Centred choices (D37): more than two, or a hub's "choiceLayout": "center". Between the top controls and the
+   dialogue panel's top (--dialogue-top, measured by uiController: the panel grows with its text). */
+#game-root.choices-center #choice-panel {
+  top: calc(clamp(0.75rem, 2vw, 1.5rem) + 3.1rem); /* below #top-controls: its top plus its 2.6rem buttons and a gap */
+  bottom: var(--dialogue-top, 14rem);
+  left: 0;
+  right: 0;
+  width: min(640px, 90vw, calc(100vw - 2 * max(0.5rem, env(safe-area-inset-left), env(safe-area-inset-right))));
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#game-root.choices-center .choice-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  /* Plain center pushes an overflowing list's first buttons out of scroll reach; start where safe isn't known. */
+  align-content: start;
+  align-content: safe center;
+}
+
+#game-root.choices-center .choice-button {
+  font-size: clamp(1.15rem, 2.25vw, 1.8rem);
+}
+
+/* The choice guard (D37): dimmed while a tap would be ignored. */
+#choice-panel.waiting .choice-button,
+#end-home.waiting {
+  opacity: 0.45;
+}
+
 .choice-button {
   width: 100%;
   min-height: 3.1rem;
@@ -202,9 +244,14 @@ button {
 /* While a minigame is active the regular VN UI is hidden so the gameplay and
    the minigame HUD have the stage to themselves. */
 #game-root.minigame-active #dialogue-panel,
-#game-root.minigame-active #choice-panel,
-#game-root.minigame-active #top-controls {
+#game-root.minigame-active #choice-panel {
   display: none !important;
+}
+
+/* Hidden, not removed: the renderer measures the controls' bottom under the menu and during a minigame (D37). */
+#game-root.minigame-active #top-controls,
+#game-root.menu-open #top-controls {
+  visibility: hidden;
 }
 
 .minigame-hud {
@@ -345,8 +392,7 @@ button {
 
 #game-root.end-open #dialogue-panel,
 #game-root.menu-open #dialogue-panel,
-#game-root.menu-open #choice-panel,
-#game-root.menu-open #top-controls {
+#game-root.menu-open #choice-panel {
   display: none !important;
 }
 
@@ -535,7 +581,8 @@ button {
 /* ================================================== Phones (landscape) === */
 
 /* The one phone layout (D14). Keyed on height, so short desktop windows get it
-   too. Must stay below the rules above: same specificity, later wins. */
+   too. Must stay below the rules above: same specificity, later wins. The centred choices' rules here use
+   #game-root.choices-center #choice-panel, which outranks the plain #choice-panel ones wherever they sit (D37). */
 @media (orientation: landscape) and (max-height: 500px) {
   #dialogue-panel {
     left: max(0.5rem, env(safe-area-inset-left));
@@ -569,8 +616,8 @@ button {
     text-align: right;
   }
 
-  /* Choice scenes: dialogue on the left half, choices on the right half. */
-  #game-root:has(#choice-panel:not(.hidden)) #dialogue-panel {
+  /* Choice scenes: dialogue on the left half, choices on the right half (not the centred choices, D37). */
+  #game-root:not(.choices-center):has(#choice-panel:not(.hidden)) #dialogue-panel {
     right: calc(50% + 0.25rem);
   }
 
@@ -597,6 +644,40 @@ button {
   #top-controls {
     top: max(0.5rem, env(safe-area-inset-top));
     right: max(0.5rem, env(safe-area-inset-right));
+  }
+
+  /* Centred choices on a phone (D37): the whole height under the top controls, over the hidden dialogue strip,
+     the line repeated as the panel's heading; more than three choices in two columns. */
+  #game-root.choices-center #choice-panel {
+    top: calc(max(0.5rem, env(safe-area-inset-top)) + 3rem);
+    bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  #game-root.choices-center #dialogue-panel {
+    visibility: hidden;
+  }
+
+  #game-root.choices-center .choice-heading {
+    display: -webkit-box;
+    flex: none;
+    margin: 0 0 0.4rem;
+    overflow: hidden;
+    font-size: 1rem;
+    line-height: 1.35;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  #game-root.choices-center .choice-heading strong {
+    color: var(--gold);
+  }
+
+  #game-root.choices-center .choice-list.many {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #game-root.choices-center .choice-button {
+    font-size: 0.95rem;
   }
 
   .mg-topbar {

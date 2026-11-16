@@ -40,11 +40,19 @@ The production build is written to `dist/`.
 
 ## Story editing
 
-Edit:
+The story is split into files in `public/story/` (D37):
 
 ```text
-public/story/story.json
+public/story/story-v2.json        the main file: id, start, music, characters, movedScenes, and the list of parts
+public/story/act1.json            a part: { "scenes": [...] }
+public/story/act2a-den1.json      …one file per act or day
+public/story/lokace-<place>.json  a location (none yet): { "location": {...}, "scenes": [...] }
 ```
+
+A new part is a file there plus its name in the main file's `"parts"` list (commit both). `public/story/story.json` is
+the old one-line-per-scene story, frozen for cached old tabs: never edit it. `npm test` checks the story (dangling ids,
+malformed conditions, missing files, removed scenes; not a forgotten `next`: a scene with no way on is a dead end) and CI
+runs it before every deploy.
 
 A character with real sprites looks like this:
 
@@ -54,58 +62,53 @@ A character with real sprites looks like this:
     "displayName": "Róza",
     "sprites": {
       "neutral": "assets/characters/roza/roza_neutral.png",
-      "happy": "assets/characters/roza/roza_happy.png",
-      "excited": "assets/characters/roza/roza_excited.png",
-      "sad": "assets/characters/roza/roza_sad.png",
-      "nervous": "assets/characters/roza/roza_nervous.png",
-      "talking": "assets/characters/roza/roza_talking.png"
+      "happy": "assets/characters/roza/roza_happy.png"
     }
-  }
+  },
+  "jezevec": { "displayName": "Jezevec", "scale": 0.35, "raise": 0.35, "sprites": { "neutral": "…" } }
 }
 ```
 
-Store the files here:
+`scale` draws a creature that many rider heights tall, `raise` lifts its feet behind the riders (both optional;
+riders have neither). Store the files in `public/assets/characters/<id>/<id>_<pose>.png`. Do not start asset paths
+with `/`. Use `assets/...`, not `/assets/...`, so GitHub Pages project URLs work correctly.
 
-```text
-public/assets/characters/roza/roza_neutral.png
-public/assets/characters/roza/roza_happy.png
-public/assets/characters/roza/roza_excited.png
-public/assets/characters/roza/roza_sad.png
-public/assets/characters/roza/roza_nervous.png
-public/assets/characters/roza/roza_talking.png
-```
-
-Do not start asset paths with `/`. Use `assets/...`, not `/assets/...`, so GitHub Pages project URLs work correctly.
-
-A scene can contain:
+A scene is one background with its lines until a choice, another scene or a minigame:
 
 ```json
 {
   "id": "example_scene",
-  "background": { "type": "generated", "preset": "sunset_forest" },
-  "effects": ["sunsetGlow", "wind", "snow"],
-  "characters": [
-    { "id": "roza", "position": "center", "pose": "happy" }
+  "background": { "type": "image", "src": "assets/backgrounds/forest_path.png" },
+  "effects": ["wind"],
+  "music": "forest_ground",
+  "characters": [{ "id": "roza", "position": "left", "pose": "happy" }],
+  "set": ["byli_v_lese"],
+  "add": { "pul": 1 },
+  "lines": [
+    { "text": "Narration has no speaker." },
+    { "speaker": "roza", "text": "Kam teď?", "characters": [{ "id": "roza", "position": 0.3, "flip": true }] },
+    { "speaker": "emma", "text": "Jen když jsme pomohly jezevcům.", "if": "jezevci" }
   ],
-  "speaker": "roza",
-  "text": "Dialogue goes here.",
-  "next": "another_scene"
-}
-```
-
-A choice scene can use:
-
-```json
-{
-  "id": "choice_scene",
-  "speaker": "roza",
-  "text": "Which way do we go?",
   "choices": [
-    { "text": "Go left.", "next": "left_scene" },
-    { "text": "Go right.", "next": "right_scene" }
-  ]
+    { "text": "Do lesa.", "next": "forest", "if": "pul<2" },
+    { "text": "Do hor.", "location": "hory" }
+  ],
+  "next": [{ "if": "pul>=6", "next": "evening" }, { "next": "hub" }]
 }
 ```
+
+- `characters` on a line is the whole stage from that line on. Positions: `left`, `center`, `right` or a number
+  0.2–0.8 (a share of the width; the lint refuses others); `flip` mirrors.
+- The memory: `set` (names to at least 1) and `add` (counters) on a scene (when entered) or a choice (when picked); `if` on
+  a line, a choice or a `next` entry: `"name"`, `"!name"`, `"name>=2"`, `"name<2"`, or a list that must all hold.
+- After the last line: the visible choices, else `next` (a string or the first list entry that holds), else `end`.
+- `"lines": []` with a `next`: a pass-through (applies its changes and goes on).
+- `"choiceLayout": "center"`: the choices in a big panel in the middle (automatic with 3 or more).
+- A choice with `"location"` flies to a location: the engine plays one of its available events (`"first": true`
+  ones first, the rest at random) and marks it played by its name; the choice disappears once nothing is left.
+  A lost event is offered again by a choice with `"giveUp": true` on its lose scene.
+- Renaming or removing a scene needs a `movedScenes` entry (`"old_id": { "scene": "new_id", "line": 0 }`); inserting
+  lines into a scene shifts saved games (appending is safe). `npm test` says when one is missing.
 
 ## Optional image backgrounds
 
@@ -155,7 +158,8 @@ Add a minigame to the flow by giving a scene a `minigame` field instead of
   omit uses the default).
 
 The minigame scene itself is kept out of the back-history, so pressing **Back**
-on an outcome scene returns to whatever came before the minigame.
+on an outcome scene returns to whatever came before the minigame (after a lost retry, to before the lose scene's first
+visit: its lines aren't shown twice).
 
 Minigames live in `src/engine/minigames/`. To add a new one, implement a class
 with `start()` and `destroy()` methods and register it in `minigameManager.js`:
@@ -281,7 +285,7 @@ game's saved music and effects volumes and never saves anything. Dev: `http://lo
 
 - Click/tap, Space, or Enter: advance
 - Number keys: choose a decision option
-- Back button, Backspace, or Left Arrow: go one scene back
+- Back button, Backspace, or Left Arrow: go one line back (the memory as it was there)
 - Menu button or Esc: the main menu over the game (Esc again, or Pokračovat, goes back)
 - Nová hra in the menu: start again from the first scene (asks first when there is progress to lose)
 - Nastavení in the menu: music volume, effects volume (letting go of the slider plays a test sound), autoread, the
@@ -289,7 +293,8 @@ game's saved music and effects volumes and never saves anything. Dev: `http://lo
 - Minigame result: Enter or Space presses Pokračovat once nothing was pressed for 500 ms; the story then waits another
   500 ms (a double tap or a held key doesn't skip a line)
 
-Back history is stored in autosave, so refreshing the browser should preserve the current scene and the previous-scene stack.
+The position (scene, line, memory) and the back history are stored in autosave (`vn:<story id>:autosave2`), so a reload
+continues on the same line.
 
 ## Deploy to GitHub Pages
 
@@ -307,4 +312,4 @@ The Vite config uses `base: './'`, so the build should work both for a user page
 - `src/engine/effects/`: snow, wind, sunbeams, particles
 - `src/engine/visualRenderer.js`: real backgrounds, character sprites, transitions
 - `src/engine/audioManager.js`: music, voice lines (sound effects: `src/engine/sfx.js`)
-- `src/engine/startVisualNovel.js`: branching, minigame routing, flags, inventory
+- `src/engine/startVisualNovel.js`: branching, minigame routing, inventory

@@ -884,3 +884,84 @@ Consequences: ~24 MB more music to stream (each track only on its scenes, D21). 
 changes the track (a 350 ms fade, D21); a Back across such a change starts the other track over (only `battle` resumes,
 D26). The tracks are AI-generated like the older ones; the deployed files lose their provenance metadata, as before.
 The older tracks (`village_day`, `dragon_flight`, `forest_ground`, `battle`) are not in the folk style.
+
+## D37 — Scenes with lines, choice memory, sprite sizes, the story in parts, centred choices, locations (2026-11-16) — Accepted
+Supersedes: D3 (one story file; a typo now warns at load), D14's choice split on phones (not for centred choices),
+D18's "the next tap opens the end card" for an ending with no line (it opens 500 ms after the move), D6's save (a new key and format), D8's "3 scenes ahead" (3
+taps ahead), D18's "an ending counts as soon as its scene is shown" and its gallery source (`readSceneIds`), D19's
+autoread per scene (per line), D27's `hasProgress` (from the real follow-up).
+Decision:
+- A scene is one background with its lines until a choice, another scene or a minigame (`lines`: speaker, text, an
+  optional stage and `if`); minigames stay scenes of their own; a new scene also starts where two branches meet and
+  where the music changes. Back goes one line back. The old one-line form still reads (one line).
+- Choice memory: names → whole numbers (`set` = flags, `add` = counters), changed by choices and by scenes when entered
+  by a move (once per entry; the start scene's at every fresh start), read by `if` on lines, choices and `next` list
+  entries (`name`, `!name`, `name>=N`, `name<N`, or a list that must all hold). One order after a scene's last visible
+  line: visible choices, `next`, `end`. A move is resolved purely first (`resolveEntry`: pass-throughs followed, at
+  most 20); a dead end changes nothing; only the landing is saved, drawn and played. Back restores the memory. After a minigame, a landing on the scene the newest history entries are from (with the same
+  memory: a lost retry) takes that earlier visit back, so Back never shows the lose scene's lines twice (a retry whose
+  choice or lose scene changes the memory keeps both visits: Back restores each memory).
+- The save: `vn:<id>:autosave2` (position: scene, line, memory; history entries with their memory, at most 500;
+  `endings`); the old key is migrated once (the memory replayed from scenes' own changes, old ids through
+  `movedScenes`) and never written, so old cached code and new code never touch each other's data. Act 1's two
+  memories sit on scenes for the replay: `bobri_pratele` on `dam_with_beavers_persuade`, `bobri_porazeni` on
+  `beaver_battle_win` (names by Sára). A save that can't be placed falls back to its newest placeable history entry.
+- An ending counts when its last line is shown with the end card next (the gallery lists `endings`, in story order).
+  An end card with no line before it opens 500 ms after the move. `hasProgress` is false on the fresh position with
+  no history, and on a recorded ending's last line.
+- Sprites: a character's `scale` (a height in rider heights, R = min(0.72·H, 0.42·W); characters without it keep the
+  old fit exactly) and `raise` (feet above the riders' in rider heights); positions by name or as a share of the width;
+  `flip`; entry order is draw order; a scaled or raised sprite's top stays below the top controls (never under 10 % of
+  the height); `#top-controls` is `visibility: hidden` under the menu and during a minigame (so it can be measured).
+  Act 2a's creatures got Sára's sizes as a start; `liskova_rodina` is a character of its own (one scale per character).
+- The story is split into a main file (`story-v2.json`: everything shared, `movedScenes`, `parts`) and parts beside it
+  (Act 1, each day of Act 2a), merged at load, fetched with `cache: 'no-cache'` so a deploy can't pair a new main file
+  with an old part; a part that fails stops the load. `story.json` is frozen for cached old tabs.
+- Choices are centred in a big panel when more than two are visible or the scene says `choiceLayout: "center"` (Sára:
+  "it should take center stage"); its bottom follows the dialogue panel (`--dialogue-top`, measured); on phones it
+  takes the whole height over the dialogue strip and repeats the line as its heading.
+- Every choice panel waits 500 ms without any input (one long-lived `choiceGuard`, D27's rule, judged by the press as
+  `guardTaps` does); "Zpět na začátek" is behind `guardTaps` with keys (armed per open). The tap that shows a line can
+  no longer press what appears under the finger (the story still advances on `pointerup`: a click-based advance was
+  dropped, Android's long press gives no click). A finger already down when the choices, the end card or the minigame's result appear (autoread, a
+  no-line ending's card, a round ending) never counts, however long it is held (one set of the pointers down, shared by
+  `choiceGuard` and `guardTaps`).
+- Locations (Sára: one file per location, the engine picks among the available events, some first, no event twice): a
+  part may hold a `location` with its `events` (`scene`, `if`, `first`, `name`); a choice with `"location"` plays the
+  first available `first` event, else one of the available others at random, and marks it played by its name (its
+  `name`, else its scene id; permanent once committed: a removed event stays listed as `{ "name", "retired": true }`); the choice shows only while its pick would find an event
+  (judged with the choice's own changes); a lost event comes back through a give-up choice (`"giveUp": true`: the engine un-plays the event whose scenes hold
+  the choice).
+Why: asked for by Sára ("paměť voleb je určitě potřeba", "Scéna by měla být tam, kde je jedno pozadí…", the sizes and
+positions of the creatures, "split story.json… act 1, each day in act 2a separate file", "the multiple choice dialog
+should… take center stage", the locations and events of 2026-11-16), with her answers: all in one change, Back
+restores the memory, a lost quest is offered again, a skipped minigame wins its helper, the part names, the creatures'
+sizes as a start. Planned through 39 disprover rounds, plus 7 for locations and the tests in the repo.
+Consequences: every line tap rewrites the save (up to 500 history entries with memory, ~100–200 KB late in the game);
+`readSceneIds` is per scene and records landings only; preload reads conditions with the current memory (a warm-up);
+progress made in old code after the migration stays in the old key; a `set`/`add` added later doesn't reach saves
+already past it; inserting lines into a scene shifts saved positions (the editing rule in CLAUDE.md); Back undoes the
+memory, so a player can undo time spent or re-roll a location's event; a duplicate scene id keeps the first; a
+corrupt top-level `memory` takes the last history entry's; a corrupt `autosave2` (not an object) brings
+the old key's save back through the migration (the old key is never deleted: better than a fresh start); every choice panel is dimmed for its first 0.5 s; under
+720 px wide desktop windows a 2-choice line covers a small creature (accepted by Sára); after the Act 2a rewrite
+players saved inside old Act 2a restart from `act1_end`; a lost `first` event given up keeps its location's other
+events waiting until it is won. The Act 2a story itself is not rewritten yet (story work, with Sára).
+
+## D38 — The node checks live in the repo and run before every deploy (2026-11-16) — Accepted
+Decision: `tests/storyflow.test.mjs`, `tests/autosave.test.mjs`, `tests/story.test.mjs` and `tests/story-history.test.mjs`
+(node and git only; the last runs `story.test.mjs` on synthetic git repos in the system temp folder, never inside the
+project: an early version kept them in `tests/.tmp`, and when two runs collided a git command fell through to the
+project's own repository and committed there) are in the repo; `npm test` runs them; the deploy workflow runs `npm test` before `npm run build` (with the full history,
+`fetch-depth: 0`), so a failing check leaves the live site on its previous build. `tests/story.test.mjs` checks the
+story files as they are: no lint warning, every referenced file in git, no scene id of a committed version (or of the
+frozen `story.json`) gone without a `movedScenes` entry, every committed event name still listed (active or retired),
+`movedScenes` into an event only from its own old scenes, the frozen `story.json` unchanged, one texture size per character; committed versions that don't load are skipped with a note.
+Why: Sára ("some set of test should be in the repository itself, and that should be run before deploy"). Her own
+story edits (a dangling id, a malformed condition, a missing file, a removed scene) now stop the deploy instead of
+breaking the live game.
+Consequences: a push with a story mistake doesn't deploy (check the Actions tab). Only `main` deploys (a manual run
+from another branch builds nothing); the build job keeps no token on disk (`persist-credentials: false`) and only the
+deploy job has the Pages permissions. A shallow clone, or a newest committed version today's engine can't load, fails
+the test instead of letting the history checks compare nothing. The Playwright suite (Chrome, a dev
+server, the live URL for D11) and the ffmpeg checks stay in `C:\tmp\claude`; moving them is a separate step.

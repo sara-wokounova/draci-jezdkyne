@@ -1,0 +1,555 @@
+{
+  "scenes": [
+    {
+      "id": "forest_flight_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "music": "dragon_flight",
+      "characters": [],
+      "lines": [
+        {
+          "text": "Bylo, nebylo. Byly tři dračí jezdkyně - Róza, Emma a Anna. Byly to kamarádky a každý den dohlížely na svoji část lesa, aby se zvířátka žijící v lese moc nežrala navzájem."
+        },
+        {
+          "speaker": "emma",
+          "text": "Běsko, ne tak rychle! Anna s Buřinohou za námi nestačí.",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "center",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Že nestačíme? Buřinoho, ukažme jim to! Kdo bude první u řeky, vyhrává!",
+          "characters": [
+            {
+              "id": "anna",
+              "position": "center",
+              "pose": "excited"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "Bezzubka vás obě předběhne! Podél řeky to máme domů na hradiště kousek, stihneme to i na oběd.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "center",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "Holky, támhle se něco leskne! Co to je?",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "center",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "emma",
+          "text": "Poleťme se podívat blíž, ať to můžeme prozkoumat.",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "center",
+              "pose": "talking"
+            }
+          ]
+        }
+      ],
+      "choices": [
+        {
+          "text": "Prozkoumat.",
+          "next": "river_dam"
+        },
+        {
+          "text": "Vrátit se domů na oběd.",
+          "next": "village_home"
+        }
+      ]
+    },
+    {
+      "id": "river_dam",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_01.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "roza",
+          "position": "center",
+          "pose": "talking"
+        }
+      ],
+      "lines": [
+        {
+          "speaker": "roza",
+          "text": "Co to je? Na bobří přehradu je to obří. To je fakt divné."
+        }
+      ],
+      "next": "dam_with_beavers"
+    },
+    {
+      "id": "dam_with_beavers",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "lines": [
+        {
+          "speaker": "anna",
+          "text": "Obří bobři! A staví velkou přehradu, aby zadrželi vodu. To je nebezpečné pro ostatní zvířata v lese."
+        },
+        {
+          "speaker": "roza",
+          "text": "Bobři! Co to děláte? Takhle blokujete vodu všem zvířatům dolů po řece! A můžete způsobit velkou povodeň.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "Velký bobr",
+          "text": "Jsme velcí bobři, tak potřebujeme velkou přehradu, abychom měli domov. Nechceme nikomu škodit, ale potřebujeme se postarat o sebe."
+        },
+        {
+          "speaker": "emma",
+          "text": "Holky, nemůžeme to tak nechat. Kdyby se přehrada protrhla, mohlo by to způsobit velkou povodeň a zničit domovy mnoha zvířat. Musíme něco udělat.",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        }
+      ],
+      "choices": [
+        {
+          "text": "Zkusit přesvědčit bobry, aby přehradu zmenšili.",
+          "next": "dam_with_beavers_persuade"
+        },
+        {
+          "text": "Poprat se s bobry, aby nás brali vážně.",
+          "next": "dam_with_beavers_fight"
+        }
+      ]
+    },
+    {
+      "id": "dam_with_beavers_persuade",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "roza",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "set": [
+        "bobri_pratele"
+      ],
+      "lines": [
+        {
+          "speaker": "roza",
+          "text": "Jsou moc velcí, přeprat je by nemuselo dopadnout dobře. Mohly bychom přitom poškodit přehradu a způsobit povodeň."
+        },
+        {
+          "speaker": "emma",
+          "text": "Co bychom mohly udělat, abyste zmenšili přehradu?",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "Velký bobr",
+          "text": "Velcí bobři nemůžou žít v malé přehradě. Museli bychom se zase stát malými bobry."
+        },
+        {
+          "speaker": "anna",
+          "text": "A proč jste vlastně tak velcí? Co se stalo? Nemohli byste se vrátit do normální velikosti?",
+          "characters": [
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "Velký bobr",
+          "text": "Přišla sem čarodějnice, pronesla zaříkávání a byli z nás obří bobři."
+        },
+        {
+          "speaker": "roza",
+          "text": "Ale proč by to dělala? Co jste jí udělali?",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "Velký bobr",
+          "text": "Nic jsme jí neudělali a nevíme, proč to udělala. Měla zrzavé vlasy, bledou pleť plnou pih a šarlatové šaty, jaké nosí jen velmožky. Byla vysoká a silná jako bojovnice, takovou nepřehlédnete.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        }
+      ],
+      "next": "dam_deal_01"
+    },
+    {
+      "id": "dam_with_beavers_fight",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "talking"
+        }
+      ],
+      "lines": [
+        {
+          "speaker": "anna",
+          "text": "Nevypadá to, že by nám naslouchali. Dejme jim do nosu a snad nás začnou brát vážně!"
+        }
+      ],
+      "next": "beaver_battle"
+    },
+    {
+      "id": "beaver_battle",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "minigame": {
+        "type": "dragonAttack",
+        "title": "Dračí nálet na bobry",
+        "allowSkip": true,
+        "onVictory": "beaver_battle_win",
+        "onFailure": "beaver_battle_lose",
+        "config": {}
+      },
+      "music": "battle"
+    },
+    {
+      "id": "beaver_battle_win",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "roza",
+          "position": "center",
+          "pose": "happy"
+        }
+      ],
+      "set": [
+        "bobri_porazeni"
+      ],
+      "lines": [
+        {
+          "speaker": "roza",
+          "text": "Zvládly jsme to! Teď nás bobři určitě budou brát vážně a domluvíme se na menší přehradě."
+        },
+        {
+          "speaker": "Velký bobr",
+          "text": "Jde z vás stejně velký strach jako z té čarodějnice. Zmenšíme naši přehradu, ale musíte nám pomoct se zmenšit. Jinak se do ní nevejdeme.",
+          "characters": [
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "A proč jste vlastně tak velcí? Co se stalo? Nemohli byste se vrátit do normální velikosti?"
+        },
+        {
+          "speaker": "Velký bobr",
+          "text": "Přišla sem čarodějnice, pronesla zaříkávání a byli z nás obří bobři."
+        },
+        {
+          "speaker": "roza",
+          "text": "A proč to udělala? Jaký pro to mohla mít důvod?",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "Velký bobr",
+          "text": "Co já vím. Ale když ji najdete, tak by nás mohla zase zmenšit."
+        },
+        {
+          "speaker": "anna",
+          "text": "A jak ji poznáme? Kam šla?",
+          "characters": [
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "Velký bobr",
+          "text": "Měla zrzavé vlasy, bledou pleť a spoustu pih. Byla vysoká a silná jako bojovnice, ale nosila šarlatové šaty, jaké mají jen velmožky."
+        }
+      ],
+      "next": "dam_deal_01"
+    },
+    {
+      "id": "dam_deal_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "anna",
+          "position": "right",
+          "pose": "nervous"
+        }
+      ],
+      "lines": [
+        {
+          "speaker": "Velký bobr",
+          "text": "Kam šla, nevíme. Ale když zaříkávala, pořád opakovala něco o velké vodě a o nejkratší noci."
+        },
+        {
+          "speaker": "emma",
+          "text": "Nejkratší noc je o slunovratu, a to je za tři dny! Kdyby se přehrada protrhla, voda by se přivalila rovnou na naše hradiště.",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "Tak se dohodneme. Vy přehradu do slunovratu udržíte a my tu čarodějnici najdeme a přinutíme ji, aby vás zase zmenšila.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "Velký bobr",
+          "text": "Platí. Do slunovratu přehrada vydrží. Ale pospěšte si, voda pořád stoupá.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Jenže kde ji máme hledat? Les je velký a hory ještě větší.",
+          "characters": [
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "emma",
+          "text": "Poptáme se v lese. Takovou čarodějnici si přece musel někdo všimnout.",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        }
+      ],
+      "next": "act1_end"
+    },
+    {
+      "id": "act1_end",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "music": "dragon_flight",
+      "characters": [],
+      "lines": [
+        {
+          "text": "A tak se tři jezdkyně se svými draky vydaly do lesa hledat zrzavou čarodějnici. Do slunovratu zbývaly tři dny."
+        }
+      ],
+      "next": "a2_fox_01"
+    },
+    {
+      "id": "beaver_battle_lose",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/dam_02.png"
+      },
+      "effects": [],
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "anna",
+          "position": "center",
+          "pose": "sad"
+        }
+      ],
+      "lines": [
+        {
+          "speaker": "anna",
+          "text": "To se nepovedlo, bobři jsou prostě moc velcí. Musíme to zkusit znovu, nebo vymyslet jiný plán."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Zkusit nálet znovu.",
+          "next": "beaver_battle"
+        },
+        {
+          "text": "Raději bobry přesvědčit.",
+          "next": "dam_with_beavers_persuade"
+        }
+      ]
+    },
+    {
+      "id": "village_home",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/town_01.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "music": "village_day",
+      "characters": [
+        {
+          "id": "roza",
+          "position": "center",
+          "pose": "excited"
+        }
+      ],
+      "lines": [
+        {
+          "speaker": "roza",
+          "text": "Cítím kaši. Rychle, než nám ji ostatní sní!"
+        }
+      ],
+      "next": "lunch_in_town"
+    },
+    {
+      "id": "lunch_in_town",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/lunch_in_town.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "music": "village_day",
+      "characters": [],
+      "lines": [
+        {
+          "text": "Holky se s chutí vrhly na kaši, po dlouhém letu jim fakt vyhládlo."
+        }
+      ],
+      "next": "flooded_town"
+    },
+    {
+      "id": "flooded_town",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/town_flooded.png"
+      },
+      "effects": [
+        "wind"
+      ],
+      "music": "village_day",
+      "characters": [],
+      "lines": [
+        {
+          "text": "Zatímco dračí jezdkyně jedly kaši, na hradiště se přiřítila povodeň a zaplavila ho."
+        }
+      ],
+      "end": {
+        "good": false,
+        "title": "Zaplavené hradiště",
+        "text": "Jezdkyně se nešly podívat, co se v lese leskne. Obří bobří přehrada se protrhla a voda zaplavila hradiště. Příště to zkus prozkoumat!"
+      }
+    }
+  ]
+}

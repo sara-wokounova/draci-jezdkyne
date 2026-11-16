@@ -47,7 +47,7 @@ const stage = await createPixiStage(document.querySelector('#pixi-host'));
 const visuals = new VisualRenderer(stage, { characters: {} });
 const minigames = new MinigameManager(stage, { root });
 // The game's own saved volumes, read only (same origin, the story id): this page never saves.
-const volumes = new AutoSave('draci-jezdkyne-z-vlpu').settings;
+const volumes = AutoSave.readSettings('draci-jezdkyne-z-vlpu'); // read only: both save keys stay as they are
 const audio = new AudioManager({ battle: 'assets/music/battle.mp3' }, volumes.musicVolume);
 setEffectsVolume(volumes.effectsVolume);
 audio.playMusic('battle'); // starts with the page's first input (D22) and loops for the whole visit

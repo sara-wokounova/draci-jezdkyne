@@ -1,9 +1,9 @@
 /**
- * Asset paths from story.json are relative ("assets/…", D4). Resolves them against the
+ * Asset paths from the story files are relative ("assets/…", D4). Resolves them against the
  * build's base URL; absolute http(s) URLs pass through.
  */
 export function resolveAssetPath(value) {
-  // A non-string from story.json (a number, an object) must not crash a scene or the gallery: it
+  // A non-string from the story (a number, an object) must not crash a scene or the gallery: it
   // becomes '' and simply fails to load.
   // Tabs and newlines go too: browsers drop them inside URLs, which would undo the slash strip below.
   const path = (typeof value === 'string' ? value : '').replace(/[\t\n\r]/g, '');

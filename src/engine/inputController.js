@@ -12,8 +12,9 @@ export function fullscreenOnTap() {
 }
 
 export class InputController {
-  constructor({ root, onAdvance, onChoiceNumber, onBack, onEscape }) {
+  constructor({ root, onAdvance, onChoiceNumber, onBack, onEscape, choiceGuard = null }) {
     this.root = root;
+    this.choiceGuard = choiceGuard; // the choice panel's guard (D37): every key press counts as input
     this.onAdvance = onAdvance;
     this.onChoiceNumber = onChoiceNumber;
     this.onBack = onBack;
@@ -30,6 +31,7 @@ export class InputController {
     fullscreenOnTap();
 
     window.addEventListener('keydown', (event) => {
+      const choiceReady = this.choiceGuard?.noteKey() ?? true;
       // Esc opens and closes the menu, also over the end card. Held down, it would toggle on every repeat.
       if (event.key === 'Escape') {
         if (!event.repeat) this.onEscape();
@@ -49,6 +51,13 @@ export class InputController {
         return;
       }
 
+      // Back works on the end card too (it focuses "Zpět na začátek"; a no-line ending opens it by itself, D37).
+      if ((event.key === 'Backspace' || event.key === 'ArrowLeft') && event.target.closest?.('#end-card')) {
+        event.preventDefault();
+        this.onBack();
+        return;
+      }
+
       // Let Space/Enter press the focused menu, end-card, minigame-result or top-bar button.
       if (event.target.closest?.('#main-menu, #end-card, .mg-result')) return;
       const onTopButton = Boolean(event.target.closest?.('#top-controls button'));
@@ -63,7 +72,8 @@ export class InputController {
         this.onBack();
       }
 
-      if (/^[1-9]$/.test(event.key)) {
+      // A number picks only when the choices had been quiet for TAP_GUARD_MS before it, and never by a repeat (D37).
+      if (/^[1-9]$/.test(event.key) && choiceReady && !event.repeat) {
         this.onChoiceNumber(Number(event.key) - 1);
       }
     });

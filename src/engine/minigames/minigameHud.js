@@ -74,7 +74,7 @@ export class MinigameHud {
 
       <p class="mg-instructions"></p>
     `;
-    // Title, labels and instructions come from story.json: text, never markup.
+    // Title, labels and instructions come from the story files: text, never markup.
     const texts = {
       '.mg-title': storyText(options.title),
       '.mg-score': `${labels.score}: 0`,

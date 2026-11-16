@@ -1,0 +1,775 @@
+{
+  "id": "draci-jezdkyne-z-vlpu",
+  "start": "forest_flight_01",
+  "menuMusic": "village_day",
+  "resumeMusic": [
+    "battle"
+  ],
+  "assets": {
+    "music": {
+      "village_day": "assets/music/village_day.mp3",
+      "dragon_flight": "assets/music/dragon_flight_above_the_green_sea.mp3",
+      "forest_ground": "assets/music/forest_ground_whispering_trees.mp3",
+      "battle": "assets/music/battle.mp3",
+      "vedma_hut": "assets/music/vedma_hut.mp3",
+      "night_forest": "assets/music/night_forest.mp3",
+      "vily_magic": "assets/music/vily_magic.mp3",
+      "playful": "assets/music/playful.mp3",
+      "tesak_lair": "assets/music/tesak_lair.mp3",
+      "sacred_grove": "assets/music/sacred_grove.mp3",
+      "danger": "assets/music/danger.mp3"
+    }
+  },
+  "characters": {
+    "emma": {
+      "displayName": "Emma",
+      "color": "#b88765",
+      "hair": "#6a432f",
+      "sprites": {
+        "neutral": "assets/characters/emma/emma_neutral.png",
+        "happy": "assets/characters/emma/emma_happy.png",
+        "excited": "assets/characters/emma/emma_excited.png",
+        "sad": "assets/characters/emma/emma_sad.png",
+        "nervous": "assets/characters/emma/emma_nervous.png",
+        "talking": "assets/characters/emma/emma_talking.png"
+      }
+    },
+    "anna": {
+      "displayName": "Anna",
+      "color": "#9f7258",
+      "hair": "#402f28",
+      "sprites": {
+        "neutral": "assets/characters/anna/anna_neutral.png",
+        "happy": "assets/characters/anna/anna_happy.png",
+        "excited": "assets/characters/anna/anna_excited.png",
+        "sad": "assets/characters/anna/anna_sad.png",
+        "nervous": "assets/characters/anna/anna_nervous.png",
+        "talking": "assets/characters/anna/anna_talking.png"
+      }
+    },
+    "roza": {
+      "displayName": "Róza",
+      "color": "#d6462f",
+      "hair": "#eac470",
+      "sprites": {
+        "neutral": "assets/characters/roza/roza_neutral.png",
+        "happy": "assets/characters/roza/roza_happy.png",
+        "excited": "assets/characters/roza/roza_excited.png",
+        "sad": "assets/characters/roza/roza_sad.png",
+        "nervous": "assets/characters/roza/roza_nervous.png",
+        "talking": "assets/characters/roza/roza_talking.png"
+      }
+    },
+    "sona": {
+      "displayName": "Soňa",
+      "color": "#5f8f4e",
+      "hair": "#8a5a2b",
+      "sprites": {
+        "neutral": "assets/characters/sona/sona_neutral.png",
+        "happy": "assets/characters/sona/sona_happy.png",
+        "sad": "assets/characters/sona/sona_sad.png",
+        "nervous": "assets/characters/sona/sona_nervous.png"
+      }
+    },
+    "vedma": {
+      "displayName": "Vědma",
+      "color": "#6b5b7a",
+      "hair": "#cfcfcf",
+      "sprites": {
+        "neutral": "assets/characters/vedma/vedma_neutral.png",
+        "sad": "assets/characters/vedma/vedma_sad.png",
+        "happy": "assets/characters/vedma/vedma_happy.png"
+      }
+    },
+    "jezevec": {
+      "displayName": "Jezevec",
+      "color": "#7a7a7a",
+      "hair": "#2b2b2b",
+      "scale": 0.35,
+      "raise": 0.35,
+      "sprites": {
+        "neutral": "assets/characters/jezevec/jezevec_neutral.png",
+        "happy": "assets/characters/jezevec/jezevec_happy.png"
+      }
+    },
+    "liska": {
+      "displayName": "Liška",
+      "color": "#d9772b",
+      "hair": "#b85a1a",
+      "scale": 0.3,
+      "raise": 0.35,
+      "sprites": {
+        "neutral": "assets/characters/liska/liska_neutral.png"
+      }
+    },
+    "liskova_rodina": {
+      "displayName": "Liška",
+      "scale": 0.55,
+      "raise": 0.35,
+      "sprites": {
+        "neutral": "assets/characters/liskova_rodina/liskova_rodina_neutral.png"
+      }
+    },
+    "srnce": {
+      "displayName": "Srnče",
+      "color": "#a8774a",
+      "hair": "#7a5230",
+      "scale": 0.45,
+      "raise": 0.35,
+      "sprites": {
+        "neutral": "assets/characters/srnce/srnce_neutral.png"
+      }
+    },
+    "srna": {
+      "displayName": "Srna",
+      "color": "#a8774a",
+      "hair": "#7a5230",
+      "scale": 0.65,
+      "raise": 0.2,
+      "sprites": {
+        "happy": "assets/characters/srna/srna_happy.png"
+      }
+    },
+    "zubr": {
+      "displayName": "Zubr",
+      "color": "#5a3d24",
+      "hair": "#3a2614",
+      "scale": 1.1,
+      "raise": 0,
+      "sprites": {
+        "neutral": "assets/characters/zubr/zubr_neutral.png",
+        "happy": "assets/characters/zubr/zubr_happy.png"
+      }
+    },
+    "vila": {
+      "displayName": "Víla",
+      "color": "#f2efe6",
+      "hair": "#e8d9a0",
+      "scale": 1,
+      "raise": 0,
+      "sprites": {
+        "neutral": "assets/characters/vila/vila_neutral.png",
+        "happy": "assets/characters/vila/vila_happy.png"
+      }
+    },
+    "hejkal": {
+      "displayName": "Hejkal",
+      "color": "#5d6b3a",
+      "hair": "#3f4a22",
+      "scale": 0.9,
+      "raise": 0,
+      "sprites": {
+        "neutral": "assets/characters/hejkal/hejkal_neutral.png",
+        "happy": "assets/characters/hejkal/hejkal_happy.png"
+      }
+    }
+  },
+  "movedScenes": {
+    "forest_flight_01a": {
+      "scene": "forest_flight_01",
+      "line": 1
+    },
+    "forest_flight_01b": {
+      "scene": "forest_flight_01",
+      "line": 2
+    },
+    "forest_flight_01c": {
+      "scene": "forest_flight_01",
+      "line": 3
+    },
+    "forest_flight_02": {
+      "scene": "forest_flight_01",
+      "line": 4
+    },
+    "first_choice": {
+      "scene": "forest_flight_01",
+      "line": 5
+    },
+    "dam_with_beavers_roza": {
+      "scene": "dam_with_beavers",
+      "line": 1
+    },
+    "dam_with_beavers_beaver": {
+      "scene": "dam_with_beavers",
+      "line": 2
+    },
+    "dam_with_beavers_choice": {
+      "scene": "dam_with_beavers",
+      "line": 3
+    },
+    "dam_with_beavers_persuade_01": {
+      "scene": "dam_with_beavers_persuade",
+      "line": 1
+    },
+    "dam_with_beavers_persuade_02": {
+      "scene": "dam_with_beavers_persuade",
+      "line": 2
+    },
+    "dam_with_beavers_persuade_03": {
+      "scene": "dam_with_beavers_persuade",
+      "line": 3
+    },
+    "dam_with_beavers_persuade_04": {
+      "scene": "dam_with_beavers_persuade",
+      "line": 4
+    },
+    "dam_with_beavers_persuade_05": {
+      "scene": "dam_with_beavers_persuade",
+      "line": 5
+    },
+    "dam_with_beavers_persuade_06": {
+      "scene": "dam_with_beavers_persuade",
+      "line": 6
+    },
+    "beaver_after_battle_win_01": {
+      "scene": "beaver_battle_win",
+      "line": 1
+    },
+    "beaver_after_battle_win_02": {
+      "scene": "beaver_battle_win",
+      "line": 2
+    },
+    "beaver_after_battle_win_03": {
+      "scene": "beaver_battle_win",
+      "line": 3
+    },
+    "beaver_after_battle_win_04": {
+      "scene": "beaver_battle_win",
+      "line": 4
+    },
+    "beaver_after_battle_win_05": {
+      "scene": "beaver_battle_win",
+      "line": 5
+    },
+    "beaver_after_battle_win_06": {
+      "scene": "beaver_battle_win",
+      "line": 6
+    },
+    "beaver_after_battle_win_07": {
+      "scene": "beaver_battle_win",
+      "line": 7
+    },
+    "dam_deal_02": {
+      "scene": "dam_deal_01",
+      "line": 1
+    },
+    "dam_deal_03": {
+      "scene": "dam_deal_01",
+      "line": 2
+    },
+    "dam_deal_04": {
+      "scene": "dam_deal_01",
+      "line": 3
+    },
+    "dam_deal_05": {
+      "scene": "dam_deal_01",
+      "line": 4
+    },
+    "dam_deal_06": {
+      "scene": "dam_deal_01",
+      "line": 5
+    },
+    "a2_fox_02": {
+      "scene": "a2_fox_01",
+      "line": 1
+    },
+    "a2_fox_03": {
+      "scene": "a2_fox_01",
+      "line": 2
+    },
+    "a2_fox_04": {
+      "scene": "a2_fox_01",
+      "line": 3
+    },
+    "a2_fox_05": {
+      "scene": "a2_fox_01",
+      "line": 4
+    },
+    "a2_fox_06": {
+      "scene": "a2_fox_01",
+      "line": 5
+    },
+    "a2_fox_07": {
+      "scene": "a2_fox_01",
+      "line": 6
+    },
+    "a2_fox_08": {
+      "scene": "a2_fox_01",
+      "line": 7
+    },
+    "a2_badger_02": {
+      "scene": "a2_badger_01",
+      "line": 1
+    },
+    "a2_badger_03": {
+      "scene": "a2_badger_01",
+      "line": 2
+    },
+    "a2_badger_04": {
+      "scene": "a2_badger_01",
+      "line": 3
+    },
+    "a2_badger_choice": {
+      "scene": "a2_badger_01",
+      "line": 4
+    },
+    "a2_badger_help_02": {
+      "scene": "a2_badger_help_01",
+      "line": 1
+    },
+    "a2_badger_help_03": {
+      "scene": "a2_badger_help_01",
+      "line": 2
+    },
+    "a2_badger_help_04": {
+      "scene": "a2_badger_help_01",
+      "line": 3
+    },
+    "a2_badger_help_05": {
+      "scene": "a2_badger_help_01",
+      "line": 4
+    },
+    "a2_badger_skip_02": {
+      "scene": "a2_badger_skip_01",
+      "line": 1
+    },
+    "a2_sona_02": {
+      "scene": "a2_sona_01",
+      "line": 1
+    },
+    "a2_sona_03": {
+      "scene": "a2_sona_01",
+      "line": 2
+    },
+    "a2_sona_04": {
+      "scene": "a2_sona_01",
+      "line": 3
+    },
+    "a2_sona_05": {
+      "scene": "a2_sona_01",
+      "line": 4
+    },
+    "a2_sona_06": {
+      "scene": "a2_sona_01",
+      "line": 5
+    },
+    "a2_sona_07": {
+      "scene": "a2_sona_01",
+      "line": 6
+    },
+    "a2_sona_08": {
+      "scene": "a2_sona_01",
+      "line": 7
+    },
+    "a2_sona_09": {
+      "scene": "a2_sona_01",
+      "line": 8
+    },
+    "a2_sona_10": {
+      "scene": "a2_sona_01",
+      "line": 9
+    },
+    "a2_sona_choice": {
+      "scene": "a2_sona_01",
+      "line": 10
+    },
+    "a2_sona_skip_02": {
+      "scene": "a2_sona_skip_01",
+      "line": 1
+    },
+    "a2_herb_02": {
+      "scene": "a2_herb_01",
+      "line": 1
+    },
+    "a2_herb_03": {
+      "scene": "a2_herb_01",
+      "line": 2
+    },
+    "a2_herb_04": {
+      "scene": "a2_herb_01",
+      "line": 3
+    },
+    "a2_herb_choice": {
+      "scene": "a2_herb_01",
+      "line": 4
+    },
+    "a2_herb_wisp_02": {
+      "scene": "a2_herb_wisp_01",
+      "line": 1
+    },
+    "a2_herb_wisp_03": {
+      "scene": "a2_herb_wisp_01",
+      "line": 2
+    },
+    "a2_herb_found_02": {
+      "scene": "a2_herb_found_01",
+      "line": 1
+    },
+    "a2_herb_found_03": {
+      "scene": "a2_herb_found_01",
+      "line": 2
+    },
+    "a2_herb_found_04": {
+      "scene": "a2_herb_found_01",
+      "line": 3
+    },
+    "a2_herb_found_05": {
+      "scene": "a2_herb_found_01",
+      "line": 4
+    },
+    "a2_vedma_02": {
+      "scene": "a2_vedma_01",
+      "line": 1
+    },
+    "a2_vedma_03": {
+      "scene": "a2_vedma_01",
+      "line": 2
+    },
+    "a2_vedma_04": {
+      "scene": "a2_vedma_01",
+      "line": 3
+    },
+    "a2_vedma_05": {
+      "scene": "a2_vedma_01",
+      "line": 4
+    },
+    "a2_vedma_06": {
+      "scene": "a2_vedma_01",
+      "line": 5
+    },
+    "a2_vedma_07": {
+      "scene": "a2_vedma_01",
+      "line": 6
+    },
+    "a2_vedma_08": {
+      "scene": "a2_vedma_01",
+      "line": 7
+    },
+    "a2_vedma_09": {
+      "scene": "a2_vedma_01",
+      "line": 8
+    },
+    "a2_vedma_choice": {
+      "scene": "a2_vedma_01",
+      "line": 9
+    },
+    "a2_vedma_angry_02": {
+      "scene": "a2_vedma_angry_01",
+      "line": 1
+    },
+    "a2_vedma_angry_03": {
+      "scene": "a2_vedma_angry_01",
+      "line": 2
+    },
+    "a2_vedma_kind_02": {
+      "scene": "a2_vedma_kind_01",
+      "line": 1
+    },
+    "a2_vedma_water_02": {
+      "scene": "a2_vedma_water_01",
+      "line": 1
+    },
+    "a2_vedma_water_03": {
+      "scene": "a2_vedma_water_01",
+      "line": 2
+    },
+    "a2_vedma_water_04": {
+      "scene": "a2_vedma_water_01",
+      "line": 3
+    },
+    "a2_vedma_water_05": {
+      "scene": "a2_vedma_water_01",
+      "line": 4
+    },
+    "a2_vedma_water_06": {
+      "scene": "a2_vedma_water_01",
+      "line": 5
+    },
+    "a2_hejkal_02": {
+      "scene": "a2_hejkal_01",
+      "line": 1
+    },
+    "a2_hejkal_03": {
+      "scene": "a2_hejkal_01",
+      "line": 2
+    },
+    "a2_hejkal_05": {
+      "scene": "a2_hejkal_04",
+      "line": 1
+    },
+    "a2_hejkal_06": {
+      "scene": "a2_hejkal_04",
+      "line": 2
+    },
+    "a2_hejkal_07": {
+      "scene": "a2_hejkal_04",
+      "line": 3
+    },
+    "a2_hejkal_08": {
+      "scene": "a2_hejkal_04",
+      "line": 4
+    },
+    "a2_hejkal_09": {
+      "scene": "a2_hejkal_04",
+      "line": 5
+    },
+    "a2_fawn_02": {
+      "scene": "a2_fawn_01",
+      "line": 1
+    },
+    "a2_fawn_03": {
+      "scene": "a2_fawn_01",
+      "line": 2
+    },
+    "a2_fawn_choice": {
+      "scene": "a2_fawn_01",
+      "line": 3
+    },
+    "a2_fawn_help_02": {
+      "scene": "a2_fawn_help_01",
+      "line": 1
+    },
+    "a2_fawn_help_03": {
+      "scene": "a2_fawn_help_01",
+      "line": 2
+    },
+    "a2_fawn_help_04": {
+      "scene": "a2_fawn_help_01",
+      "line": 3
+    },
+    "a2_fawn_skip_02": {
+      "scene": "a2_fawn_skip_01",
+      "line": 1
+    },
+    "a2_wisent_02": {
+      "scene": "a2_wisent_01",
+      "line": 1
+    },
+    "a2_wisent_03": {
+      "scene": "a2_wisent_01",
+      "line": 2
+    },
+    "a2_wisent_04": {
+      "scene": "a2_wisent_01",
+      "line": 3
+    },
+    "a2_wisent_choice": {
+      "scene": "a2_wisent_01",
+      "line": 4
+    },
+    "a2_wisent_help_02": {
+      "scene": "a2_wisent_help_01",
+      "line": 1
+    },
+    "a2_wisent_help_03": {
+      "scene": "a2_wisent_help_01",
+      "line": 2
+    },
+    "a2_wisent_help_04": {
+      "scene": "a2_wisent_help_01",
+      "line": 3
+    },
+    "a2_wisent_help_05": {
+      "scene": "a2_wisent_help_01",
+      "line": 4
+    },
+    "a2_wisent_help_06": {
+      "scene": "a2_wisent_help_01",
+      "line": 5
+    },
+    "a2_wisent_help_07": {
+      "scene": "a2_wisent_help_01",
+      "line": 6
+    },
+    "a2_vily_02": {
+      "scene": "a2_vily_01",
+      "line": 1
+    },
+    "a2_vily_03": {
+      "scene": "a2_vily_01",
+      "line": 2
+    },
+    "a2_vily_choice": {
+      "scene": "a2_vily_01",
+      "line": 3
+    },
+    "a2_vily_help_02": {
+      "scene": "a2_vily_help_01",
+      "line": 1
+    },
+    "a2_vily_help_03": {
+      "scene": "a2_vily_help_01",
+      "line": 2
+    },
+    "a2_lair_smell_02": {
+      "scene": "a2_lair_smell_01",
+      "line": 1
+    },
+    "a2_lair_smell_03": {
+      "scene": "a2_lair_smell_01",
+      "line": 2
+    },
+    "a2_lair_choice": {
+      "scene": "a2_lair_smell_01",
+      "line": 3
+    },
+    "a2_lair_02": {
+      "scene": "a2_lair_01",
+      "line": 1
+    },
+    "a2_lair_03": {
+      "scene": "a2_lair_01",
+      "line": 2
+    },
+    "a2_lair_04": {
+      "scene": "a2_lair_01",
+      "line": 3
+    },
+    "a2_lair_05": {
+      "scene": "a2_lair_01",
+      "line": 4
+    },
+    "a2_lair_06": {
+      "scene": "a2_lair_01",
+      "line": 5
+    },
+    "a2_lair_07": {
+      "scene": "a2_lair_01",
+      "line": 6
+    },
+    "a2_lair_08": {
+      "scene": "a2_lair_01",
+      "line": 7
+    },
+    "a2_lair_09": {
+      "scene": "a2_lair_01",
+      "line": 8
+    },
+    "a2_lair_10": {
+      "scene": "a2_lair_01",
+      "line": 9
+    },
+    "a2_lair_11": {
+      "scene": "a2_lair_01",
+      "line": 10
+    },
+    "a2_foxfam_02": {
+      "scene": "a2_foxfam_01",
+      "line": 1
+    },
+    "a2_foxfam_03": {
+      "scene": "a2_foxfam_01",
+      "line": 2
+    },
+    "a2_foxfam_04": {
+      "scene": "a2_foxfam_01",
+      "line": 3
+    },
+    "a2_foxfam_05": {
+      "scene": "a2_foxfam_01",
+      "line": 4
+    },
+    "a2_foxfam_06": {
+      "scene": "a2_foxfam_01",
+      "line": 5
+    },
+    "a2_grove_02": {
+      "scene": "a2_grove_01",
+      "line": 1
+    },
+    "a2_grove_03": {
+      "scene": "a2_grove_01",
+      "line": 2
+    },
+    "a2_grove_04": {
+      "scene": "a2_grove_01",
+      "line": 3
+    },
+    "a2_grove_05": {
+      "scene": "a2_grove_01",
+      "line": 4
+    },
+    "a2_grove_06": {
+      "scene": "a2_grove_01",
+      "line": 5
+    },
+    "a2_grove_07": {
+      "scene": "a2_grove_01",
+      "line": 6
+    },
+    "a2_grove_08": {
+      "scene": "a2_grove_01",
+      "line": 7
+    },
+    "a2_grove_09": {
+      "scene": "a2_grove_01",
+      "line": 8
+    },
+    "a2_grove_10": {
+      "scene": "a2_grove_01",
+      "line": 9
+    },
+    "a2_grove_11": {
+      "scene": "a2_grove_01",
+      "line": 10
+    },
+    "a2_grove_12": {
+      "scene": "a2_grove_01",
+      "line": 11
+    },
+    "a2_grove_13": {
+      "scene": "a2_grove_01",
+      "line": 12
+    },
+    "a2_grove_14": {
+      "scene": "a2_grove_01",
+      "line": 13
+    },
+    "a2_grove_15": {
+      "scene": "a2_grove_01",
+      "line": 14
+    },
+    "a2_grove_16": {
+      "scene": "a2_grove_01",
+      "line": 15
+    },
+    "a2_grove_17": {
+      "scene": "a2_grove_01",
+      "line": 16
+    },
+    "a2_grove_18": {
+      "scene": "a2_grove_01",
+      "line": 17
+    },
+    "a2_grove_19": {
+      "scene": "a2_grove_01",
+      "line": 18
+    },
+    "a2_grove_20": {
+      "scene": "a2_grove_01",
+      "line": 19
+    },
+    "a2_grove_21": {
+      "scene": "a2_grove_01",
+      "line": 20
+    },
+    "a2_grove_23": {
+      "scene": "a2_grove_22",
+      "line": 1
+    },
+    "a2_grove_24": {
+      "scene": "a2_grove_22",
+      "line": 2
+    },
+    "a2_grove_25": {
+      "scene": "a2_grove_22",
+      "line": 3
+    }
+  },
+  "parts": [
+    "act1.json",
+    "act2a-den1.json",
+    "act2a-den2.json",
+    "act2a-den3.json"
+  ]
+}

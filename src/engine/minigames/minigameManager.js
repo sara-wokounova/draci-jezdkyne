@@ -13,7 +13,7 @@ import { DragonAttackMinigame } from './dragonAttack.js';
  *   1. Implement a class with `start()` and `destroy()` methods (see
  *      {@link DragonAttackMinigame} for the contract).
  *   2. Register it: `manager.register('myGame', (ctx) => new MyGame(ctx));`
- *   3. Reference it from a scene in story.json (see {@link MinigameManager#run}).
+ *   3. Reference it from a scene in the story files (public/story/) (see {@link MinigameManager#run}).
  *   A throw in its constructor or start() already ends in 'failure'; its own ticker
  *   listener must catch errors itself and end the round (D24), as DragonAttackMinigame#tick does.
  */

@@ -35,10 +35,14 @@ npm run dev            # Vite dev server (the play-test page: /playtest.html)
 npm run build          # production build into dist/ (CI runs this)
 npm run preview        # serve dist/
 npm run clean-sprites  # strip baked checkerboard from character PNGs (in place; skips already-transparent files)
+npm test               # the node checks in tests/ (story rules, the save, the story files); CI runs them before every deploy
 ```
 
-No unit tests in the repo and no linter. The Playwright check scripts (and node checks
-for `AutoSave`, the sprite scripts, the music and the sound-effect files) live outside the repo (see the Tests section of workflow.md). Also verify changes by running the game
+`npm test` (D38) runs `tests/storyflow.test.mjs`, `tests/autosave.test.mjs`, `tests/story.test.mjs` and
+`tests/story-history.test.mjs` (needs git; its synthetic repos live in the system temp folder, or `STORY_TEST_TMP`: run it
+locally as `STORY_TEST_TMP=C:/tmp/claude/story-test-tmp npm test` in Git Bash (forward slashes: bash eats backslashes),
+`$env:STORY_TEST_TMP='C:\tmp\claude\story-test-tmp'; npm test` in PowerShell, the temp-folder rule); a failure stops the deploy. No linter. The Playwright check scripts (and the node checks for the sprite scripts, the music and the
+sound-effect files, which need ffmpeg) live outside the repo (see the Tests section of workflow.md). Also verify changes by running the game
 (`npm run dev`) in a browser, including a phone-sized viewport.
 
 ## Architecture
@@ -56,19 +60,29 @@ src/playtest.js            the play-test page: 15 sliders (beavers, goal, flight
                            inert 500 ms after it; the game's saved volumes read, never written; window.__vn (the test
                            hook, as in the game)
 src/engine/
-  startVisualNovel.js      game loop: showScene / advance / goBack / runMinigame (passes the difficulty); the menu
+  startVisualNovel.js      game loop: the position (scene, line, memory); showPosition / move / advance / goBack /
+                           runMinigame (passes the difficulty); location choices (pickEvent, D37); the menu
                            (Pokračovat, Nová hra, Menu, Esc; the session rule, D27); the 500 ms story guard after the menu
                            closes or a minigame ends (storyPausedAt, D27, D33)
-  storyRepository.js       fetch + minimal validation of story.json, scene lookup
-  autoSave.js              localStorage: current scene, back-history, readSceneIds, settings (musicVolume,
-                           effectsVolume, autoRead, difficulty: 'easy' | 'normal' | 'hard', D33)
-  uiController.js          DOM dialogue text, speaker name, choice buttons, end card, main menu (pages, focus,
-                           Nastavení incl. the minigame difficulty) + gallery; guardTaps (Ano's tap guard, also the
-                           minigame result's, with keys: D27, D33), TAP_GUARD_MS
+  storyFlow.js             the story's rules, pure (D37): parts merged, scenes normalised (lines), memory and conditions,
+                           the order after a scene's lines, resolveEntry (pass-throughs), locations (availableEvents,
+                           pickEvent), placeSave / migrateOldSave, preload's walk (reachableWithin), the load-time lint
+  storyRepository.js       fetches story-v2.json and its parts (no-cache), merges, normalises, lints, checks the start
+  autoSave.js              localStorage `vn:<id>:autosave2`: position (scene, line, memory), back-history with memory,
+                           readSceneIds, endings, settings (musicVolume, effectsVolume, autoRead, difficulty: 'easy' |
+                           'normal' | 'hard', D33); the old `…:autosave` save migrated once (migrateIfNeeded), never
+                           written; readSettings (the play-test page, read only)
+  uiController.js          DOM dialogue text, speaker name, choice buttons (the corner panel, or centred with 3+ or
+                           choiceLayout "center", D37), end card, main menu (pages, focus, Nastavení incl. the minigame
+                           difficulty) + gallery; choiceGuard (every choice waits 500 ms of quiet, D37); guardTaps (Ano's
+                           tap guard, also the minigame result's and "Zpět na začátek", with keys: D27, D33, D37),
+                           TAP_GUARD_MS; --dialogue-top (measured for the centred panel)
   inputController.js       click/tap anywhere = advance; keys: Space/Enter, 1-9, Backspace/←, Esc (menu); Space/Enter
-                           left to a focused button in the menu, end card or minigame result; a key held from a button
+                           left to a focused button in the menu, end card or minigame result; number keys behind the
+                           choice guard (D37); a key held from a button
                            never repeats into the story (D33); fullscreenOnTap (D16, also the play-test page)
-  visualRenderer.js        Pixi: background (contain-fit), character sprites, placeholders, preload
+  visualRenderer.js        Pixi: background (contain-fit), character sprites (scale, raise, numeric positions, flip, the
+                           top cap: D37), placeholders, preload(items)
   assetPath.js             resolveAssetPath (story paths → base URL) and backgroundImage (which backgrounds are files)
   pixiStage.js             Pixi Application + layers: background, characters, effects, minigame, overlay
   audioManager.js          Howler music per scene + menu (HTML5 streaming; same key continues, none = silence;
@@ -95,7 +109,9 @@ src/engine/
 src/styles/main.css        all styling (DOM UI is absolutely positioned over the canvas)
 src/styles/playtest.css    the play-test panel (over main.css)
 vite.config.js             base './'; three build inputs: index.html, playtest.html, playtest/index.html (D33)
-public/story/story.json    the whole story (fetched at runtime, not bundled)
+public/story/story-v2.json the story's main file (fetched at runtime, not bundled) and its parts beside it (D37);
+                           public/story/story.json is the old story, frozen for cached old tabs (never edited)
+tests/                     the node checks (npm test, D38)
 public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, minigames/dragon-attack/,
                            minigames/dragon-attack/sfx/ (the effects, mp3, ≤ 15 KB each), music/ (mp3, ~3.6–4.8 MB
                            each, streamed)
@@ -106,69 +122,111 @@ scripts/packFrames.mjs           scattered sheet frames → one-row strip, ancho
 scripts/build-music.sh           the deployed music from art/music/ (9 dB quieter, D29)
 scripts/build-sfx.sh             the minigame's sound effects from art/minigames/dragon-attack/sfx/ (D29)
 scripts/cleanBeavers.mjs         the beaver sheets cut by their own pieces into padded cells (D31; no arguments)
+scripts/reexportCreatures.mjs    a creature's poses on one canvas (D37): node scripts/reexportCreatures.mjs <id>…; reads art/
+                                 only, writes public/assets/characters/<id>/ (every pose of the creature together)
 scripts/measureEmmaAnchors.mjs   prints Emma's attack anchors, found from her face in each attack frame (D32; no arguments)
 art/                             source art kept in git but not deployed (originals of the packed strips, Emma's flight
                                  poses and their frames list, the beaver sheets, the music and the sound effects)
-.github/workflows/deploy.yml     push to main → npm ci → build → GitHub Pages
+.github/workflows/deploy.yml     push to main → npm ci → npm test → build → GitHub Pages
 ```
 
 Startup opens `#main-menu` (`openMenu`): queues `menuMusic` (it starts on the page's first
 click, tap or key, D22), draws the saved scene behind
 the menu (visuals only, no minigame) and preloads ahead of it (D20). Pokračovat (enabled when there is a
-game to continue) and Nová hra call `showScene` (D27); the Menu button and Esc open the menu from the game.
+game to continue) and Nová hra call `showPosition` (D27); the Menu button and Esc open the menu from the game.
 While the menu is open (`menuOpen`) all story input is ignored, like during a minigame, and for 500 ms
 after it closes or a minigame ends (D33).
-With autoread on (Nastavení), `showScene` ends by scheduling `advance()` (D19).
-Flow: `showScene(scene)` → save to localStorage → DOM text/choices → music (deliberately
-before the render's await, D21) → if `scene.minigame`, run it at once (its render goes on behind it,
-unawaited, D27) and jump to `onVictory`/`onFailure`; else await `visuals.render(scene)` (clears layers,
-draws background, characters, effects) and preload the next 3 reachable scenes.
-Window resize re-renders the current scene.
-`window.__vn` (stage, minigames, audio, sceneId) is the check scripts' test hook and ships to the live
+With autoread on (Nastavení), `showPosition` ends by scheduling `advance()` per line (D19).
+Flow: a tap shows the next visible line; after the last line, a move (`move`: `resolveEntry` first, a dead end
+changes nothing) pushes the position into the history and lands. `showPosition()` → save (only on a move or Back) →
+DOM text/choices → music (deliberately before the render's await, D21) → if `scene.minigame`, run it at once (its
+render goes on behind it, unawaited, D27) and move to `onVictory`/`onFailure`; else await `visuals.render(scene,
+stage)` (clears layers, draws background, the stage at the line, effects) and preload the positions within 3 taps.
+Pokračovat, a reload and a resize show the position again without changing anything.
+`window.__vn` (stage, minigames, audio, sceneId, line, memory, characters) is the check scripts' test hook and ships to the live
 site (D11 runs the checks there). It hands out live objects: put nothing on it you wouldn't show in the console.
 
 The UI is two stacked systems: Pixi canvas fills the screen; DOM panels float
 on top with CSS. Layout bugs are almost always in `main.css`; scene-fit bugs in
 `visualRenderer.js` (`contain`, `positionFor`, `scaleCharacter`).
 
-## Story format (`public/story/story.json`)
+## Story format (`public/story/story-v2.json` and its parts, D37)
 
 ```jsonc
+// story-v2.json: everything but the scenes, and the list of parts (files beside it in public/story/)
 {
-  "id": "draci-jezdkyne-z-vlpu",          // also the localStorage key: vn:<id>:autosave
+  "id": "draci-jezdkyne-z-vlpu",          // also the localStorage key: vn:<id>:autosave2
   "start": "forest_flight_01",
   "menuMusic": "village_day",             // music key for the main menu
   "resumeMusic": ["battle"],              // music keys that continue where they were left (D26)
   "assets": { "music": { "village_day": "assets/music/village_day.mp3" } },
   "characters": {
-    "roza": { "displayName": "Róza", "color": "#d6462f", "hair": "#eac470",
-              "sprites": { "neutral": "...", "happy": "...", "excited": "...",
-                           "sad": "...", "nervous": "...", "talking": "..." } }
-  },
-  "scenes": [{
-    "id": "scene_id",
-    "background": { "type": "image", "src": "assets/backgrounds/x.png" },  // or {type:"generated", preset}
-    "effects": ["wind", "snow", "sunsetGlow"],
-    "characters": [{ "id": "roza", "position": "left|center|right", "pose": "talking", "alpha": 1 }],
-    "speaker": "roza",          // character id, or a literal name like "Velký bobr"
-    "text": "…",
-    "music": "village_day",     // same key as the previous scene = keeps playing; omitted = silence;
-                                // a key not in assets.music = console warning + silence
-    "next": "other_scene",      // OR
-    "choices": [{ "text": "…", "next": "id" }],   // OR
-    "minigame": { "type": "dragonAttack", "title": "…", "allowSkip": true,
-                  "onVictory": "id", "onFailure": "id", "config": {} },
-    "end": { "good": false, "title": "…", "text": "…" }   // ending, see below
-  }]
+    "roza": { "displayName": "Róza", "color": "#d6462f", "hair": "#eac470", "sprites": { "neutral": "...", "happy": "..." } },
+    "jezevec": { "displayName": "Jezevec", "scale": 0.35, "raise": 0.35, "sprites": { "neutral": "..." } }
+  },                                      // scale: rider heights tall; raise: feet that many rider heights higher
+  "movedScenes": { "first_choice": { "scene": "forest_flight_01", "line": 5 } },  // old ids → where saves go on
+  "parts": ["act1.json", "act2a-den1.json", "act2a-den2.json", "act2a-den3.json"]
+}
+// a part: { "scenes": [ … ] }; a location part also { "location": { "id": "hory", "events": [
+//   { "scene": "hory_doupe_01", "if": "vedma_doupe", "first": true }, { "scene": "hory_zubr_01" } ] } }  ("name" only to keep an old one)
+{
+  "id": "scene_id",                       // one background, its lines until a choice, another scene or a minigame
+  "background": { "type": "image", "src": "assets/backgrounds/x.png" },  // or {type:"generated", preset}
+  "effects": ["wind", "snow", "sunsetGlow"],
+  "music": "village_day",                 // same key = keeps playing; omitted = silence; unknown key = warning + silence
+  "characters": [{ "id": "roza", "position": "left|center|right|0.3" /* a number 0.2–0.8 */, "pose": "talking", "alpha": 1, "flip": true }],
+  "set": ["vejce"], "add": { "pul": 1 },  // applied when the scene is entered by a move
+  "lines": [
+    { "speaker": "roza", "text": "…" },   // speaker: character id or a literal name ("Velký bobr"); none = narrator
+    { "text": "…", "characters": [], "if": "bobri_pratele" }   // characters: the whole stage from here on
+  ],
+  "choices": [{ "text": "…", "next": "id", "if": "!vejce", "set": [], "add": {} },
+              { "text": "Do hor", "location": "hory" }],       // a location: the engine picks an available event
+  "choiceLayout": "center",               // the choices as a big centred panel (automatic with 3 or more)
+  "next": "other_scene",                  // or a list: [{ "if": "pul>=6", "next": "evening" }, { "next": "hub" }]
+  "minigame": { "type": "dragonAttack", "title": "…", "allowSkip": true,
+                "onVictory": "id", "onFailure": "id", "config": {} },   // a scene of its own, no lines
+  "end": { "good": false, "title": "…", "text": "…" }
 }
 ```
 
-Rules: asset paths are relative (`assets/...`, never `/assets/...`) — required for
-the GitHub Pages sub-path. A scene with neither `next`, `choices` nor `minigame`
-is a dead end unless it has `end`. An `end` scene shows normally; the next tap opens
-the end card (KONEC, "Dobrý/Špatný konec: title", `text`, "Zpět na začátek" → reset
-to `start` + main menu). Galerie lists every `end` scene the player has ever reached
-(from `readSceneIds`), with the scene's background as thumbnail. The minigame scene is kept out of back-history.
+Rules: asset paths are relative (`assets/...`, never `/assets/...`) — required for the GitHub Pages sub-path. The
+memory is names → whole numbers (`set` = at least 1, `add` = raise, never below 0); a condition is `name`,
+`!name`, `name>=N`, `name<N`, or a list that must all hold. After a scene's last visible line: its visible
+choices, else `next`, else `end` (the next tap opens the end card, or by itself 500 ms after the move for an ending with no line
+before it: KONEC, "Dobrý/Špatný konec: title", `text`,
+"Zpět na začátek" → reset to `start` + main menu), else a dead end. `"lines": []` with a `next` is a pass-through.
+Galerie lists the endings reached (their end card next; `endings` in the save), in story order. The minigame scene is
+kept out of back-history. Back goes one line back with the memory as it was. Old scene ids live on in `movedScenes`.
+
+Editing the story (D37): write in `story-v2.json` and its parts, never in the frozen `story.json`. `npm test` (CI runs
+it before every deploy) checks most mistakes and its message says what to do; these it catches:
+- a scene id that doesn't exist (also a scene in a file not listed in `parts`: "not a scene"), a malformed condition, a
+  file missing from git;
+- a renamed or removed scene without a `movedScenes` entry for its old id (every committed version counts, also one
+  CI refused); a wholesale rewrite of an act points its old ids at the last line of the act before it (`act1_end`);
+- locations: an event's scene entered other than by the location's pick; an event name (its `name`, else its scene
+  id) that was committed and is gone (keep it as `"name"` when renaming or re-pointing; list a removed event as
+  `{ "name": "…", "retired": true }`; a whole location removed keeps its file with every event retired); a give-up
+  choice (`"giveUp": true`, the way a lost event is offered again) outside its event's scenes (one lose scene per
+  event), leading back into the event (a retry, a "sure?" question), after a win or before trying, or on a location
+  choice; `movedScenes` pointing into another event's scenes (point a removed event's ids at the earliest
+  day hub it could be played from).
+
+And these it can't catch:
+- a scene with no visible choice, no `next` and no `end` (a forgotten `next`): a dead end where a tap does nothing
+  (`act2a_end` is one on purpose until Act 2b); the lint warns only when conditions make a scene's way on vanish;
+- inserting or deleting a line shifts saved positions on that scene (and its `movedScenes` lines): append lines, or
+  edit a line's text, instead;
+- splitting a scene in two (its later lines moved into a new scene): saves on the moved lines land on the old scene's
+  last line, and `movedScenes` can't send them on (the old id still exists); split only where nobody is saved yet, or
+  accept that those players replay a few lines;
+- a day hub's last line stays short, ~40 characters (it is the phone panel's heading; the lint warns only over 80), and a
+  hub whose choices can drop to two or fewer has `"choiceLayout": "center"` (three or more centre anyway);
+- a retired event's scenes aren't reused by another event (its players would replay them);
+- never amend, rebase or force-push the story files once pushed (a deployed commit would vanish from the history).
+
+Good to know: conditions inside a scene see that scene's own changes (its `set`/`add` apply on entry).
 
 ## Assets
 
@@ -183,9 +241,14 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
   (Sára; a missing pose falls back to `neutral`): Soňa 4, the vědma 3 (2026-11-15, Runway's GPT Image model with a
   transparent background, `emma_neutral.png` as the style reference, each other pose made from the neutral one;
   originals 1280×1920 in `art/characters/<id>/`, scaled with ffmpeg lanczos to 1024×1536, `-pix_fmt rgba`). The Act 2a
-  creatures (jezevec, liska, srnce, srna, zubr, vila, hejkal; 1–2 poses each, any aspect ratio) the same way from
-  1920×1280 / 1920×1920 / 1280×1920 originals, but first cropped to the figure (alpha > 10, feet on the bottom edge) and
-  scaled to fit 1536×1536.
+  creatures (jezevec, liska, srnce, srna, zubr, vila, hejkal; 1–2 poses each, any aspect ratio) from 1920×1280 /
+  1920×1920 / 1280×1920 originals in `art/characters/<id>/`. The two-pose ones' deployed files (jezevec, zubr, vila, hejkal) are
+  made by `node scripts/reexportCreatures.mjs <id>` (liska, srnce and srna are an older one-pose export: re-running the
+  script redraws them slightly differently, so do it only when adding a pose) (D37: `scale` sizes the whole texture, so all of a creature's poses share
+  one canvas, the body at one pixel scale and the feet on the bottom edge): each pose cropped to the figure, lined up on
+  its alpha mass, one canvas and one factor per creature to fit 1536×1536. A new pose: put its original in `art/`, then
+  re-run the script for that creature (never scale one pose on its own: `tests/story.test.mjs` checks only that the
+  sizes are equal, not that the body matches). `liskova_rodina` (the fox family, its own size) is a copy of the old `liska_happy.png`.
 - Beaver sheets: `beaver{n}_frames.png` (n = 1…7), 1326×544, a 6×2 grid of 221×272 cells padded 50 px a side
   (walk 0–5, hit 7 then 6, log 8, scurry 9–11), made by `node scripts/cleanBeavers.mjs` from
   `art/minigames/dragon-attack/beaver{n}.png` (1448×1086, already cleaned of their checkerboard on 2026-10-17, unlike
@@ -278,6 +341,7 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
 ## Deployment
 
 GitHub Actions on every push to `main` (Node 20). Vite `base: './'` makes the
-build work under `/draci-jezdkyne/`. A failed build leaves the previous deploy
+build work under `/draci-jezdkyne/`. Only `main` deploys; `npm test` runs before the build, and a failing check or a
+failed build leaves the previous deploy
 live — check the Actions tab after pushing. Every file the code imports or
 the story references must be committed, or CI breaks / assets 404.

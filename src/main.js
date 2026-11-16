@@ -3,7 +3,7 @@ import { startVisualNovel } from './engine/startVisualNovel.js';
 
 startVisualNovel({
   pixiHost: document.querySelector('#pixi-host'),
-  storyUrl: `${import.meta.env.BASE_URL}story/story.json`,
+  storyUrl: `${import.meta.env.BASE_URL}story/story-v2.json`,
   ui: {
     speakerName: document.querySelector('#speaker-name'),
     dialogueText: document.querySelector('#dialogue-text'),

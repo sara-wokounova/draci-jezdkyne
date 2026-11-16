@@ -7,8 +7,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -16,10 +14,15 @@ concurrency:
 
 jobs:
   build:
+    # Only main deploys: a branch's story names would never enter main's history (tests/story.test.mjs).
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # tests/story.test.mjs compares the story with every committed version
+          persist-credentials: false # no token on disk while npm ci runs install scripts
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -30,6 +33,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Test
+        run: npm test # a failing check stops the deploy (the live site keeps the previous build)
+
       - name: Build
         run: npm run build
 
@@ -39,6 +45,9 @@ jobs:
           path: dist
 
   deploy:
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

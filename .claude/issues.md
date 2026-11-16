@@ -5,6 +5,23 @@ Severity: **P0** broken for everyone · **P1** blocks play on some setups · **P
 
 ## Open
 
+### P3 — The frozen story.json and its old key stay until a cleanup (D37, 2026-11-16)
+`public/story/story.json` (the old one-line story) stays for cached old tabs and is never edited
+(`tests/story.test.mjs` checks its hash). Remove it in a later cleanup commit, together with: `tests/story.test.mjs`'s two
+checks that read it (its hash, and its ids placing: both can go, every committed `story-v2.json` carries those ids as
+scene ids or `movedScenes` keys and the history check covers them), the check-script lines that still open it (the d33 snapshots,
+`as-test/music.test.mjs` if it still reads it), and `public/assets/characters/liska/liska_happy.png` (only the frozen
+story uses it). Its scene ids must stay as `movedScenes` keys (old-key saves can still arrive).
+
+### P3 — The corner choice panel can overlap a tall dialogue panel (found in planning D37, 2026-11-16)
+The 2-choice corner panel sits at a fixed bottom (`calc(clamp(1rem, 4vh, 3rem) + 11rem)`), while the dialogue panel
+grows with its text: at 1280×720 the story's longest lines push the dialogue ~76 px under the panel. The centred panel
+(D37) follows the dialogue's measured top (`--dialogue-top`); the corner panel could use the same variable.
+
+### P3 — The written story ends in a dead end at act2a_end (D37, 2026-11-16)
+`act2a_end` has no `next` and no `end`: a tap does nothing (on purpose until Act 2b; `followUp` warns once).
+Act 2a is to be rewritten into days and locations (story work with Sára, story.md).
+
 ### P2 — Minigame starts seconds after its HUD appears (verified 2026-10-17)
 Scene preload (D8) only covers backgrounds and characters, so the minigame loads the 7
 beaver sheets (~12 MB; ~1.7 MB since D31) after its HUD shows. On the live site the HUD showed over an empty
@@ -63,7 +80,7 @@ goes, `export` on dragonAttack.js's `DEFAULTS` and `worldScale` has no other use
 ### P3 — Engine UI is English, story is Czech
 `index.html` has `lang="en"` and title "Visual Novel Starter"; the "← Back" button
 (the menu, Menu and Nová hra are Czech since D27); hint "Click, tap, Space, or Enter to continue"; save status shows
-internal scene ids ("Autosaved • river_dam"). Minigame HUD is already Czech.
+internal scene ids ("Autosaved • river_dam · 1", the scene and the line). Minigame HUD is already Czech.
 
 ### P3 — Heavy assets for mobile data
 Backgrounds ~3.3 MB, character poses ~2 MB, beaver sheets ~250 KB each since D31 (~1.5 MB before), Emma's three
@@ -75,7 +92,7 @@ Beaver lines show a dragon rider's sprite instead.
 
 ### P3 — Continue hint shown when there's nothing to continue to
 Choice scenes and dead-end scenes still say "Click, tap, Space, or Enter to continue".
-On phones (D14 layout) it is hidden on choice scenes. Desktop and dead ends still show it.
+On phones (D14 layout) it is hidden on choice scenes (also under the centred choices, D37). Desktop and dead ends still show it.
 (On `end` scenes the hint is right: the tap opens the end card.)
 
 ### P3 — No `webkitRequestFullscreen` fallback (2026-10-17)
@@ -191,6 +208,14 @@ the volume: there it can sound for up to ~400 ms. Check that it stays silent els
 `music-race.mjs` "switch while starting".
 
 ## Fixed
+
+### P2 — The tap that showed choices or the end card pressed what appeared under the finger (found in planning D37, verified 2026-11-16) — fixed 2026-11-16, not yet live
+On touch, the story advances on the root's `pointerup`, and the click of that same tap went to a button inserted under
+the finger meanwhile: one tap on `forest_flight_02` where choice 1 appears went straight to `river_dam`, one tap on
+`flooded_town`'s line where "Zpět na začátek" appears reset the game. Fix (D37): every choice panel waits 500 ms of
+quiet (`choiceGuard`), "Zpět na začátek" is behind `guardTaps` (armed per open); a finger already down when either appears never counts
+(also the minigame result's Pokračovat). Checks: `lines.mjs` "guard: one touch tap…", "guard: a finger held down…",
+"endings: the end card guard", "endings: a finger held down…".
 
 ### P1 — Persuade branch crashed at `dam_with_beavers_persuade_04` (verified 2026-10-17) — fixed 2026-11-15, not yet live
 `next: "dam_with_beavers_persuade_05"` didn't exist: tapping threw "Unknown scene id". Fix: Act 1's new scenes (story.md →

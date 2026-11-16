@@ -1,6 +1,15 @@
 import { Assets, Container, Graphics, Sprite, Text, Texture } from 'pixi.js';
 import { AtmosphereEffects } from './effects/atmosphereEffects.js';
 import { backgroundImage, resolveAssetPath } from './assetPath.js';
+import { characterRaise, characterScale, isFraction, isNamedPosition, positionFraction } from './storyFlow.js';
+
+const MIN_HEIGHT = 0.1; // a capped creature never shrinks below this share of the screen height
+// The placeholder (D7) in its local units, measured from createPlaceholderCharacter's shapes (change both together): its
+// body from hair top to body bottom, and the pivot (feet) to hair top.
+const PLACEHOLDER_BODY = 324;
+const PLACEHOLDER_REACH = 352;
+const PLACEHOLDER_WIDTH = 124; // its body's width (createPlaceholderCharacter)
+const RIDER_ASPECT = 1.5; // a rider sprite's height / width (1024×1536)
 
 export class VisualRenderer {
   constructor(stage, story) {
@@ -10,26 +19,29 @@ export class VisualRenderer {
   }
 
   /**
-   * Preloads only the assets needed for the given scene and the next few
-   * reachable scenes (following `next` and `choices`). This keeps the upcoming
-   * "pages" warm in the PixiJS Assets cache without loading the whole story.
-   *
-   * @param {object} scene The scene to start the lookahead from.
-   * @param {number} [lookahead=3] How many scenes ahead to walk.
+   * Warms the PixiJS Assets cache for the given positions ({ background, characters }: a scene's background and the
+   * stage at a line), so the next few taps feel instant without loading the whole story (D8, D37).
    */
-  async preloadFrom(scene, lookahead = 3) {
-    if (!scene) return;
-
-    const scenes = collectReachableScenes(this.story, scene, lookahead);
-    const paths = collectAssetPathsForScenes(this.story, scenes);
-
-    if (paths.length === 0) return;
-
-    await Assets.load(paths);
+  async preload(items) {
+    const paths = new Set();
+    for (const { background, characters } of items) {
+      const imageSource = backgroundImage(background);
+      if (imageSource) paths.add(resolveAssetPath(imageSource));
+      for (const entry of Array.isArray(characters) ? characters : []) {
+        if (!entry || typeof entry !== 'object') continue; // a malformed stage entry (the lint warns) doesn't stop the rest
+        const source = spriteSource(this.characterFor(entry), entry.pose ?? 'neutral');
+        if (source) paths.add(resolveAssetPath(source));
+      }
+    }
+    if (paths.size > 0) await Assets.load([...paths]);
   }
 
-  async render(scene) {
-    // A newer render (next scene, resize, phone going fullscreen) makes this one stale:
+  /**
+   * Draws the scene's background and effects with the given stage (the characters on stage at the line shown).
+   * `topLimit`: the top controls' bottom in screen px; a scaled or raised sprite's top stays below it (0: no cap).
+   */
+  async render(scene, characters = scene.characters ?? [], { topLimit = 0 } = {}) {
+    // A newer render (next line, resize, phone going fullscreen) makes this one stale:
     // after every await, a stale render stops instead of adding its sprites (D17).
     const token = (this.renderToken = (this.renderToken ?? 0) + 1);
 
@@ -39,8 +51,13 @@ export class VisualRenderer {
     this.effects.stop();
 
     await this.drawBackground(scene.background, token);
-    await this.drawCharacters(scene.characters ?? [], token);
+    await this.drawCharacters(Array.isArray(characters) ? characters : [], token, topLimit);
     if (token === this.renderToken) this.effects.start(scene.effects ?? []);
+  }
+
+  characterFor(entry) {
+    const characters = this.story.characters ?? {};
+    return entry && Object.hasOwn(characters, entry.id) ? characters[entry.id] : undefined;
   }
 
   async drawBackground(background, token) {
@@ -83,23 +100,65 @@ export class VisualRenderer {
     this.stage.layers.background.addChild(sprite);
   }
 
-  async drawCharacters(sceneCharacters, token) {
+  async drawCharacters(stage, token, topLimit) {
     const { width, height } = this.stage.app.screen;
 
-    for (const entry of sceneCharacters) {
-      const character = this.story.characters[entry.id];
+    for (const entry of stage) {
+      if (!entry || typeof entry !== 'object') continue;
+      const character = this.characterFor(entry);
       const avatar = await createCharacterSprite(character, entry.pose ?? 'neutral');
       if (token !== this.renderToken) return;
-      const target = positionFor(entry.position, width, height);
-
-      avatar.x = target.x;
-      avatar.y = target.y;
+      placeCharacter(avatar, character ?? {}, entry, width, height, topLimit);
       avatar.alpha = entry.alpha ?? 1;
-
-      scaleCharacter(avatar, width, height, target);
-
       this.stage.layers.characters.addChild(avatar);
     }
+  }
+}
+
+/**
+ * Size and place a sprite (D37). Characters without `scale` keep the old fit at left/center/right (the side box at
+ * a numeric position); with `scale` the sprite is `scale` rider heights tall whatever its texture's shape, the
+ * rider height being R = min(0.72·H, 0.42·W). `raise` lifts the feet that many rider heights. A scaled or raised
+ * sprite's top stays below `topLimit` (never under 10 % of the height); a scaled one's x stays on the screen.
+ */
+function placeCharacter(avatar, character, entry, width, height, topLimit) {
+  const named = isNamedPosition(entry.position) ? entry.position : null;
+  const numeric = isFraction(entry.position);
+  // A named position its own box; a number the side box (a rider's); none or a bad one the centre's, as before.
+  const box = positionFor(named ?? (numeric ? 'left' : 'center'), width, height);
+  const x = named ? box.x : width * positionFraction(entry.position);
+  const scale = characterScale(character);
+  const raise = characterRaise(character);
+  // The rider height R: a 2:3 rider fitted into the side box (the riders' own fit at left/right).
+  const side = positionFor('left', width, height);
+  const riderHeight = Math.min(side.heightRatio * height, side.widthRatio * width * RIDER_ASPECT);
+  const feetY = side.y - raise * riderHeight;
+  const placeholder = avatar.isPlaceholder === true;
+  const reach = placeholder ? PLACEHOLDER_REACH / PLACEHOLDER_BODY : 1; // feet to top, per unit of drawn height
+
+  avatar.x = x;
+  avatar.y = feetY;
+  const unit = placeholder ? PLACEHOLDER_BODY : avatar.texture.height;
+  if (scale === null) {
+    scaleCharacter(avatar, width, height, box);
+  } else {
+    avatar.scale.set((scale * riderHeight) / unit);
+  }
+  if (scale !== null || raise > 0) {
+    const drawn = unit * avatar.scale.y * reach;
+    const room = Math.max(feetY - topLimit, MIN_HEIGHT * height);
+    if (drawn > room) avatar.scale.set(avatar.scale.y * (room / drawn));
+  }
+  if (scale !== null) {
+    const half = (placeholder ? PLACEHOLDER_WIDTH : avatar.texture.width) * avatar.scale.x / 2;
+    avatar.x = half * 2 > width ? width / 2 : Math.min(Math.max(avatar.x, half), width - half);
+  }
+  const sign = entry.flip === true ? -1 : 1;
+  avatar.scale.x = Math.abs(avatar.scale.x) * sign; // after the sizing, whose scale.set would undo it
+  if (placeholder) {
+    // The name label keeps its reading direction, and on a scaled placeholder its normal size.
+    const k = scale === null ? 1 : Math.abs(avatar.scale.y);
+    avatar.nameLabel.scale.set(scale === null ? sign : sign / k, scale === null ? 1 : 1 / k);
   }
 }
 
@@ -107,9 +166,14 @@ function clear(container) {
   container.removeChildren().forEach((child) => child.destroy({ children: true }));
 }
 
-async function createCharacterSprite(character = {}, pose = 'neutral') {
-  const source = character.sprites?.[pose] ?? character.sprites?.neutral;
+function spriteSource(character, pose) {
+  const sprites = character?.sprites;
+  if (!sprites || typeof sprites !== 'object') return undefined;
+  return (Object.hasOwn(sprites, pose) ? sprites[pose] : undefined) ?? (Object.hasOwn(sprites, 'neutral') ? sprites.neutral : undefined);
+}
 
+async function createCharacterSprite(character = {}, pose = 'neutral') {
+  const source = spriteSource(character, pose);
   if (!source) {
     return createPlaceholderCharacter(character, pose);
   }
@@ -125,52 +189,6 @@ async function createCharacterSprite(character = {}, pose = 'neutral') {
     console.warn(`Could not load sprite "${source}". Falling back to placeholder.`, error);
     return createPlaceholderCharacter(character, pose);
   }
-}
-
-function collectReachableScenes(story, startScene, lookahead) {
-  const collected = new Map([[startScene.id, startScene]]);
-  let frontier = [startScene];
-
-  for (let depth = 0; depth < lookahead && frontier.length > 0; depth += 1) {
-    const nextFrontier = [];
-
-    for (const scene of frontier) {
-      const nextIds = [];
-      if (scene.next) nextIds.push(scene.next);
-      for (const choice of scene.choices ?? []) {
-        if (choice.next) nextIds.push(choice.next);
-      }
-
-      for (const id of nextIds) {
-        if (collected.has(id) || !story.hasScene(id)) continue;
-        const next = story.getScene(id);
-        collected.set(id, next);
-        nextFrontier.push(next);
-      }
-    }
-
-    frontier = nextFrontier;
-  }
-
-  return [...collected.values()];
-}
-
-function collectAssetPathsForScenes(story, scenes) {
-  const paths = new Set();
-
-  for (const scene of scenes) {
-    const imageSource = backgroundImage(scene?.background);
-    if (imageSource) paths.add(resolveAssetPath(imageSource));
-
-    for (const entry of scene?.characters ?? []) {
-      const character = story.characters?.[entry.id];
-      const pose = entry.pose ?? 'neutral';
-      const source = character?.sprites?.[pose] ?? character?.sprites?.neutral;
-      if (source) paths.add(resolveAssetPath(source));
-    }
-  }
-
-  return [...paths];
 }
 
 function scaleCharacter(sprite, width, height, target) {
@@ -324,7 +342,9 @@ function createPlaceholderCharacter(character = {}, pose = 'neutral') {
   label.y = 182;
   root.addChild(label);
 
-  root.pivot.set(0, 182);
+  root.pivot.set(0, 182); // PLACEHOLDER_BODY / _REACH / _WIDTH at the top are measured from these shapes
+  root.isPlaceholder = true;
+  root.nameLabel = label;
 
   return root;
 }
@@ -334,19 +354,19 @@ function positionFor(position, width, height) {
 
   const positions = {
     left: {
-      x: width * 0.25,
+      x: width * positionFraction('left'),
       y: bottomY,
       heightRatio: 0.72,
       widthRatio: 0.28,
     },
     center: {
-      x: width * 0.5,
+      x: width * positionFraction('center'),
       y: bottomY,
       heightRatio: 0.82,
       widthRatio: 0.34,
     },
     right: {
-      x: width * 0.75,
+      x: width * positionFraction('right'),
       y: bottomY,
       heightRatio: 0.72,
       widthRatio: 0.28,
