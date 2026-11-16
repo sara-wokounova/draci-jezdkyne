@@ -10,7 +10,14 @@
       "village_day": "assets/music/village_day.mp3",
       "dragon_flight": "assets/music/dragon_flight_above_the_green_sea.mp3",
       "forest_ground": "assets/music/forest_ground_whispering_trees.mp3",
-      "battle": "assets/music/battle.mp3"
+      "battle": "assets/music/battle.mp3",
+      "vedma_hut": "assets/music/vedma_hut.mp3",
+      "night_forest": "assets/music/night_forest.mp3",
+      "vily_magic": "assets/music/vily_magic.mp3",
+      "playful": "assets/music/playful.mp3",
+      "tesak_lair": "assets/music/tesak_lair.mp3",
+      "sacred_grove": "assets/music/sacred_grove.mp3",
+      "danger": "assets/music/danger.mp3"
     }
   },
   "characters": {
@@ -837,7 +844,7 @@
       ],
       "text": "Sotva přistály na lesní pěšině, z kapradí se ozvalo žalostné kňučení.",
       "next": "a2_fox_02",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_fox_02",
@@ -861,7 +868,7 @@
       "speaker": "anna",
       "text": "Podívejte, liščátko! Je úplně samo.",
       "next": "a2_fox_03",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_fox_03",
@@ -885,7 +892,7 @@
       "speaker": "emma",
       "text": "Asi se ztratilo. Liščí nora bude někde blízko, ale kde?",
       "next": "a2_fox_04",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_fox_04",
@@ -909,7 +916,7 @@
       "speaker": "roza",
       "text": "Bezzubka má nejlepší čich v celém lese. Bezzubko, hledej!",
       "next": "a2_fox_05",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_fox_05",
@@ -932,7 +939,7 @@
       ],
       "text": "Bezzubka zavětřila, zafuněla a vykročila k vývratu starého buku. Liščátko za ní cupitalo jako za mámou.",
       "next": "a2_fox_06",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_fox_06",
@@ -950,7 +957,7 @@
       ],
       "text": "U vývratu vykoukla stará liška, popadla liščátko za kůži na krku a zmizela s ním v noře.",
       "next": "a2_fox_07",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_fox_07",
@@ -969,7 +976,7 @@
       "speaker": "anna",
       "text": "Ani nepoděkovala! Ale stejně to bylo hezké.",
       "next": "a2_fox_08",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_fox_08",
@@ -988,7 +995,7 @@
       "speaker": "roza",
       "text": "Tak, a teď ta čarodějnice. Někdo v lese ji musel vidět.",
       "next": "a2_badger_01",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_badger_01",
@@ -1603,7 +1610,7 @@
       ],
       "text": "Když se setmělo, vznesly se jezdkyně se Soňou nad les. Pod nimi byla tma, jen tu a tam se zatřpytila tůňka.",
       "next": "a2_herb_02",
-      "music": "forest_ground"
+      "music": "night_forest"
     },
     {
       "id": "a2_herb_02",
@@ -1627,7 +1634,7 @@
       "speaker": "emma",
       "text": "Rozdělíme se. Každá proletí kus lesa, a kdo uvidí stříbrné světlo, zavolá.",
       "next": "a2_herb_03",
-      "music": "forest_ground"
+      "music": "night_forest"
     },
     {
       "id": "a2_herb_03",
@@ -1651,7 +1658,7 @@
       "speaker": "anna",
       "text": "Tamhle! U bažiny něco svítí! A tamhle taky… a tamhle!",
       "next": "a2_herb_04",
-      "music": "forest_ground"
+      "music": "night_forest"
     },
     {
       "id": "a2_herb_04",
@@ -1675,7 +1682,7 @@
       "speaker": "sona",
       "text": "Pozor, to můžou být bludičky. Lákají lidi do bažiny. Pravá třezalka nesvítí, jen se stříbrně třpytí ve svitu měsíce.",
       "next": "a2_herb_choice",
-      "music": "forest_ground"
+      "music": "night_forest"
     },
     {
       "id": "a2_herb_choice",
@@ -1708,7 +1715,7 @@
           "next": "a2_herb_found_01"
         }
       ],
-      "music": "forest_ground"
+      "music": "night_forest"
     },
     {
       "id": "a2_herb_wisp_01",
@@ -1731,7 +1738,7 @@
       ],
       "text": "Jezdkyně se snesly k tančícím světýlkům. Ta se zachichotala a odletěla dál a ještě dál, až byly všechny po kotníky v bahně.",
       "next": "a2_herb_wisp_02",
-      "music": "forest_ground"
+      "music": "night_forest"
     },
     {
       "id": "a2_herb_wisp_02",
@@ -1755,7 +1762,7 @@
       "speaker": "anna",
       "text": "Fuj! To byly bludičky. Teď jsme ztratily spoustu času.",
       "next": "a2_herb_wisp_03",
-      "music": "forest_ground"
+      "music": "night_forest"
     },
     {
       "id": "a2_herb_wisp_03",
@@ -1779,7 +1786,7 @@
       "speaker": "sona",
       "text": "Nevadí. Tamhle na pasece, vidíte? To světlo se nehýbe.",
       "next": "a2_herb_found_01",
-      "music": "forest_ground"
+      "music": "night_forest"
     },
     {
       "id": "a2_herb_found_01",
@@ -1802,7 +1809,7 @@
       ],
       "text": "Na malé pasece mezi kořeny stál drobný kvítek. Jeho lístky se ve svitu měsíce třpytily jako stříbro.",
       "next": "a2_herb_found_02",
-      "music": "forest_ground"
+      "music": "night_forest"
     },
     {
       "id": "a2_herb_found_02",
@@ -1826,7 +1833,7 @@
       "speaker": "sona",
       "text": "Stříbrná třezalka! Našly jste ji! Bez vás bych ji do slunovratu nikdy nenašla.",
       "next": "a2_herb_found_03",
-      "music": "forest_ground"
+      "music": "night_forest"
     },
     {
       "id": "a2_herb_found_03",
@@ -1850,7 +1857,7 @@
       "speaker": "sona",
       "text": "Na oplátku vám udělám amulety. Ať vás na cestě chrání před zlými kouzly.",
       "next": "a2_herb_found_04",
-      "music": "forest_ground"
+      "music": "night_forest"
     },
     {
       "id": "a2_herb_found_04",
@@ -1873,7 +1880,7 @@
       ],
       "text": "Než se rozednilo, upletla Soňa z třezalky tři malé amulety a každé jezdkyni jeden pověsila na krk.",
       "next": "a2_herb_found_05",
-      "music": "forest_ground"
+      "music": "night_forest"
     },
     {
       "id": "a2_herb_found_05",
@@ -1897,7 +1904,7 @@
       "speaker": "emma",
       "text": "Děkujeme, Soňo. Ráno poletíme za vědmou.",
       "next": "a2_day2_01",
-      "music": "forest_ground"
+      "music": "night_forest"
     },
     {
       "id": "a2_day2_01",
@@ -1929,7 +1936,7 @@
       ],
       "text": "Vědma bydlela v chýši kousek za valem hradiště. Ze střechy visely svazky sušených bylin a z komína stoupal dým.",
       "next": "a2_vedma_02",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_02",
@@ -1948,7 +1955,7 @@
       "speaker": "vedma",
       "text": "Jezdkyně? Co vás ke mně přivádí tak brzy ráno?",
       "next": "a2_vedma_03",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_03",
@@ -1972,7 +1979,7 @@
       "speaker": "emma",
       "text": "Hledáme zrzavou ženu v šarlatových šatech. Soňa říkala, že u vás byla.",
       "next": "a2_vedma_04",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_04",
@@ -1995,7 +2002,7 @@
       ],
       "text": "Vědma zbledla a dlouho mlčela.",
       "next": "a2_vedma_05",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_05",
@@ -2019,7 +2026,7 @@
       "speaker": "vedma",
       "text": "Jmenuje se Rubínka. Bývala dračí jezdkyně, jako vy. Jejím drakem byl Tesák, rudý jako oheň.",
       "next": "a2_vedma_06",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_06",
@@ -2043,7 +2050,7 @@
       "speaker": "vedma",
       "text": "Loni Tesák onemocněl popelavkou. Drak přichází o oheň, šupiny mu šednou jako popel, až nakonec úplně vyhasne.",
       "next": "a2_vedma_07",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_07",
@@ -2067,7 +2074,7 @@
       "speaker": "anna",
       "text": "O popelavce jsem slyšela. Prý přechází z draka na draka.",
       "next": "a2_vedma_08",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_08",
@@ -2091,7 +2098,7 @@
       "speaker": "vedma",
       "text": "Právě proto. Rubínka sem s Tesákem přiletěla prosit o pomoc. Ale lidé z hradiště se báli o své draky a zavřeli bránu.",
       "next": "a2_vedma_09",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_09",
@@ -2115,7 +2122,7 @@
       "speaker": "vedma",
       "text": "A já jsem za nimi mohla vyjít. Jenže jsem se neodvážila jít proti všem. Tesák tu noc umřel.",
       "next": "a2_vedma_choice",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_choice",
@@ -2147,7 +2154,7 @@
           "next": "a2_vedma_kind_01"
         }
       ],
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_angry_01",
@@ -2171,7 +2178,7 @@
       "speaker": "anna",
       "text": "Jak jste jí mohla nepomoct?! Vždyť Tesák umřel!",
       "next": "a2_vedma_angry_02",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_angry_02",
@@ -2195,7 +2202,7 @@
       "speaker": "vedma",
       "text": "Máš pravdu. Nemám se čím omlouvat.",
       "next": "a2_vedma_angry_03",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_angry_03",
@@ -2218,7 +2225,7 @@
       ],
       "text": "Vědma se odvrátila a chvíli jen mlčky míchala byliny v hrnci.",
       "next": "a2_vedma_water_01",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_kind_01",
@@ -2242,7 +2249,7 @@
       "speaker": "emma",
       "text": "Bála jste se. To se může stát každému.",
       "next": "a2_vedma_kind_02",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_kind_02",
@@ -2266,7 +2273,7 @@
       "speaker": "vedma",
       "text": "Děkuju, děvče. Celý rok mě to tíží. Kdybyste někdy potřebovaly mou pomoc, přijďte. Pomůžu vám, jak jen budu umět.",
       "next": "a2_vedma_water_01",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_water_01",
@@ -2290,7 +2297,7 @@
       "speaker": "roza",
       "text": "A proč za vámi Rubínka přišla teď?",
       "next": "a2_vedma_water_02",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_water_02",
@@ -2314,7 +2321,7 @@
       "speaker": "vedma",
       "text": "Ptala se, kde najde mrtvou vodu. Takovou, co hojí rány, ale nikoho neoživí.",
       "next": "a2_vedma_water_03",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_water_03",
@@ -2338,7 +2345,7 @@
       "speaker": "vedma",
       "text": "Mrtvá voda vyvěrá jen tam, kde se náš svět dotýká Navi, říše mrtvých. Bojím se, co to znamená.",
       "next": "a2_vedma_water_04",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_water_04",
@@ -2362,7 +2369,7 @@
       "speaker": "emma",
       "text": "Velká voda za přehradou… nejkratší noc… a mrtvá voda. Myslíte, že chce otevřít bránu do Navi?",
       "next": "a2_vedma_water_05",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_water_05",
@@ -2386,7 +2393,7 @@
       "speaker": "vedma",
       "text": "Aby získala Tesáka zpátky. Toho se bojím. Víc o Navi ví jen Triglav v posvátném háji. Jeho tři hlavy vidí do nebe, na zem i pod zem.",
       "next": "a2_vedma_water_06",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_vedma_water_06",
@@ -2410,7 +2417,7 @@
       "speaker": "anna",
       "text": "Tak poletíme do posvátného háje.",
       "next": "a2_hejkal_01",
-      "music": "village_day"
+      "music": "vedma_hut"
     },
     {
       "id": "a2_hejkal_01",
@@ -2484,7 +2491,7 @@
       "speaker": "hejkal",
       "text": "Hej! Hej, jezdkyně! Kam tak spěcháte?",
       "next": "a2_hejkal_05",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_hejkal_05",
@@ -2508,7 +2515,7 @@
       "speaker": "roza",
       "text": "Do posvátného háje. A ty nás nezmateš!",
       "next": "a2_hejkal_06",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_hejkal_06",
@@ -2532,7 +2539,7 @@
       "speaker": "hejkal",
       "text": "Zmást? Já? Kdepak. Mně je tady jen hrozně dlouhá chvíle. Sto let sedím na pařezu a nikdo si se mnou nepovídá.",
       "next": "a2_hejkal_07",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_hejkal_07",
@@ -2556,7 +2563,7 @@
       "speaker": "anna",
       "text": "To musí být smutné. Chceš slyšet hádanku?",
       "next": "a2_hejkal_08",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_hejkal_08",
@@ -2579,7 +2586,7 @@
       ],
       "text": "Hejkal se rozzářil. Hádal a hádal, a když konečně uhodl, zahejkal radostí tak, že ze tří smrků popadaly šišky.",
       "next": "a2_hejkal_09",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_hejkal_09",
@@ -2603,7 +2610,7 @@
       "speaker": "hejkal",
       "text": "Děkuju, děvčata! Do háje je to rovně za sluncem. A kdyby vás někdo zlobil, zahejkám na něj!",
       "next": "a2_fawn_01",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_fawn_01",
@@ -3196,7 +3203,7 @@
       ],
       "text": "Na louce u řeky se v ranní mlze vznášely víly v bílých šatech. Netančily ale, jen smutně stály po kotníky ve vodě.",
       "next": "a2_vily_02",
-      "music": "forest_ground"
+      "music": "vily_magic"
     },
     {
       "id": "a2_vily_02",
@@ -3220,7 +3227,7 @@
       "speaker": "vila",
       "text": "Jezdkyně! Voda od bobří přehrady nám zaplavila louku. Kde budeme o slunovratu tančit?",
       "next": "a2_vily_03",
-      "music": "forest_ground"
+      "music": "vily_magic"
     },
     {
       "id": "a2_vily_03",
@@ -3244,7 +3251,7 @@
       "speaker": "emma",
       "text": "Draci by mohli vyhloubit odtok, aby voda stekla zpátky do řeky. Ale bude to chvíli trvat.",
       "next": "a2_vily_choice",
-      "music": "forest_ground"
+      "music": "vily_magic"
     },
     {
       "id": "a2_vily_choice",
@@ -3277,7 +3284,7 @@
           "next": "a2_vily_skip_01"
         }
       ],
-      "music": "forest_ground"
+      "music": "vily_magic"
     },
     {
       "id": "a2_vily_help_01",
@@ -3300,7 +3307,7 @@
       ],
       "text": "Draci hrabali drápy a holky odnášely kameny, dokud voda s bubláním nestekla zpátky do řeky.",
       "next": "a2_vily_help_02",
-      "music": "forest_ground"
+      "music": "vily_magic"
     },
     {
       "id": "a2_vily_help_02",
@@ -3324,7 +3331,7 @@
       "speaker": "vila",
       "text": "Naše louka! Děkujeme. Až budete nejvíc potřebovat čas, zavolejte nás. Kdo se zadívá na náš tanec, zapomene na všechno ostatní.",
       "next": "a2_vily_help_03",
-      "music": "forest_ground"
+      "music": "vily_magic"
     },
     {
       "id": "a2_vily_help_03",
@@ -3348,7 +3355,7 @@
       "speaker": "roza",
       "text": "To zní jako dobrý plán na jednu zrzavou čarodějnici.",
       "next": "a2_lair_smell_01",
-      "music": "forest_ground"
+      "music": "vily_magic"
     },
     {
       "id": "a2_vily_skip_01",
@@ -3372,7 +3379,7 @@
       "speaker": "vila",
       "text": "Tak leťte. Snad louka do slunovratu sama vyschne.",
       "next": "a2_lair_smell_01",
-      "music": "forest_ground"
+      "music": "vily_magic"
     },
     {
       "id": "a2_lair_smell_01",
@@ -3476,7 +3483,7 @@
       ],
       "text": "Bezzubka je dovedla k jeskyni vysoko ve skalách. Na zemi se leskly rudé šupiny, staré a zaprášené.",
       "next": "a2_lair_02",
-      "music": "forest_ground"
+      "music": "tesak_lair"
     },
     {
       "id": "a2_lair_02",
@@ -3495,7 +3502,7 @@
       "speaker": "anna",
       "text": "Rudé šupiny… Tohle bylo Tesákovo doupě.",
       "next": "a2_lair_03",
-      "music": "forest_ground"
+      "music": "tesak_lair"
     },
     {
       "id": "a2_lair_03",
@@ -3513,7 +3520,7 @@
       ],
       "text": "Uprostřed jeskyně leželo prázdné hnízdo z větví. Bezzubka ho obešla a začala čenichat u úzké pukliny ve skále.",
       "next": "a2_lair_04",
-      "music": "forest_ground"
+      "music": "tesak_lair"
     },
     {
       "id": "a2_lair_04",
@@ -3532,7 +3539,7 @@
       "speaker": "emma",
       "text": "Je tam něco schovaného. Rózo, posviť si.",
       "next": "a2_lair_05",
-      "music": "forest_ground"
+      "music": "tesak_lair"
     },
     {
       "id": "a2_lair_05",
@@ -3550,7 +3557,7 @@
       ],
       "text": "Hluboko v puklině leželo vejce. Velké, šedé a studené jako kámen.",
       "next": "a2_lair_06",
-      "music": "forest_ground"
+      "music": "tesak_lair"
     },
     {
       "id": "a2_lair_06",
@@ -3569,7 +3576,7 @@
       "speaker": "roza",
       "text": "Dračí vejce! Tesák ho tu musel schovat, než umřel!",
       "next": "a2_lair_07",
-      "music": "forest_ground"
+      "music": "tesak_lair"
     },
     {
       "id": "a2_lair_07",
@@ -3588,7 +3595,7 @@
       "speaker": "anna",
       "text": "Je úplně studené. Myslíte, že je ještě živé?",
       "next": "a2_lair_08",
-      "music": "forest_ground"
+      "music": "tesak_lair"
     },
     {
       "id": "a2_lair_08",
@@ -3607,7 +3614,7 @@
       "speaker": "emma",
       "text": "Dračí vejce prý může spát celé roky, dokud ho nezahřeje dračí oheň.",
       "next": "a2_lair_09",
-      "music": "forest_ground"
+      "music": "tesak_lair"
     },
     {
       "id": "a2_lair_09",
@@ -3625,7 +3632,7 @@
       ],
       "text": "Bezzubka se nad vejcem sklonila a jemně na něj dýchla plamenem. Skořápka zrudla, zazářila… a zevnitř se ozvalo tiché ťuknutí.",
       "next": "a2_lair_10",
-      "music": "forest_ground"
+      "music": "tesak_lair"
     },
     {
       "id": "a2_lair_10",
@@ -3644,7 +3651,7 @@
       "speaker": "roza",
       "text": "Je živé! A Rubínka o něm vůbec neví.",
       "next": "a2_lair_11",
-      "music": "forest_ground"
+      "music": "tesak_lair"
     },
     {
       "id": "a2_lair_11",
@@ -3663,7 +3670,7 @@
       "speaker": "anna",
       "text": "Vezmeme ho s sebou. Opatrně.",
       "next": "a2_foxfam_01",
-      "music": "forest_ground"
+      "music": "tesak_lair"
     },
     {
       "id": "a2_foxfam_01",
@@ -3686,7 +3693,7 @@
       ],
       "text": "Když se jezdkyně snesly na pěšinu kousek od háje, z kapradí vykoukl známý zrzavý ocásek.",
       "next": "a2_foxfam_02",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_foxfam_02",
@@ -3710,7 +3717,7 @@
       "speaker": "anna",
       "text": "To je naše liščátko! A má s sebou celou rodinu!",
       "next": "a2_foxfam_03",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_foxfam_03",
@@ -3733,7 +3740,7 @@
       ],
       "text": "Liščata se přikutálela k drakům, tahala Buřinohu za ocas a jedno vylezlo Běsce až na hlavu.",
       "next": "a2_foxfam_04",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_foxfam_04",
@@ -3757,7 +3764,7 @@
       "speaker": "emma",
       "text": "Běsko, nehýbej se! Vždyť ho shodíš.",
       "next": "a2_foxfam_05",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_foxfam_05",
@@ -3780,7 +3787,7 @@
       ],
       "text": "Stará liška tentokrát kývla hlavou, jako by děkovala. Pak celou rodinu odvedla zpátky do lesa.",
       "next": "a2_foxfam_06",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_foxfam_06",
@@ -3799,7 +3806,7 @@
       "speaker": "roza",
       "text": "Tak, a teď do háje. Triglav na nás čeká.",
       "next": "a2_grove_01",
-      "music": "forest_ground"
+      "music": "playful"
     },
     {
       "id": "a2_grove_01",
@@ -3817,7 +3824,7 @@
       ],
       "text": "Posvátný háj tvořily obrovské staré duby. Mezi nimi na kamenném návrší stála dřevěná socha boha se třemi hlavami.",
       "next": "a2_grove_02",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_02",
@@ -3836,7 +3843,7 @@
       "speaker": "emma",
       "text": "Triglav. Draci musí zůstat venku, do háje smějí jen lidé.",
       "next": "a2_grove_03",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_03",
@@ -3855,7 +3862,7 @@
       "speaker": "roza",
       "text": "Bezzubko, počkej tady s Běskou a Buřinohou. Hned jsme zpátky.",
       "next": "a2_grove_04",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_04",
@@ -3873,7 +3880,7 @@
       ],
       "text": "Jezdkyně tiše vstoupily mezi duby. Všechny tři hlavy Triglava měly přes oči zlatou pásku.",
       "next": "a2_grove_05",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_05",
@@ -3892,7 +3899,7 @@
       "speaker": "anna",
       "text": "Má zavázané oči. Prý aby neviděl, co zlého lidé dělají.",
       "next": "a2_grove_06",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_06",
@@ -3910,7 +3917,7 @@
       ],
       "text": "Emma se uctivě uklonila a opatrně odhrnula zlatou pásku z první hlavy.",
       "next": "a2_grove_07",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_07",
@@ -3929,7 +3936,7 @@
       "speaker": "Hlava nebe",
       "text": "Vidím všechno, co je pod nebem. Ptejte se, jezdkyně.",
       "next": "a2_grove_08",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_08",
@@ -3948,7 +3955,7 @@
       "speaker": "roza",
       "text": "Kde je Rubínka? Čarodějka se zrzavými vlasy.",
       "next": "a2_grove_09",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_09",
@@ -3967,7 +3974,7 @@
       "speaker": "Hlava nebe",
       "text": "Je blíž, než si myslíte. Celou cestu vás sleduje z oblak. Hlídejte svou ohnivou dračici.",
       "next": "a2_grove_10",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_10",
@@ -3986,7 +3993,7 @@
       "speaker": "roza",
       "text": "Bezzubku? Proč zrovna ji?",
       "next": "a2_grove_11",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_11",
@@ -4004,7 +4011,7 @@
       ],
       "text": "Ale první hlava už mlčela. Anna odhrnula pásku z druhé hlavy.",
       "next": "a2_grove_12",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_12",
@@ -4023,7 +4030,7 @@
       "speaker": "Hlava země",
       "text": "Znám všechno, co žije na zemi. Na co se ptáš, dítě?",
       "next": "a2_grove_13",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_13",
@@ -4042,7 +4049,7 @@
       "speaker": "anna",
       "text": "Čarodějka omámila zubra. Jak se dá omámení zlomit?",
       "next": "a2_grove_14",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_14",
@@ -4061,7 +4068,7 @@
       "speaker": "Hlava země",
       "text": "Omámení zlomí jen hlas toho, koho omámený miluje. Klidný hlas, ne křik.",
       "next": "a2_grove_15",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_15",
@@ -4079,7 +4086,7 @@
       ],
       "text": "Nakonec Róza sáhla po pásce třetí hlavy. Ta promluvila šeptem, ze kterého běhal mráz po zádech.",
       "next": "a2_grove_16",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_16",
@@ -4098,7 +4105,7 @@
       "speaker": "Hlava podsvětí",
       "text": "Znám Nav, říši mrtvých. Ptejte se, ale odpověď se vám nebude líbit.",
       "next": "a2_grove_17",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_17",
@@ -4117,7 +4124,7 @@
       "speaker": "emma",
       "text": "Chce Rubínka otevřít bránu do Navi?",
       "next": "a2_grove_18",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_18",
@@ -4136,7 +4143,7 @@
       "speaker": "Hlava podsvětí",
       "text": "Bránu otevře velká voda v nejkratší noci, mrtvá voda a oheň živého draka.",
       "next": "a2_grove_19",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_19",
@@ -4155,7 +4162,7 @@
       "speaker": "Hlava podsvětí",
       "text": "Ale kdo bránou projde, už se nevrátí. Mrtví se nevracejí. Jen živí odcházejí za nimi.",
       "next": "a2_grove_20",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_20",
@@ -4174,7 +4181,7 @@
       "speaker": "anna",
       "text": "Takže Rubínka… by v Navi zůstala navždy.",
       "next": "a2_grove_21",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_21",
@@ -4193,7 +4200,7 @@
       "speaker": "roza",
       "text": "Počkat. Oheň živého draka? Hlídejte svou ohnivou dračici…",
       "next": "a2_grove_22",
-      "music": "forest_ground"
+      "music": "sacred_grove"
     },
     {
       "id": "a2_grove_22",
@@ -4211,7 +4218,7 @@
       ],
       "text": "Venku se ozval řev. Bezzubčin řev.",
       "next": "a2_grove_23",
-      "music": "forest_ground"
+      "music": "danger"
     },
     {
       "id": "a2_grove_23",
@@ -4229,7 +4236,7 @@
       ],
       "text": "Jezdkyně vyběhly z háje. Běska a Buřinoha zmateně pobíhaly mezi stromy. Bezzubka byla pryč.",
       "next": "a2_grove_24",
-      "music": "forest_ground"
+      "music": "danger"
     },
     {
       "id": "a2_grove_24",
@@ -4247,7 +4254,7 @@
       ],
       "text": "Vysoko na nebi se mihla šarlatová skvrna a zmizela v oblacích. Vítr k nim donesl tichý, krutý smích.",
       "next": "a2_grove_25",
-      "music": "forest_ground"
+      "music": "danger"
     },
     {
       "id": "a2_grove_25",
@@ -4266,7 +4273,7 @@
       "speaker": "roza",
       "text": "Bezzubko!",
       "next": "act2a_end",
-      "music": "forest_ground"
+      "music": "danger"
     },
     {
       "id": "act2a_end",
@@ -4279,7 +4286,7 @@
       ],
       "characters": [],
       "text": "Rubínka unesla Bezzubku a do slunovratu zbýval jediný den. (Pokračování se teprve píše.)",
-      "music": "forest_ground"
+      "music": "danger"
     },
     {
       "id": "beaver_battle_lose",

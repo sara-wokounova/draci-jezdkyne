@@ -862,3 +862,25 @@ Decision: characters' names don't have to be period names (D34): Róza, Emma, An
 Mythological and fantastic creatures fall under the magic exception too.
 Why: decided by Sára ("Jména jsou výjimka z dobové přesnosti"), asked after Claude noted that Soňa (the Russian form of
 Sofia) reached Czech much later; Róza isn't a period name either.
+
+## D36 — Act 2a's places get their own music, in early-medieval Slavic folk style (2026-11-16) — Accepted
+Decision: seven new tracks, one per kind of place or mood in Act 2a: `vedma_hut` (the vědma's hut), `night_forest`
+(the night search, the will-o'-the-wisps), `vily_magic` (the víly), `playful` (the fox, the hejkal from his first line,
+the fox family), `tesak_lair` (Tesák's lair and the egg), `sacred_grove` (Triglav's grove) and `danger` (from Bezzubka's
+roar to `act2a_end`). The paths, the badger, the fawn, the wisent and Soňa keep `forest_ground`. Made with Runway's
+music tool (full-length model, ~1:40–3:00 each, 8 credits a track), all instrumental early-medieval Slavic folk: a
+wooden folk flute, a hammered dulcimer (cimbalom), a plucked or bowed gusle, a drone, a frame drum at most; no piano,
+orchestra, synthesizers or modern drums; a short, simple modal melody repeated with small variations; an ending that
+flows back into the start. `vily_magic` has wordless women's voices and `sacred_grove` a wordless choir (low men's
+voices with women's above); every other track is without voices. Each prompt also names the place's mood (warm and
+melancholic, hushed night, playful dance, lament with hope, solemn ritual, driving tension). Originals in `art/music/`,
+deployed 9 dB quieter by `scripts/build-music.sh` (D29).
+Why: asked for by Sára ("we need new music for new scenes, so the music score is more diverse"): 155 Act 2a scenes
+played `forest_ground` almost throughout. Her direction for the style: background music without lyrics, evoking old
+Slavic music, the early Middle Ages, folklore, flutes and cimbalom, not piano, simpler melodies; she heard the first
+track (`vedma_hut`) before the rest were made ("je to fajn"), and asked for the wordless voices for the víly and the
+grove. A first, instrumental `sacred_grove` was replaced by the choir version (it stays in Runway, not in the repo).
+Consequences: ~24 MB more music to stream (each track only on its scenes, D21). Every change of place in Act 2a now
+changes the track (a 350 ms fade, D21); a Back across such a change starts the other track over (only `battle` resumes,
+D26). The tracks are AI-generated like the older ones; the deployed files lose their provenance metadata, as before.
+The older tracks (`village_day`, `dragon_flight`, `forest_ground`, `battle`) are not in the folk style.

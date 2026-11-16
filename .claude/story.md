@@ -155,3 +155,8 @@ a big water on the shortest night, flooding the riders' gord on the way). Acts 2
   `beaver_after_battle_win_*`, lose. The minigame `beaver_battle` plays `battle`: battle_01 then
   battle_02, looped as one file (D25); a retry continues it where the last attempt stopped, a new
   game starts it over (D26).
+- Act 2a music (D36, 2026-11-16): `vedma_hut` (a2_vedma_*), `night_forest` (a2_herb_*), `vily_magic` (a2_vily_*,
+  wordless women's voices), `playful` (a2_fox_*, a2_hejkal_04 … _09, a2_foxfam_*), `tesak_lair` (a2_lair_01 … _11),
+  `sacred_grove` (a2_grove_01 … _21, a wordless choir), `danger` (a2_grove_22 … _25, `act2a_end`: Bezzubka taken);
+  the rest of Act 2a (the paths, the badger, the fawn, the wisent, Soňa) keeps `forest_ground`, the flights
+  `dragon_flight`.

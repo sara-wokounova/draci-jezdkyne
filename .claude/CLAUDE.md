@@ -200,7 +200,10 @@ to `start` + main menu). Galerie lists every `end` scene the player has ever rea
   original's bit rate; `battle.mp3` (the minigame) is the two songs joined and re-encoded at 128 kbps (D25).
   Made by `bash scripts/build-music.sh` (the committed files with ffmpeg 8.1; another build makes the same audio but
   not the same bytes). The originals keep their C2PA provenance metadata (AI-generated content); the deployed files
-  lose it, and `-vn -map_metadata -1` keep a future song's cover art and text tags out of them. A new track: put the
+  lose it, and `-vn -map_metadata -1` keep a future song's cover art and text tags out of them. Act 2a's seven tracks (D36: `vedma_hut`, `night_forest`, `vily_magic`,
+  `playful`, `tesak_lair`, `sacred_grove`, `danger`) were made with Runway's music tool (AI-generated, 192 kbps,
+  −14.3 dB mean like the older originals) in early-medieval Slavic folk style (Sára: flutes, cimbalom, no piano, simple
+  melodies, no lyrics; the víly and the grove with wordless voices); their style is in D36. A new track: put the
   original in `art/music/` and add its line to the script (its own bit rate, from `ffprobe`).
 - Sound effects (D29): `public/assets/minigames/dragon-attack/sfx/*.mp3`, made from Sára's picks in
   `art/minigames/dragon-attack/sfx/` (Runway's sound-effect tool, AI-generated), mono, levelled to an RMS

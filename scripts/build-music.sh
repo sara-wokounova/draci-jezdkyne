@@ -11,3 +11,10 @@ ffmpeg -y -i art/music/battle_01.mp3 -i art/music/battle_02.mp3 -filter_complex 
 ffmpeg -y -i art/music/village_day.mp3 -af volume=-9dB $E -b:a 192k public/assets/music/village_day.mp3
 ffmpeg -y -i art/music/dragon_flight_above_the_green_sea.mp3 -af volume=-9dB $E -b:a 192k public/assets/music/dragon_flight_above_the_green_sea.mp3
 ffmpeg -y -i art/music/forest_ground_whispering_trees.mp3 -af volume=-9dB $E -b:a 192k public/assets/music/forest_ground_whispering_trees.mp3
+ffmpeg -y -i art/music/vedma_hut.mp3 -af volume=-9dB $E -b:a 192k public/assets/music/vedma_hut.mp3
+ffmpeg -y -i art/music/night_forest.mp3 -af volume=-9dB $E -b:a 192k public/assets/music/night_forest.mp3
+ffmpeg -y -i art/music/vily_magic.mp3 -af volume=-9dB $E -b:a 192k public/assets/music/vily_magic.mp3
+ffmpeg -y -i art/music/playful.mp3 -af volume=-9dB $E -b:a 192k public/assets/music/playful.mp3
+ffmpeg -y -i art/music/tesak_lair.mp3 -af volume=-9dB $E -b:a 192k public/assets/music/tesak_lair.mp3
+ffmpeg -y -i art/music/sacred_grove.mp3 -af volume=-9dB $E -b:a 192k public/assets/music/sacred_grove.mp3
+ffmpeg -y -i art/music/danger.mp3 -af volume=-9dB $E -b:a 192k public/assets/music/danger.mp3
