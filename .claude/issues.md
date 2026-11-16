@@ -209,7 +209,7 @@ the volume: there it can sound for up to ~400 ms. Check that it stays silent els
 
 ## Fixed
 
-### P2 — The tap that showed choices or the end card pressed what appeared under the finger (found in planning D37, verified 2026-11-16) — fixed 2026-11-16, not yet live
+### P2 — The tap that showed choices or the end card pressed what appeared under the finger (found in planning D37, verified 2026-11-16) — fixed 2026-11-16 in `30224d0` (D37), verified live
 On touch, the story advances on the root's `pointerup`, and the click of that same tap went to a button inserted under
 the finger meanwhile: one tap on `forest_flight_02` where choice 1 appears went straight to `river_dam`, one tap on
 `flooded_town`'s line where "Zpět na začátek" appears reset the game. Fix (D37): every choice panel waits 500 ms of
@@ -217,20 +217,20 @@ quiet (`choiceGuard`), "Zpět na začátek" is behind `guardTaps` (armed per ope
 (also the minigame result's Pokračovat). Checks: `lines.mjs` "guard: one touch tap…", "guard: a finger held down…",
 "endings: the end card guard", "endings: a finger held down…".
 
-### P1 — Persuade branch crashed at `dam_with_beavers_persuade_04` (verified 2026-10-17) — fixed 2026-11-15, not yet live
+### P1 — Persuade branch crashed at `dam_with_beavers_persuade_04` (verified 2026-10-17) — fixed 2026-11-15, verified live 2026-11-16 (`30224d0`)
 `next: "dam_with_beavers_persuade_05"` didn't exist: tapping threw "Unknown scene id". Fix: Act 1's new scenes (story.md →
 Structure): `_05`, `_06`, then the shared deal `dam_deal_01` … `_06` and `act1_end`.
 
-### P2 — The fight branch's victory had no way on (verified 2026-10-28) — fixed 2026-11-15, not yet live
+### P2 — The fight branch's victory had no way on (verified 2026-10-28) — fixed 2026-11-15, verified live 2026-11-16 (`30224d0`)
 `beaver_after_battle_win_07` looped to itself. Fix: it goes on to the shared deal (`dam_deal_01`). Both branches now
 go on to Act 2a, which ends on `act2a_end`, the temporary end of the written story (no `next`: a tap does nothing;
 not an ending).
 
-### P3 — Czech typos in `story.json` — fixed 2026-11-15, not yet live
+### P3 — Czech typos in `story.json` — fixed 2026-11-15, verified live 2026-11-16 (`30224d0`)
 "v lesa", "nežraly" (`forest_flight_01`), "přeprat by je by" (`dam_with_beavers_persuade`), "Co by bychom"
 (`_01`), "byly z nám" (`_04`, fixed with the incantation, D34).
 
-### P3 — Anachronisms in story.json (D34, 2026-11-15) — fixed 2026-11-15, not yet live
+### P3 — Anachronisms in story.json (D34, 2026-11-15) — fixed 2026-11-15, verified live 2026-11-16 (`30224d0`)
 The story is set in the 10th century (D34). `flooded_town` and its end card said "město" (now "hradiště", the title
 "Zaplavené hradiště"); the beaver said the sorceress "mávla kouzelnou hůlkou" (a modern fairy-tale prop; now she "pronesla
 zaříkávání", in `dam_with_beavers_persuade_04` and `beaver_after_battle_win_03`, with the typo "byly z nám" → "byli z nás").
