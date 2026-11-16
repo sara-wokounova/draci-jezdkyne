@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean-sprites": "node scripts/removeCheckerboard.mjs public/assets/characters",
-    "test": "node tests/storyflow.test.mjs && node tests/autosave.test.mjs && node tests/story.test.mjs && node tests/story-history.test.mjs"
+    "test": "node tests/storyflow.test.mjs && node tests/autosave.test.mjs && node tests/story.test.mjs && node tests/act2a.test.mjs && node tests/story-history.test.mjs"
   },
   "dependencies": {
     "howler": "^2.2.3",

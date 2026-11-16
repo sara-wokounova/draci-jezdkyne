@@ -1,0 +1,391 @@
+{
+  "location": {
+    "id": "reka",
+    "events": [
+      {
+        "scene": "reka_jezevec"
+      },
+      {
+        "scene": "reka_vily"
+      }
+    ]
+  },
+  "scenes": [
+    {
+      "id": "reka_jezevec",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_burrow.png"
+      },
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "jezevec",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "add": {
+        "pul": 1
+      },
+      "next": "reka_jezevec_pomoc",
+      "lines": [
+        {
+          "text": "Podél řeky bylo vidět, co bobří přehrada dělá. Voda za ní stoupala, tiše a trpělivě, a ukusovala břeh pod starými duby.",
+          "characters": []
+        },
+        {
+          "text": "Na hrázi stál bobr veliký jako medvěd. Když uviděl draky, zvedl tlapu a zamával jim.",
+          "if": "bobri_pratele"
+        },
+        {
+          "text": "Bobři na hrázi se přikrčili, sotva na vodu padl dračí stín. Jeden po druhém zmizeli pod hladinou.",
+          "if": "bobri_porazeni"
+        },
+        {
+          "text": "Na břehu zuřivě hrabal jezevec. Bláto od něj lítalo na všechny strany a mezi hrabáním nadával tak, že se i Buřinoha začervenala.",
+          "characters": [
+            {
+              "id": "jezevec",
+              "position": "left",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "jezevec",
+          "text": "Čtyřicet zim tu bydlel můj děd! Po něm můj otec! Nejlepší nora na celém břehu, suchá, na jih! A teď mi do ní teče řeka!"
+        },
+        {
+          "speaker": "emma",
+          "text": "Voda vám teče do nory? Je tam ještě někdo?",
+          "characters": [
+            {
+              "id": "jezevec",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "jezevec",
+          "text": "Pět jezevčat! Dvě vynesu v zubech, ale pět? A voda stoupá rychleji, než stačím hrabat. Tak tam nestůjte a neokounějte… Totiž. Prosím."
+        },
+        {
+          "speaker": "roza",
+          "text": "Pomůžeme vám! Holky, dolů z draků. Bezzubko, zadrž tu vodu!",
+          "characters": [
+            {
+              "id": "jezevec",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "excited"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reka_jezevec_pomoc",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_burrow.png"
+      },
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "jezevec",
+          "position": "left",
+          "pose": "happy"
+        }
+      ],
+      "set": [
+        "jezevci"
+      ],
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "text": "Draci roztáhli křídla nad vodou jako tři hráze. Holky lezly do nory po břiše a jedno po druhém podávaly ven mokrá, zablácená, prskající jezevčata.",
+          "characters": [
+            {
+              "id": "jezevec",
+              "position": "left",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Páté! Kouše, takže je živé. Au. Hodně živé.",
+          "characters": [
+            {
+              "id": "jezevec",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "speaker": "jezevec",
+          "text": "To má po mně. Počkat. Raz, dva, tři, čtyři… pět. Pět! Všechna!",
+          "characters": [
+            {
+              "id": "jezevec",
+              "position": "left",
+              "pose": "happy"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "text": "Pak draci vyhrabali novou noru vysoko na stráni. Jezevec jim do toho celou dobu mluvil: vchod víc k jihu, komoru hlubší, a tohle že má být chodba?"
+        },
+        {
+          "speaker": "jezevec",
+          "text": "Hm. Dědova nora to není. Ale je suchá. A draci, to musím uznat, hrabou skoro jako jezevci. Skoro.",
+          "characters": [
+            {
+              "id": "jezevec",
+              "position": "left",
+              "pose": "happy"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "speaker": "jezevec",
+          "text": "Jezevec nezapomíná. Až budete potřebovat něco podhrabat, podkopat nebo vyhrabat, zadupejte třikrát na zem a zavolejte. Líp než my nekope nikdo pod sluncem."
+        },
+        {
+          "speaker": "roza",
+          "text": "Budeme si to pamatovat. A dejte pozor na to páté!"
+        }
+      ]
+    },
+    {
+      "id": "reka_vily",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vily_meadow.png"
+      },
+      "music": "vily_magic",
+      "characters": [
+        {
+          "id": "vila",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "add": {
+        "pul": 1
+      },
+      "next": "reka_vily_pomoc",
+      "lines": [
+        {
+          "text": "Na louce u řeky ležela mlha, i když všude kolem svítilo slunce. V mlze nad vodou stály postavy v bílém. Netančily. Jen stály po kotníky v kalné vodě a mlčely.",
+          "characters": []
+        },
+        {
+          "text": "Z hráze nad loukou zamával jezdkyním veliký bobr. Víly se po něm ani neohlédly.",
+          "if": "bobri_pratele"
+        },
+        {
+          "text": "Bobři na hrázi nad loukou zmizeli pod vodou, sotva zahlédli draky. Víly se po nich ani neohlédly.",
+          "if": "bobri_porazeni"
+        },
+        {
+          "speaker": "emma",
+          "text": "Víly. Nedívejte se jim dlouho do očí. Kdo se zadívá na jejich tanec, zapomene, kdo je a kam šel.",
+          "characters": [
+            {
+              "id": "vila",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "vila",
+          "text": "Nebojte se, lidská mláďata. V blátě se tančit nedá. Bobří voda nám vzala louku, na které tančíme od časů, kdy byl tenhle les ještě semínkem."
+        },
+        {
+          "speaker": "vila",
+          "text": "O slunovratu tančit musíme. Když víly o slunovratu netančí, měsíc se urazí a rosa přestane padat. Ale to vás lidi asi netrápí."
+        },
+        {
+          "speaker": "anna",
+          "text": "Trápí! Tedy… rosa je důležitá. A co kdyby ta voda zase odtekla?",
+          "characters": [
+            {
+              "id": "vila",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "emma",
+          "text": "Draci vyhloubí strouhu, aby voda z louky zase odtekla. Cestu si najde sama, když jí ji ukážeme.",
+          "characters": [
+            {
+              "id": "vila",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "vila",
+          "text": "Dračí drápy v naší louce… Dobrá. Kopejte. Ale běda vám, jestli pošlapete kosatce."
+        }
+      ]
+    },
+    {
+      "id": "reka_vily_pomoc",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vily_meadow.png"
+      },
+      "music": "vily_magic",
+      "characters": [
+        {
+          "id": "vila",
+          "position": "left",
+          "pose": "happy"
+        }
+      ],
+      "set": [
+        "vily",
+        "studanka"
+      ],
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "text": "Draci ryli drápy, holky odnášely kameny a kosatcům se vyhýbaly širokým obloukem. Konečně voda zabublala, zatočila se a s úlevným šplouchnutím odtekla z louky pryč.",
+          "characters": [
+            {
+              "id": "vila",
+              "position": "left",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "vila",
+          "text": "Naše louka zase dýchá. Děkujeme, a víly neděkují často. Až budete ze všeho nejvíc potřebovat čas, zavolejte nás. Kdo se zadívá na náš tanec, zapomene na všechno ostatní.",
+          "characters": [
+            {
+              "id": "vila",
+              "position": "left",
+              "pose": "happy"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "To by se mohlo hodit na jednu zrzavou čarodějnici.",
+          "characters": [
+            {
+              "id": "vila",
+              "position": "left",
+              "pose": "happy"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "speaker": "vila",
+          "text": "Zrzavou? Ta u nás byla. Před pár dny stála na břehu, na náš tanec se nepodívala ani jednou a ptala se na mrtvou vodu. My známe každou vodu v téhle zemi. Jí jsme neřekly nic.",
+          "characters": [
+            {
+              "id": "vila",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "vila",
+          "text": "Vám to povíme. Jděte tam, kde se řeka ztrácí ve skalách. Pod třemi uschlými olšemi je studánka. Nic živého z ní nepije, ani žába u ní nezakváká. To je mrtvá voda."
+        },
+        {
+          "speaker": "roza",
+          "text": "Triglav nám o ní říkal!",
+          "if": "haj_nav"
+        },
+        {
+          "speaker": "vila",
+          "text": "Triglav vidí. My známe cestu. To je rozdíl, děvče.",
+          "if": "haj_nav"
+        },
+        {
+          "speaker": "roza",
+          "text": "Mrtvá voda… to je ta brána do Navi!",
+          "if": [
+            "vedma",
+            "!haj_nav"
+          ]
+        },
+        {
+          "speaker": "vila",
+          "text": "Nepijte z ní a nedívejte se do ní dlouho. Mrtvá voda ukazuje ty, kdo nám chybí. Proto se od ní tak těžko odchází."
+        },
+        {
+          "text": "Mlha se zvedla. Když se jezdkyně ohlédly, víly už tančily – a Emma musela Anně rychle zakrýt oči.",
+          "characters": []
+        }
+      ]
+    }
+  ]
+}

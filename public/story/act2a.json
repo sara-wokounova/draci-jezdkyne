@@ -1,0 +1,1689 @@
+{
+  "scenes": [
+    {
+      "id": "a2_rano1",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "music": "dragon_flight",
+      "characters": [],
+      "next": "a2_liska",
+      "lines": [
+        {
+          "text": "Ten den už jezdkyně nikoho nepotkaly. Les mlčel, jako by čarodějnici sám schovával, a jen sovy se za nimi dlouho dívaly."
+        },
+        {
+          "speaker": "emma",
+          "text": "Zrzavé vlasy a šarlatové šaty se neschovají ani v tom nejhlubším lese. Zítra ji najdeme.",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "center",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "text": "Ráno, sotva rosa oschla na dračích křídlech, se všechny tři vznesly nad les znovu. Do slunovratu zbývaly tři dny.",
+          "characters": []
+        }
+      ]
+    },
+    {
+      "id": "a2_liska",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "music": "playful",
+      "characters": [
+        {
+          "id": "liska",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "text": "Sotva draci dosedli na lesní pěšinu, ozvalo se z kapradí kňučení. Tenké, žalostné – a trochu uražené.",
+          "characters": []
+        },
+        {
+          "speaker": "anna",
+          "text": "Liščátko! Je úplně samo a třese se jako osika.",
+          "characters": [
+            {
+              "id": "liska",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "excited"
+            }
+          ]
+        },
+        {
+          "speaker": "liska",
+          "text": "Já se netřesu! Já se… chvěju odvahou. A neztratil jsem se. To nora se ztratila!"
+        },
+        {
+          "speaker": "emma",
+          "text": "Tak to ji musíme najít, než se zatoulá ještě dál. Kudy jsi šel naposled?",
+          "characters": [
+            {
+              "id": "liska",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "liska",
+          "text": "Honil jsem motýla. Modrého. Byl skoro můj! A pak najednou vypadaly všechny stromy stejně."
+        },
+        {
+          "speaker": "roza",
+          "text": "Bezzubka má nejlepší nos v celém lese. Bezzubko, hledej noru!",
+          "characters": [
+            {
+              "id": "liska",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "text": "Bezzubka zavětřila, kýchla do kapradí, až z něj vylétla jiskra, a vykročila k vývratu starého buku. Liščátko cupitalo před ní, jako by cestu celou dobu znalo."
+        },
+        {
+          "text": "Z nory vyhlédla stará liška. Změřila si draky jantarovýma očima, beze slova popadla synka za kůži na krku a zmizela s ním pod kořeny."
+        },
+        {
+          "speaker": "liska",
+          "text": "Mami, pusť! To já je sem dovedl! Na shledanou, draci! Toho motýla příště chytím!"
+        },
+        {
+          "speaker": "anna",
+          "text": "Ani nepoděkovala. Ta by se nepoklonila ani knížeti.",
+          "characters": [
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "Je to liška, ne velmož. Tak pojďte, čarodějnice na nás čekat nebude.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2_cesta",
+      "lines": [],
+      "next": [
+        {
+          "if": "pul>=6",
+          "next": "a2_vecer3"
+        },
+        {
+          "if": [
+            "slib",
+            "!noc",
+            "pul>=2",
+            "!rano2"
+          ],
+          "next": "a2_noc"
+        },
+        {
+          "if": [
+            "slib",
+            "!noc",
+            "pul>=4",
+            "!rano3"
+          ],
+          "next": "a2_noc"
+        },
+        {
+          "if": [
+            "pul>=2",
+            "!rano2"
+          ],
+          "next": "a2_rano2"
+        },
+        {
+          "if": [
+            "pul>=4",
+            "rano2",
+            "!rano3"
+          ],
+          "next": "a2_rano3"
+        },
+        {
+          "next": "a2_kam"
+        }
+      ]
+    },
+    {
+      "id": "a2_kam",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "music": "dragon_flight",
+      "characters": [],
+      "choiceLayout": "center",
+      "lines": [
+        {
+          "text": "První den ráno. Kam poletíme?",
+          "if": "pul<1"
+        },
+        {
+          "text": "První den odpoledne. Kam poletíme?",
+          "if": [
+            "pul>=1",
+            "pul<2"
+          ]
+        },
+        {
+          "text": "Druhý den ráno. Kam poletíme?",
+          "if": [
+            "pul>=2",
+            "pul<3"
+          ]
+        },
+        {
+          "text": "Druhý den odpoledne. Kam poletíme?",
+          "if": [
+            "pul>=3",
+            "pul<4"
+          ]
+        },
+        {
+          "text": "Třetí den ráno. Kam poletíme?",
+          "if": [
+            "pul>=4",
+            "pul<5"
+          ]
+        },
+        {
+          "text": "Třetí den odpoledne. Kam poletíme?",
+          "if": "pul>=5"
+        }
+      ],
+      "choices": [
+        {
+          "text": "Do hlubokého lesa",
+          "location": "les"
+        },
+        {
+          "text": "K přehradě",
+          "location": "reka"
+        },
+        {
+          "text": "Do hor",
+          "location": "hory"
+        },
+        {
+          "text": "Za vědmou na hradiště",
+          "next": "vedma_01",
+          "if": [
+            "sona",
+            "!vedma"
+          ]
+        },
+        {
+          "text": "Do posvátného háje",
+          "next": "haj_01",
+          "if": [
+            "haj_znam",
+            "!haj"
+          ]
+        },
+        {
+          "text": "Odpočinout si na hradišti",
+          "next": "a2_odpocinek"
+        }
+      ]
+    },
+    {
+      "id": "a2_odpocinek",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/town_01.png"
+      },
+      "music": "village_day",
+      "characters": [],
+      "add": {
+        "pul": 1
+      },
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "text": "Draci se stočili do klubíček za valem a spali, až se jim od nozder kouřilo. Jezdkyně si lehly do trávy vedle nich a dívaly se, jak nad hradištěm plují oblaka."
+        },
+        {
+          "text": "Hledání chvíli počká. I dračí křídla si někdy musí odpočinout."
+        }
+      ]
+    },
+    {
+      "id": "a2_rano2",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "music": "dragon_flight",
+      "characters": [],
+      "set": [
+        "rano2"
+      ],
+      "next": "a2_hejkal",
+      "lines": [
+        {
+          "text": "Po dlouhé noci se Soňou spaly jezdkyně i draci až do poledne. Když konečně otevřely oči, stálo slunce vysoko nad lesem.",
+          "if": "pul>=3"
+        },
+        {
+          "text": "Druhý den se jezdkyně vznesly nad koruny stromů a les se pod nimi vlnil jako zelené moře. Do slunovratu zbývaly dva dny."
+        }
+      ]
+    },
+    {
+      "id": "a2_hejkal",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "music": "playful",
+      "characters": [
+        {
+          "id": "hejkal",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "set": [
+        "haj_znam"
+      ],
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "text": "U potoka, kde se draci zastavili napít, bylo ticho. Až moc velké ticho. A pak se z houští ozvalo: „Hej! Hej!“",
+          "characters": []
+        },
+        {
+          "speaker": "emma",
+          "text": "Neodpovídejte! To je hejkal. Kdo se mu ozve, toho vodí lesem v kruhu, dokud nezapomene, kudy přišel.",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "hejkal",
+          "text": "Hej! Slyším vás dýchat! Tři holky a tři draci. Sto let tudy nikdo nejde, a když už jde, tak mlčí. Kam tak spěcháte?",
+          "characters": [
+            {
+              "id": "hejkal",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "Hledáme zrzavou čarodějnici. A nás v kruhu vodit nebudeš!",
+          "characters": [
+            {
+              "id": "hejkal",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "hejkal",
+          "text": "Vodit? Já už nikoho nevodím. Zabloudilí utečou a já zase sedím sám na pařezu. Sto let počítám šišky. Víte, kolik jich je? Moc."
+        },
+        {
+          "speaker": "anna",
+          "text": "Tak hádej, hejkale. Bez nohou běží, bez úst šumí, nikdy nespí a nikdy se nevrátí. Co je to?",
+          "characters": [
+            {
+              "id": "hejkal",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "text": "Hejkal se drbal v mechu na hlavě, koulel očima a šeptal si: „Vítr? Ne. Zajíc? Ten má nohy…“ Pak se podíval na potok a vyskočil."
+        },
+        {
+          "speaker": "hejkal",
+          "text": "Voda! Potok! Uhodl jsem! Héééj!",
+          "characters": [
+            {
+              "id": "hejkal",
+              "position": "left",
+              "pose": "happy"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "excited"
+            }
+          ]
+        },
+        {
+          "text": "Zahejkal tak radostně, že ze tří smrků popadaly šišky a Běska leknutím vyprskla jiskru."
+        },
+        {
+          "speaker": "hejkal",
+          "text": "Za hádanku se platí radou. Čarodějnice po zemi nechodí, tu já neuhlídám. Ale Triglav v posvátném háji vidí všechno pod nebem, na zemi i pod ní. Ten ví, co hejkal neví."
+        },
+        {
+          "speaker": "hejkal",
+          "text": "A přijďte zas! Do té doby vymyslím hádanku já. Takovou, že ji nebudete umět uhodnout dalších sto let!"
+        }
+      ]
+    },
+    {
+      "id": "a2_rano3",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "music": "dragon_flight",
+      "characters": [],
+      "set": [
+        "rano3"
+      ],
+      "next": "a2_liskova_rodina",
+      "lines": [
+        {
+          "text": "Po noci strávené hledáním se Soňou spaly jezdkyně až do poledne a draci chrápali ještě o chvíli déle.",
+          "if": "pul>=5"
+        },
+        {
+          "text": "Třetí den byl vzduch těžký a teplý a vlaštovky létaly nízko nad korunami. Zítra v noci bude slunovrat."
+        },
+        {
+          "speaker": "roza",
+          "text": "Tak honem, holky. Bobři tu přehradu neudrží věčně.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "center",
+              "pose": "nervous"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2_liskova_rodina",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "music": "playful",
+      "characters": [
+        {
+          "id": "liskova_rodina",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "text": "Na lesní pěšině se zavlnilo kapradí a vykoukl z něj známý zrzavý ocásek. A za ním druhý. A třetí. A čtvrtý.",
+          "characters": []
+        },
+        {
+          "speaker": "anna",
+          "text": "To je náš lovec motýlů! A přivedl celou rodinu!",
+          "characters": [
+            {
+              "id": "liskova_rodina",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "excited"
+            }
+          ]
+        },
+        {
+          "speaker": "liska",
+          "text": "Vidíte? To jsou oni! Tahle umí kýchat oheň a tamta má na ocase trny. A všichni jsou moji kamarádi!"
+        },
+        {
+          "text": "Liščata se přikutálela k drakům. Dvě tahala Buřinohu za ocas, jedno ochutnávalo Bezzubčin dráp a to nejmenší vylezlo Běsce až na hlavu."
+        },
+        {
+          "speaker": "emma",
+          "text": "Běsko, ani se nehni! A hlavně nekýchej, nebo ho shodíš.",
+          "characters": [
+            {
+              "id": "liskova_rodina",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "text": "Stará liška seděla opodál, rovná a tichá. Dlouho se na jezdkyně dívala. Pak pomalu sklonila hlavu – jednou, hluboko, jako se klaní jen sobě rovným."
+        },
+        {
+          "speaker": "anna",
+          "text": "Viděly jste? Poklonila se! Tak přece.",
+          "characters": [
+            {
+              "id": "liskova_rodina",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "text": "Liška krátce štěkla a celá zrzavá rodina zmizela v kapradí. To nejmenší se ještě ohlédlo a zamávalo ocáskem.",
+          "characters": []
+        },
+        {
+          "speaker": "roza",
+          "text": "Tak, a teď dál.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2_vecer3",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/town_01.png"
+      },
+      "music": "village_day",
+      "characters": [],
+      "next": "a2_unos",
+      "lines": [
+        {
+          "text": "Večer na hradišti voněl kouřem a pečenými plackami. Jezdkyně seděly u ohně nad miskami kaše, ale žádná z nich neměla na jídlo ani pomyšlení."
+        },
+        {
+          "speaker": "emma",
+          "text": "Zítra v noci je slunovrat. Jestli jsme na něco zapomněly, máme poslední den na to, abychom to napravily.",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "center",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Nezapomněly. A kdyby, tak to zítra dohoníme. Buřinoha je odpočatá a já taky. Skoro.",
+          "characters": [
+            {
+              "id": "anna",
+              "position": "center",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "text": "Draci leželi venku za valem jako každý večer. Bezzubka spala s hlavou na tlapách a od nozder jí ze sna stoupal tenký proužek kouře.",
+          "characters": []
+        },
+        {
+          "speaker": "roza",
+          "text": "Půjdu jí ještě popřát dobrou noc. Bez toho neusne. A já vlastně taky ne.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "center",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "text": "Nestačila ani vstát."
+        }
+      ]
+    },
+    {
+      "id": "a2_unos",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/town_01.png"
+      },
+      "music": "danger",
+      "characters": [],
+      "set": [
+        "unos"
+      ],
+      "next": "a2_konec",
+      "lines": [
+        {
+          "text": "Tmou se rozlehl řev. Jezdkyně ho znaly: tak řvala Bezzubka. Ale takhle vyděšeně ji ještě nikdy neslyšely."
+        },
+        {
+          "text": "Vyběhly bránou za val. Běska a Buřinoha pobíhaly sem a tam, syčely do tmy a tloukly křídly. Místo, kde spávala Bezzubka, bylo prázdné a tráva na něm ještě teplá."
+        },
+        {
+          "text": "Vysoko na nebi se mihla šarlatová skvrna a zmizela v mracích. Vítr přinesl smích. Tichý a krutý – a přece zněl skoro jako pláč."
+        },
+        {
+          "text": "Emmě se vybavil šepot z posvátného háje: „Hlídejte svou ohnivou dračici.“ Triglav je varoval. A ony ji nechaly spát za valem jako každý večer.",
+          "if": "haj_nebe"
+        },
+        {
+          "speaker": "roza",
+          "text": "Bezzubko! BEZZUBKO!",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "center",
+              "pose": "sad"
+            }
+          ]
+        },
+        {
+          "text": "Odpověděla jí jen ozvěna od lesa."
+        }
+      ]
+    },
+    {
+      "id": "a2_konec",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_dragon_flight.png"
+      },
+      "music": "danger",
+      "characters": [],
+      "lines": [
+        {
+          "text": "Jezdkyně vzlétly na Běsce a Buřinoze, Róza za Emminými zády, ale nebe už bylo prázdné. Jen mraky a mlčící hvězdy."
+        },
+        {
+          "text": "Rubínka unesla Bezzubku. A do slunovratu zbýval jediný den.",
+          "if": "vedma"
+        },
+        {
+          "text": "Čarodějnice unesla Bezzubku. A do slunovratu zbýval jediný den.",
+          "if": "!vedma"
+        },
+        {
+          "text": "Róza se dívala do tmy tak dlouho, až ji pálily oči. Pak řekla docela tiše: „Najdu tě.“ (Pokračování se teprve píše.)"
+        }
+      ]
+    },
+    {
+      "id": "a2_noc",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "music": "night_forest",
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "set": [
+        "noc"
+      ],
+      "add": {
+        "pul": 1
+      },
+      "choices": [
+        {
+          "text": "Světla, která tančí nad bažinou.",
+          "next": "a2_noc_bludicky"
+        },
+        {
+          "text": "Tiché třpytivé světlo na pasece.",
+          "next": "a2_noc_trezalka"
+        }
+      ],
+      "lines": [
+        {
+          "text": "Po večeři, když se setmělo, vrátily se jezdkyně k Soně, jak slíbily. Vznesly se s ní nad les. Pod nimi ležela tma a jen tu a tam se zatřpytila tůňka jako spadlá hvězda."
+        },
+        {
+          "speaker": "sona",
+          "text": "Já letím! Já opravdu letím! Tohle mi vědma nikdy neuvěří… Ne, nedívám se dolů. Dívám se po třezalce.",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "nervous"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "emma",
+          "text": "Drž se mě pevně, Soňo. Rozdělíme se, a kdo uvidí stříbrné světlo, zavolá.",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "nervous"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Tamhle! Nad bažinou něco svítí! A tamhle taky… a tamhle! Vždyť je jich plný les!",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "nervous"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "excited"
+            }
+          ]
+        },
+        {
+          "speaker": "sona",
+          "text": "Pozor, to můžou být bludičky. Tančí, smějí se a lákají lidi do bažiny. Pravá třezalka nesvítí. Jen se tiše třpytí, když na ni dopadne měsíc."
+        },
+        {
+          "speaker": "roza",
+          "text": "Tak které světlo je to pravé?",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2_noc_bludicky",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "music": "night_forest",
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "next": "a2_noc_trezalka",
+      "lines": [
+        {
+          "text": "Draci se snesli k tančícím světýlkům. Ta se zachichotala a poodlétla. A zase kousek. „Pojďte, pojďte, tady je to hezčí!“ zvonily hlásky tenké jako rákosí."
+        },
+        {
+          "text": "Než se jezdkyně nadály, stály po kotníky v bahně a světýlka se jim smála ze všech stran."
+        },
+        {
+          "speaker": "anna",
+          "text": "Fuj! Teď jsme celé od bláta a nic. Počkejte, vy světlušky prolhané, až na vás pošlu Buřinohu!",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "Bludička",
+          "text": "Hihi! Tak pěkně tu ještě nikdo nezapadl! Přijďte zas, přijďte zas!"
+        },
+        {
+          "speaker": "sona",
+          "text": "Nezlob se na ně, Anno. Nic jiného neumějí. Ale podívejte, tamhle na pasece! To světlo se nehýbe. A nesměje se.",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "happy"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "neutral"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "a2_noc_trezalka",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_night_meadow.png"
+      },
+      "music": "night_forest",
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "happy"
+        }
+      ],
+      "set": [
+        "amulet"
+      ],
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "text": "Na malé pasece mezi kořeny staré lípy stál drobný kvítek. Nesvítil. Jen jeho lístky se v měsíčním světle třpytily, jako by je někdo ukoval ze stříbra."
+        },
+        {
+          "speaker": "sona",
+          "text": "Stříbrná třezalka… Ona opravdu je. Hledala jsem ji tolik dní, až jsem si myslela, že si ji vědma vymyslela, aby mě vyzkoušela."
+        },
+        {
+          "text": "Soňa poklekla, zašeptala kvítku pár slov, která jezdkyně neznaly, a teprve potom ho utrhla. Paseka na okamžik zavoněla medem a studenou vodou."
+        },
+        {
+          "speaker": "sona",
+          "text": "Bez vás bych ji nenašla. Vědma říká, že kdo pomoc přijal, má ji vrátit. Tak seďte a nehýbejte se. Tohle jsem ještě nikdy nedělala."
+        },
+        {
+          "text": "Než se rozednilo, upletla Soňa z třezalky a tří vlastních vlasů tři malé amulety. Každé jezdkyni pověsila jeden na krk. Hřály jako dlaň."
+        },
+        {
+          "speaker": "sona",
+          "text": "Proti zlým kouzlům. Úplně je nezastaví, ale zeslabí je. Aspoň myslím. Tedy… vím to. Skoro jistě."
+        },
+        {
+          "speaker": "emma",
+          "text": "Děkujeme, Soňo. Bude z tebe dobrá vědma.",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "happy"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vedma_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "music": "vedma_hut",
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "add": {
+        "pul": 1
+      },
+      "set": [
+        "vedma",
+        "haj_znam"
+      ],
+      "choices": [
+        {
+          "text": "„Jak jste jí mohla nepomoct?!“",
+          "next": "vedma_zlost"
+        },
+        {
+          "text": "„Bála jste se. To se může stát každému.“",
+          "next": "vedma_pochopeni",
+          "set": [
+            "vedma_pratele"
+          ]
+        }
+      ],
+      "lines": [
+        {
+          "text": "Vědma bydlela v chýši kousek za valem hradiště. Ze střechy visely svazky sušených bylin, z komína stoupal vonný dým a pod prahem bydlela užovka, které vědma nalévala mléko.",
+          "characters": [
+            {
+              "id": "vedma",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "vedma",
+          "text": "Pojďte dál, děvčata. Ty amulety poznám, i kdybych byla slepá. Soňa je uvázala nakřivo, ale drží. Kdo pomohl jí, je u mého ohně vítán.",
+          "if": "amulet"
+        },
+        {
+          "speaker": "vedma",
+          "text": "Dračí jezdkyně. Co vás vede k mému prahu? Mluvte rychle, odvar se mi nesmí převařit.",
+          "if": "!amulet"
+        },
+        {
+          "speaker": "emma",
+          "text": "Soňa vás pozdravuje. Slíbily jsme jí, že jí pomůžeme hledat třezalku, až vyjde měsíc.",
+          "if": [
+            "slib",
+            "!amulet"
+          ]
+        },
+        {
+          "speaker": "emma",
+          "text": "Hledáme zrzavou ženu v šarlatových šatech. Soňa říkala, že u vás byla.",
+          "characters": [
+            {
+              "id": "vedma",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "text": "Vědmě vypadla z ruky vařečka. Dlouho mlčela a dívala se do ohně, jako by v něm někoho hledala.",
+          "characters": [
+            {
+              "id": "vedma",
+              "position": "left",
+              "pose": "sad"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "vedma",
+          "text": "Jmenuje se Rubínka. Bývala dračí jezdkyně jako vy, nejlepší, jakou hradiště pamatuje. Jejím drakem byl Tesák, rudý jako oheň. Ti dva si rozuměli beze slov."
+        },
+        {
+          "speaker": "vedma",
+          "text": "Loni Tesák onemocněl popelavkou. Drak při ní ztrácí oheň, šupiny mu šednou jako popel, až jednoho dne docela vyhasne."
+        },
+        {
+          "speaker": "anna",
+          "text": "O popelavce jsem slyšela. Prý přeskakuje z draka na draka jako jiskra.",
+          "characters": [
+            {
+              "id": "vedma",
+              "position": "left",
+              "pose": "sad"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "vedma",
+          "text": "Právě proto. Rubínka s ním přiletěla prosit o pomoc. Jenže lidé se báli o vlastní draky a zavřeli před nimi bránu. Stála venku v dešti a volala mé jméno."
+        },
+        {
+          "speaker": "vedma",
+          "text": "Mohla jsem za nimi vyjít. Měla jsem byliny, měla jsem nohy. Jen odvahu jít proti všem jsem neměla. Než vyšlo slunce, Tesák vyhasl."
+        },
+        {
+          "text": "Oheň praskal. Jezdkyně se podívaly jedna na druhou."
+        }
+      ]
+    },
+    {
+      "id": "vedma_zlost",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "music": "vedma_hut",
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "sad"
+        }
+      ],
+      "next": "vedma_voda",
+      "lines": [
+        {
+          "speaker": "anna",
+          "text": "Jak jste jí mohla nepomoct?! Volala vás jménem! A Tesák tam venku umíral!",
+          "characters": [
+            {
+              "id": "vedma",
+              "position": "left",
+              "pose": "sad"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "vedma",
+          "text": "Máš pravdu, děvče. Nemám se čím hájit a nebudu to zkoušet."
+        },
+        {
+          "text": "Vědma se odvrátila k ohništi a dlouho jen mlčky míchala byliny v hrnci. Vařečka ťukala o jeho stěny jako déšť o zavřenou bránu."
+        },
+        {
+          "speaker": "vedma",
+          "text": "Jen se zlob. Někdo by měl. Já se na sebe zlobím celý rok a nikomu to nepomohlo."
+        },
+        {
+          "speaker": "anna",
+          "text": "Já jen… představila jsem si, že by tam venku ležela Buřinoha.",
+          "characters": [
+            {
+              "id": "vedma",
+              "position": "left",
+              "pose": "sad"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "sad"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vedma_pochopeni",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "music": "vedma_hut",
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "sad"
+        }
+      ],
+      "next": "vedma_voda",
+      "lines": [
+        {
+          "speaker": "emma",
+          "text": "Bála jste se. To se může stát každému. Já se bojím skoro pořád, a to po mně nikdo nechce, abych šla proti celému hradišti.",
+          "characters": [
+            {
+              "id": "vedma",
+              "position": "left",
+              "pose": "sad"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "sad"
+            }
+          ]
+        },
+        {
+          "text": "Vědma zvedla hlavu. Poprvé od chvíle, kdy vešly, se jim podívala do očí."
+        },
+        {
+          "speaker": "vedma",
+          "text": "Děkuju ti, děvče. Celý rok to nosím jako kámen v botě a nikdo mi neřekl nic tak laskavého. Sama bych si to říct neuměla."
+        },
+        {
+          "speaker": "vedma",
+          "text": "Strach mi tenkrát svázal nohy. Podruhé mu to nedovolím. Až budete potřebovat pomoc, přijďte. Udělám, co umím, i kdyby se celé hradiště stavělo proti."
+        },
+        {
+          "speaker": "roza",
+          "text": "Vezmeme vás za slovo.",
+          "characters": [
+            {
+              "id": "vedma",
+              "position": "left",
+              "pose": "happy"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vedma_voda",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/vedma_hut.png"
+      },
+      "music": "vedma_hut",
+      "characters": [
+        {
+          "id": "vedma",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "speaker": "roza",
+          "text": "A proč za vámi Rubínka přišla zrovna teď, po celém roce?",
+          "characters": [
+            {
+              "id": "vedma",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "vedma",
+          "text": "Nepřišla za mnou. Přišla za tím, co vím. Ptala se, kde vyvěrá mrtvá voda. Ta, co zacelí každou ránu, ale život nevrátí nikomu."
+        },
+        {
+          "speaker": "vedma",
+          "text": "Mrtvá voda prýští jen tam, kde se náš svět dotýká Navi, říše mrtvých. Neřekla jsem jí nic. Odešla beze slova a v očích měla něco, co mě straší ve snech.",
+          "characters": [
+            {
+              "id": "vedma",
+              "position": "left",
+              "pose": "sad"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "emma",
+          "text": "Velká voda za přehradou… slunovrat… a mrtvá voda. Ona se chce dostat do Navi, že ano? Za Tesákem."
+        },
+        {
+          "speaker": "emma",
+          "text": "Triglav nám řekl, že chce otevřít bránu do Navi. Teď už víme, pro koho.",
+          "if": "haj_nav"
+        },
+        {
+          "speaker": "vedma",
+          "text": "Ano. Otevřít bránu mezi mrtvé a přivést si ho zpátky. Toho jsem se bála od chvíle, kdy vyslovila slovo voda."
+        },
+        {
+          "speaker": "emma",
+          "text": "Víly nám řekly o studánce s mrtvou vodou. Nic živého z ní prý nepije.",
+          "if": [
+            "vily",
+            "!haj_nav"
+          ]
+        },
+        {
+          "speaker": "vedma",
+          "text": "Pak už víte víc než já. Kde je ta studánka, tam bude i brána.",
+          "if": [
+            "vily",
+            "!haj_nav"
+          ]
+        },
+        {
+          "speaker": "vedma",
+          "text": "Rubínka uměla vždycky víc než ostatní jezdkyně. Zazpívala drakům a usnuli. Zazpívala bouři a ta ji obešla. Proto se jí tolik lidí bálo, ještě než přišla o Tesáka.",
+          "characters": [
+            {
+              "id": "vedma",
+              "position": "left",
+              "pose": "sad"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Zazpívala i zubrovi v horách. Stál tam jako omámený a neslyšel ani vlastní stádo.",
+          "if": "zubr"
+        },
+        {
+          "speaker": "vedma",
+          "text": "Ještě něco byste měly vědět. Tesák míval doupě vysoko v horách, v jeskyni nad poslední loukou. Rubínka tam od jeho smrti nevkročila. To místo ji bolí víc než oheň.",
+          "characters": [
+            {
+              "id": "vedma",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "vedma",
+          "text": "Víc o Navi ví jen Triglav v posvátném háji. Já vařím byliny. On vidí i pod zem.",
+          "if": "!haj"
+        },
+        {
+          "speaker": "vedma",
+          "text": "Leťte opatrně, děvčata. A kdybyste ji potkaly, řekněte jí, že… Ne. Neříkejte nic. To jí musím říct sama."
+        }
+      ]
+    },
+    {
+      "id": "haj_01",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "music": "sacred_grove",
+      "characters": [],
+      "add": {
+        "pul": 1
+      },
+      "set": [
+        "haj"
+      ],
+      "next": "haj_otazka",
+      "lines": [
+        {
+          "text": "Posvátný háj poznaly dřív, než ho uviděly. Ptáci tu zmlkli, vítr se zastavil a i draci našlapovali tiše jako lišky."
+        },
+        {
+          "speaker": "emma",
+          "text": "Dál s námi nemůžete, Běsko. Do háje smějí jen lidé. A ani ti ne všichni.",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "center",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "Bezzubko, počkej tady s Běskou a Buřinohou. Hned jsme zpátky.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "center",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "text": "Mezi duby, které pamatovaly první lidi v téhle zemi, stálo kamenné návrší. A na něm dřevěná socha boha se třemi hlavami, černá stářím a kouřem obětí.",
+          "characters": []
+        },
+        {
+          "speaker": "anna",
+          "text": "Triglav. Všechny tři hlavy mají přes oči zlatou pásku. Prý aby se nemusel dívat na všechno zlé, co lidé dělají.",
+          "characters": [
+            {
+              "id": "anna",
+              "position": "center",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "text": "Sotva to dořekla, zašuměly duby, ačkoli se nepohnul jediný list. A z toho šumění se složila slova.",
+          "characters": []
+        },
+        {
+          "speaker": "Triglav",
+          "text": "Tři hlavy mám. Dvěma z nich smíte sejmout pásku. Dvakrát se ptejte, dvakrát odpovím. Třetí otázka zůstane ve vás."
+        },
+        {
+          "speaker": "roza",
+          "text": "Jen dvě otázky? Tak to si je musíme dobře rozmyslet.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "center",
+              "pose": "nervous"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "haj_otazka",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "music": "sacred_grove",
+      "characters": [],
+      "choiceLayout": "center",
+      "lines": [
+        {
+          "text": "Na co se Triglava zeptáme?"
+        }
+      ],
+      "choices": [
+        {
+          "text": "Kde je Rubínka?",
+          "next": "haj_nebe",
+          "if": [
+            "!haj_nebe",
+            "vedma"
+          ]
+        },
+        {
+          "text": "Kde je ta zrzavá čarodějnice?",
+          "next": "haj_nebe",
+          "if": [
+            "!haj_nebe",
+            "!vedma"
+          ]
+        },
+        {
+          "text": "Jak se dá zlomit čarodějné kouzlo?",
+          "next": "haj_zeme",
+          "if": "!haj_zeme"
+        },
+        {
+          "text": "Chce Rubínka otevřít bránu do Navi?",
+          "next": "haj_nav",
+          "if": [
+            "!haj_nav",
+            "vedma"
+          ]
+        },
+        {
+          "text": "Co ta čarodějnice chystá?",
+          "next": "haj_nav",
+          "if": [
+            "!haj_nav",
+            "!vedma"
+          ]
+        }
+      ],
+      "next": "haj_konec"
+    },
+    {
+      "id": "haj_nebe",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "music": "sacred_grove",
+      "characters": [],
+      "set": [
+        "haj_nebe"
+      ],
+      "add": {
+        "hlavy": 1
+      },
+      "next": [
+        {
+          "if": "hlavy>=2",
+          "next": "haj_konec"
+        },
+        {
+          "next": "haj_otazka"
+        }
+      ],
+      "lines": [
+        {
+          "text": "Zlatá páska sklouzla z hlavy, která hledí k nebi. Dřevěná víčka se zvedla a pod nimi bylo modro, hluboké a bez jediného mráčku."
+        },
+        {
+          "speaker": "Hlava nebe",
+          "text": "Vidím všechno, co je pod nebem. Každého ptáka, každý kouř, každou lež. I vás tři vidím už dlouho, dcerky."
+        },
+        {
+          "speaker": "Hlava nebe",
+          "text": "Hledáte ji v lese, a ona se zatím dívá z oblak. Je blíž, než si myslíte. Počítá vaše draky. Jednoho z nich si už vybrala."
+        },
+        {
+          "speaker": "Hlava nebe",
+          "text": "Hlídejte svou ohnivou dračici."
+        },
+        {
+          "text": "Róze přeběhl mráz po zádech.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "center",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "Bezzubku? Proč zrovna ji?",
+          "if": "!haj_nav"
+        },
+        {
+          "speaker": "roza",
+          "text": "Oheň živého draka… proto ji!",
+          "if": "haj_nav"
+        },
+        {
+          "text": "Hlava už neřekla nic. Dřevěná víčka klesla a v háji zase šuměly jen duby.",
+          "characters": []
+        }
+      ]
+    },
+    {
+      "id": "haj_zeme",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "music": "sacred_grove",
+      "characters": [],
+      "set": [
+        "haj_zeme",
+        "hlas"
+      ],
+      "add": {
+        "hlavy": 1
+      },
+      "next": [
+        {
+          "if": "hlavy>=2",
+          "next": "haj_konec"
+        },
+        {
+          "next": "haj_otazka"
+        }
+      ],
+      "lines": [
+        {
+          "text": "Zlatá páska sklouzla z hlavy, která hledí k zemi. Háj zavoněl hlínou po dešti a hlas, který promluvil, byl hluboký a pomalý, jako když rostou kořeny."
+        },
+        {
+          "speaker": "Hlava země",
+          "text": "Znám všechno, co po zemi chodí, leze a roste. Znám i kouzla. Jsou jako plevel, děti. Kdo ho trhá vztekle, tomu zůstane kořen v zemi."
+        },
+        {
+          "speaker": "Hlava země",
+          "text": "Omámení zlomí klidný hlas, ne křik. Křik slyší jen uši. Klidný hlas dojde až tam, kde omámený spí."
+        },
+        {
+          "speaker": "Hlava země",
+          "text": "A nejsilnější je hlas toho, koho omámený miluje. Ten ho najde, i kdyby se ztratil sám sobě."
+        },
+        {
+          "speaker": "anna",
+          "text": "Klidný hlas… Slyšíš, Rózo? Žádné křičení.",
+          "characters": [
+            {
+              "id": "anna",
+              "position": "center",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "Já tě slyším, Anno.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "center",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "text": "Hlava země se tiše zasmála, jako když se sype hlína, a zavřela oči.",
+          "characters": []
+        }
+      ]
+    },
+    {
+      "id": "haj_nav",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "music": "sacred_grove",
+      "characters": [],
+      "set": [
+        "haj_nav",
+        "studanka"
+      ],
+      "add": {
+        "hlavy": 1
+      },
+      "next": [
+        {
+          "if": "hlavy>=2",
+          "next": "haj_konec"
+        },
+        {
+          "next": "haj_otazka"
+        }
+      ],
+      "lines": [
+        {
+          "text": "Zlatá páska sklouzla z hlavy, která hledí pod zem. V háji se ochladilo, až jezdkyním šla pára od úst. Hlava promluvila šeptem, ze kterého mrazilo."
+        },
+        {
+          "speaker": "Hlava podsvětí",
+          "text": "Ptáte se, co chystá. Chce otevřít bránu do Navi, říše mrtvých. Někoho tam má. A chce ho zpátky.",
+          "if": "!vedma"
+        },
+        {
+          "speaker": "Hlava podsvětí",
+          "text": "Bránu otevřou tři věci. Velká voda o slunovratu, až bude tma nejkratší z celého roku. Mrtvá voda. A oheň živého draka."
+        },
+        {
+          "speaker": "Hlava podsvětí",
+          "text": "Studánka, o které vám řekly víly, je ta brána. Víly nelžou. Jen neříkají všechno.",
+          "if": "vily"
+        },
+        {
+          "speaker": "Hlava podsvětí",
+          "text": "Mrtvá voda vyvěrá tam, kde se řeka ztrácí ve skalách. Pod třemi uschlými olšemi je studánka. Nic živého z ní nepije, ani žába u ní nezakváká. Tam je brána.",
+          "if": "!vily"
+        },
+        {
+          "speaker": "Hlava podsvětí",
+          "text": "Ale slyšte. Kdo bránou projde, už se nevrátí. Mrtví se nevracejí. Jen živí odcházejí za nimi."
+        },
+        {
+          "text": "Anna polkla.",
+          "characters": [
+            {
+              "id": "anna",
+              "position": "center",
+              "pose": "sad"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Takže Rubínka… by v Navi zůstala navždy. A možná to ani neví.",
+          "if": "vedma"
+        },
+        {
+          "speaker": "anna",
+          "text": "Takže ta čarodějnice… by v Navi zůstala navždy. A možná to ani neví.",
+          "if": "!vedma"
+        },
+        {
+          "text": "Hlava už neodpověděla. Víčka klesla a do háje se pomalu vracelo teplo.",
+          "characters": []
+        }
+      ]
+    },
+    {
+      "id": "haj_konec",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/sacred_grove.png"
+      },
+      "music": "sacred_grove",
+      "characters": [],
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "text": "Třetí páska zůstala na svém místě. Zlato na ní potemnělo, jako by říkalo: dost."
+        },
+        {
+          "speaker": "emma",
+          "text": "Víc se Triglava ptát nesmíme. Co neřekl, na to budeme muset přijít samy.",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "center",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Škoda. Tu třetí otázku jsem měla zrovna na jazyku.",
+          "characters": [
+            {
+              "id": "anna",
+              "position": "center",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "text": "Jezdkyně se poklonily a vyšly z háje pozpátku, jak se sluší. Teprve za posledními duby se zase rozezpívali ptáci.",
+          "characters": []
+        },
+        {
+          "text": "Draci čekali přesně tam, kde je nechaly. Bezzubka přivítala Rózu šťouchnutím čumáku, až si sedla do mechu."
+        },
+        {
+          "speaker": "roza",
+          "text": "Taky jsi mi chyběla. Tak pojďme, holky.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "center",
+              "pose": "happy"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

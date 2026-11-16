@@ -965,3 +965,72 @@ from another branch builds nothing); the build job keeps no token on disk (`pers
 deploy job has the Pages permissions. A shallow clone, or a newest committed version today's engine can't load, fails
 the test instead of letting the history checks compare nothing. The Playwright suite (Chrome, a dev
 server, the live URL for D11) and the ffmpeg checks stay in `C:\tmp\claude`; moving them is a separate step.
+
+## D39 — Characters and movedScenes in parts of their own (2026-11-16) — Accepted
+Supersedes: D37's main file holding everything shared and `movedScenes` (now characters.json and compatibility.json).
+Decision: `story-v2.json` keeps `id`, `start`, `menuMusic`, `resumeMusic`, `assets` and `parts`; the characters are in
+`public/story/characters.json` (`{ "scenes": [], "characters": {…} }`) and `movedScenes` in `compatibility.json`
+(`{ "scenes": [], "movedScenes": {…} }`), both listed first in `parts`. `mergeStory` takes `characters` and `movedScenes`
+from any part and merges them into the main file's own (the base), the first entry of an id kept (a later one warns);
+a part needs `scenes`, a `location` or one of the two; a value that isn't a plain object warns and is ignored (in the main
+file too; absent: no warning); ids are kept as plain entries (`__proto__` included). `tests/story.test.mjs` refuses
+characters anywhere but characters.json and movedScenes anywhere but compatibility.json, and both files missing from
+`parts`. The movedScenes lint messages end with "(in compatibility.json)". The other backward-compatibility pieces stay
+where they are: retired events in their location's file (the engine reads event names per location), the frozen
+`story.json`, the old save migration and the one-line scene form in code.
+Why: asked for by Sára ("story-v2.json is too long. Can you split out characters.json and compability.json (with moved
+scenes and another backward compatibility features)"); the main file went from 17 KB to under 1 KB. The name is spelled
+`compatibility.json`. `"scenes": []` because the code deployed before this (60b204a) throws on a part without a
+`scenes` list: a tab reloaded within Pages' ~10-minute cache can run that code with the new files, and with the empty list
+it loads (warnings, placeholder sprites and speaker ids for that visit) instead of not starting. The main file still
+accepts both because committed versions and the test stories hold them there, and a stale cache pairing new code with
+the old story-v2.json stays harmless.
+Consequences: a broken or missing characters.json or compatibility.json stops the load, as a broken story-v2.json did
+(D37: a failing part stops it). `"scenes": []` can go once the window is over (with the story.json cleanup, issues.md).
+In that window, old-key saves of someone who never ran D37's code, served D37's code from a shared cache with the new
+files, would be migrated without movedScenes (unplaceable ids dropped, never re-run): theoretical, accepted.
+
+## D40 — Act 2a as days and locations (2026-11-16) — Accepted
+Supersedes: the Act 2a draft of 2026-11-15 (its 32 scenes, all `movedScenes` → `act1_end` line 0, D37's accepted
+restart); story.md's "Bezzubka is taken while the riders are in the grove" and "at the end of a location where the
+dragons wait outside" (now always in the evening of day 3 at the gord); the solstice "in three days" (now four).
+Decision:
+- The calendar: Act 1 is day 0; days 1–3 have two half-days each (`pul`, 0–6), six choices; the solstice is the night of
+  day 4 (Act 2b's day); the days left are counted the same way everywhere (day 0 "čtyři dny" … day 3 "Zítra v noci").
+- One hub (`a2_kam`, centred) with one line per half-day ("Druhý den odpoledne. Kam poletíme?"), and one router
+  (`a2_cesta`, a pass-through) after every action: day 3 over → the evening; the night search; day 2's and day 3's
+  mornings (each once, each with a free light stop: the hejkal, the fox family; day 1's is the fox); else the hub.
+- Three locations, one file each, two events each, any day: the deep forest (Soňa first, the fawn), the dam (the badger,
+  the víly), the mountains (Tesák's lair first, only after the vědma; the wisent, on the new `mountain_meadow`
+  background). Two single destinations in `act2a.json`: the vědma (after Soňa) and Triglav's grove (after the hejkal,
+  always met on day 2, or the vědma). Resting at the gord is always offered (no hub can be empty). Each event and
+  destination costs a half-day; the light stops cost nothing.
+- Quests have no "move on" choice: the trip is the cost. Their win scenes set the finale's helpers (`jezevci`, `vily`,
+  `zubr`, `srna`); a minigame later goes between an event's first scene and its win scene.
+- Soňa's help is a promise (`slib`): the riders keep the rest of the day, search with her that night after supper
+  (`a2_noc`, played by the router when the day ends) and sleep away the next morning (`add: { pul: 1 }`); not offered on
+  day 3.
+- Bezzubka is taken in the evening of day 3 at the gord, whatever the riders did (Sára: finding the grove must not be
+  punished).
+- Triglav answers two questions of three; the questions are the choices. What the riders learned elsewhere changes
+  texts and choices through `vedma`, `vily`, `haj_nav`, `haj_zeme` and `zubr` (besides the bookkeeping names `pul`,
+  `sona`, `haj_znam`, `haj`, the heads' flags, `hlavy`, and the vědma's welcome on `amulet`), each read by a scene after
+  the one that sets it. The finale's names (`studanka`, `hlas`, `melodie`, `vejce`, the helpers, `amulet`,
+  `vedma_pratele`) are recorded for Act 2b/3; of them only `studanka`, `hlas` and `melodie` are never read in Act 2a
+  (the riders' source is read instead).
+- The texts (and Claude's old Act 1 lines, rewritten in place) were written by a Fable agent on Sára's direction: more
+  fairy tale and fantasy, magic and mystery, characters with goals of their own, not long.
+- `tests/act2a.test.mjs` walks every choice and every possible pick (memoized on scene, line and memory) and checks the
+  text rules statically (no `if` on a name its own scene sets, no `studanka`, `hlas` or `melodie` read, "Rubínka" only with `vedma`, times
+  of day only where they hold, headings ≤ 40 characters).
+Why: asked for by Sára ("pojďme přepsat Akt 2a do dnů a lokací"; "I think we need to change texts and options what can
+players ask baseed on what they already know"; "it should not be too complicated"; her answers of 2026-11-16 to the
+plan's questions: day 4, the night after supper with the morning slept away, quests without a skip, the abduction always
+at the gord, the víly giving the gate and their flooded meadow, a new mountain background, the texts by Fable).
+Consequences: a focused player (Soňa, the vědma, the lair, the grove) has two half-days to spare; helping everyone
+(Soňa's night and the four animals) fills all six and misses the vědma, the egg and Triglav. Old Act 2a saves restart
+at `act1_end`. The old `act2a-den*.json` stay in git, unlisted, for one deploy (Pages' cache could pair an old main file
+with them), then go (issues.md). For ~10 minutes after the deploy a stale cache can pair the new main file with an old
+`act1.json` or the reverse: a dead end at `act1_end` for that visit. A night-search minigame can't use a give-up choice
+inside `a2_noc` (it is in no event's scenes): that feature plans a loss another way. Once deployed, the new scene ids and
+event names are permanent; Sára's text rewrites edit lines in place, or insert them only where nobody is saved yet.

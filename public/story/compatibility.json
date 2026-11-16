@@ -1,0 +1,733 @@
+{
+  "scenes": [],
+  "movedScenes": {
+    "forest_flight_01a": {
+      "scene": "forest_flight_01",
+      "line": 1
+    },
+    "forest_flight_01b": {
+      "scene": "forest_flight_01",
+      "line": 2
+    },
+    "forest_flight_01c": {
+      "scene": "forest_flight_01",
+      "line": 3
+    },
+    "forest_flight_02": {
+      "scene": "forest_flight_01",
+      "line": 4
+    },
+    "first_choice": {
+      "scene": "forest_flight_01",
+      "line": 5
+    },
+    "dam_with_beavers_roza": {
+      "scene": "dam_with_beavers",
+      "line": 1
+    },
+    "dam_with_beavers_beaver": {
+      "scene": "dam_with_beavers",
+      "line": 2
+    },
+    "dam_with_beavers_choice": {
+      "scene": "dam_with_beavers",
+      "line": 3
+    },
+    "dam_with_beavers_persuade_01": {
+      "scene": "dam_with_beavers_persuade",
+      "line": 1
+    },
+    "dam_with_beavers_persuade_02": {
+      "scene": "dam_with_beavers_persuade",
+      "line": 2
+    },
+    "dam_with_beavers_persuade_03": {
+      "scene": "dam_with_beavers_persuade",
+      "line": 3
+    },
+    "dam_with_beavers_persuade_04": {
+      "scene": "dam_with_beavers_persuade",
+      "line": 4
+    },
+    "dam_with_beavers_persuade_05": {
+      "scene": "dam_with_beavers_persuade",
+      "line": 5
+    },
+    "dam_with_beavers_persuade_06": {
+      "scene": "dam_with_beavers_persuade",
+      "line": 6
+    },
+    "beaver_after_battle_win_01": {
+      "scene": "beaver_battle_win",
+      "line": 1
+    },
+    "beaver_after_battle_win_02": {
+      "scene": "beaver_battle_win",
+      "line": 2
+    },
+    "beaver_after_battle_win_03": {
+      "scene": "beaver_battle_win",
+      "line": 3
+    },
+    "beaver_after_battle_win_04": {
+      "scene": "beaver_battle_win",
+      "line": 4
+    },
+    "beaver_after_battle_win_05": {
+      "scene": "beaver_battle_win",
+      "line": 5
+    },
+    "beaver_after_battle_win_06": {
+      "scene": "beaver_battle_win",
+      "line": 6
+    },
+    "beaver_after_battle_win_07": {
+      "scene": "beaver_battle_win",
+      "line": 7
+    },
+    "dam_deal_02": {
+      "scene": "dam_deal_01",
+      "line": 1
+    },
+    "dam_deal_03": {
+      "scene": "dam_deal_01",
+      "line": 2
+    },
+    "dam_deal_04": {
+      "scene": "dam_deal_01",
+      "line": 3
+    },
+    "dam_deal_05": {
+      "scene": "dam_deal_01",
+      "line": 4
+    },
+    "dam_deal_06": {
+      "scene": "dam_deal_01",
+      "line": 5
+    },
+    "a2_fox_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fox_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fox_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fox_05": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fox_06": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fox_07": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fox_08": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_badger_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_badger_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_badger_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_badger_choice": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_badger_help_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_badger_help_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_badger_help_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_badger_help_05": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_badger_skip_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_sona_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_sona_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_sona_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_sona_05": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_sona_06": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_sona_07": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_sona_08": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_sona_09": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_sona_10": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_sona_choice": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_sona_skip_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_herb_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_herb_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_herb_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_herb_choice": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_herb_wisp_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_herb_wisp_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_herb_found_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_herb_found_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_herb_found_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_herb_found_05": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_05": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_06": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_07": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_08": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_09": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_choice": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_angry_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_angry_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_kind_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_water_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_water_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_water_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_water_05": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_water_06": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_hejkal_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_hejkal_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_hejkal_05": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_hejkal_06": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_hejkal_07": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_hejkal_08": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_hejkal_09": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fawn_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fawn_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fawn_choice": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fawn_help_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fawn_help_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fawn_help_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fawn_skip_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_wisent_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_wisent_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_wisent_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_wisent_choice": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_wisent_help_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_wisent_help_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_wisent_help_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_wisent_help_05": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_wisent_help_06": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_wisent_help_07": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vily_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vily_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vily_choice": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vily_help_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vily_help_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_smell_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_smell_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_choice": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_05": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_06": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_07": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_08": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_09": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_10": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_11": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_foxfam_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_foxfam_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_foxfam_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_foxfam_05": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_foxfam_06": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_02": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_03": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_05": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_06": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_07": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_08": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_09": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_10": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_11": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_12": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_13": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_14": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_15": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_16": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_17": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_18": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_19": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_20": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_21": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_23": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_24": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_25": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fox_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_badger_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_badger_help_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_badger_skip_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_sona_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_sona_skip_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_herb_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_herb_wisp_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_herb_found_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_day2_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_angry_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_kind_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vedma_water_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_hejkal_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_hejkal_04": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fawn_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fawn_help_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_fawn_skip_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_day3_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_wisent_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_wisent_help_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_wisent_skip_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vily_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vily_help_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_vily_skip_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_smell_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_lair_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_foxfam_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_01": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "a2_grove_22": {
+      "scene": "act1_end",
+      "line": 0
+    },
+    "act2a_end": {
+      "scene": "act1_end",
+      "line": 0
+    }
+  }
+}

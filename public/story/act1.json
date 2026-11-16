@@ -17,7 +17,7 @@
         },
         {
           "speaker": "emma",
-          "text": "Běsko, ne tak rychle! Anna s Buřinohou za námi nestačí.",
+          "text": "Běsko, pomaleji! Vím, že umíš předhonit i blesk, ale Anna s Buřinohou nám zmizely někde za oblakem.",
           "characters": [
             {
               "id": "emma",
@@ -28,7 +28,7 @@
         },
         {
           "speaker": "anna",
-          "text": "Že nestačíme? Buřinoho, ukažme jim to! Kdo bude první u řeky, vyhrává!",
+          "text": "Zmizely? My vás jen necháváme vyhrát! Buřinoho, ukaž jim trny na ocase. Kdo bude první u řeky, vyhrává!",
           "characters": [
             {
               "id": "anna",
@@ -39,7 +39,7 @@
         },
         {
           "speaker": "roza",
-          "text": "Bezzubka vás obě předběhne! Podél řeky to máme domů na hradiště kousek, stihneme to i na oběd.",
+          "text": "První bude Bezzubka, jako vždycky! A řeka nás pak dovede rovnou domů na hradiště. Stihneme oběd, ještě než kaše vystydne.",
           "characters": [
             {
               "id": "roza",
@@ -220,7 +220,7 @@
         },
         {
           "speaker": "roza",
-          "text": "Ale proč by to dělala? Co jste jí udělali?",
+          "text": "Čarodějnice? Ale proč by vám to dělala? Rozzlobili jste ji něčím?",
           "characters": [
             {
               "id": "roza",
@@ -231,7 +231,7 @@
         },
         {
           "speaker": "Velký bobr",
-          "text": "Nic jsme jí neudělali a nevíme, proč to udělala. Měla zrzavé vlasy, bledou pleť plnou pih a šarlatové šaty, jaké nosí jen velmožky. Byla vysoká a silná jako bojovnice, takovou nepřehlédnete.",
+          "text": "Ani chlup jsme jí nezkřivili. Měla zrzavé vlasy, bledou pleť plnou pih a šarlatové šaty, jaké nosí jen velmožky. Byla vysoká a silná jako bojovnice. A smutná. Taková se nezapomíná.",
           "characters": [
             {
               "id": "roza",
@@ -376,11 +376,11 @@
       "lines": [
         {
           "speaker": "Velký bobr",
-          "text": "Kam šla, nevíme. Ale když zaříkávala, pořád opakovala něco o velké vodě a o nejkratší noci."
+          "text": "Kam odešla, to nevíme. Ale když zaříkávala, mumlala pořád dokola totéž: velká voda a nejkratší noc. Velká voda a nejkratší noc."
         },
         {
           "speaker": "emma",
-          "text": "Nejkratší noc je o slunovratu, a to je za tři dny! Kdyby se přehrada protrhla, voda by se přivalila rovnou na naše hradiště.",
+          "text": "Nejkratší noc je o slunovratu, a ten je za čtyři dny! Kdyby se přehrada protrhla, všechna ta voda by se přivalila rovnou na naše hradiště.",
           "characters": [
             {
               "id": "emma",
@@ -391,7 +391,7 @@
         },
         {
           "speaker": "roza",
-          "text": "Tak se dohodneme. Vy přehradu do slunovratu udržíte a my tu čarodějnici najdeme a přinutíme ji, aby vás zase zmenšila.",
+          "text": "Tak se dohodneme. Vy přehradu do slunovratu udržíte, ať se děje, co se děje. A my tu čarodějnici najdeme a přimějeme ji, aby vás zase zmenšila.",
           "characters": [
             {
               "id": "roza",
@@ -402,7 +402,7 @@
         },
         {
           "speaker": "Velký bobr",
-          "text": "Platí. Do slunovratu přehrada vydrží. Ale pospěšte si, voda pořád stoupá.",
+          "text": "Bobří slovo. Do slunovratu hráz vydrží, i kdybychom ji měli podpírat vlastními hřbety. Ale pospěšte si. Voda stoupá a na sliby nečeká.",
           "characters": [
             {
               "id": "roza",
@@ -413,7 +413,7 @@
         },
         {
           "speaker": "anna",
-          "text": "Jenže kde ji máme hledat? Les je velký a hory ještě větší.",
+          "text": "Jenže kde ji máme hledat? Les je veliký a hory za ním ještě větší.",
           "characters": [
             {
               "id": "anna",
@@ -424,7 +424,7 @@
         },
         {
           "speaker": "emma",
-          "text": "Poptáme se v lese. Takovou čarodějnici si přece musel někdo všimnout.",
+          "text": "Poptáme se. Les má tisíc očí a zrzavé čarodějnice v šarlatu si některé z nich všimnout muselo.",
           "characters": [
             {
               "id": "emma",
@@ -449,10 +449,10 @@
       "characters": [],
       "lines": [
         {
-          "text": "A tak se tři jezdkyně se svými draky vydaly do lesa hledat zrzavou čarodějnici. Do slunovratu zbývaly tři dny."
+          "text": "A tak se tři jezdkyně vznesly na svých dracích nad koruny stromů a vydaly se hledat zrzavou čarodějnici. Do slunovratu zbývaly čtyři dny."
         }
       ],
-      "next": "a2_fox_01"
+      "next": "a2_rano1"
     },
     {
       "id": "beaver_battle_lose",
@@ -542,13 +542,13 @@
       "characters": [],
       "lines": [
         {
-          "text": "Zatímco dračí jezdkyně jedly kaši, na hradiště se přiřítila povodeň a zaplavila ho."
+          "text": "Zatímco jezdkyně vyškrabovaly misky, přihnala se od lesa voda. Velká, kalná a hlučná. Vyvalila bránu, přelila se přes val a hradiště zmizelo pod hladinou."
         }
       ],
       "end": {
         "good": false,
         "title": "Zaplavené hradiště",
-        "text": "Jezdkyně se nešly podívat, co se v lese leskne. Obří bobří přehrada se protrhla a voda zaplavila hradiště. Příště to zkus prozkoumat!"
+        "text": "Co se to v lese lesklo, to už se jezdkyně nedozvěděly. Obří bobří přehrada se protrhla a voda vzala hradiště i s kaší. Příště se leť podívat, co se to třpytí!"
       }
     }
   ]

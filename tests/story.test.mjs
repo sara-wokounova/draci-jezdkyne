@@ -2,7 +2,8 @@
 // normalizeStory and lintStory with no warning; every listed part and every referenced file (parts, backgrounds,
 // sprites, music) is in git; no scene id of a committed version is gone without a movedScenes entry; every committed
 // event name is still listed (active or retired); movedScenes points into an event only from its own old scenes; the
-// frozen story.json is unchanged; every character's pose textures have one size.
+// frozen story.json is unchanged; every character's pose textures have one size; characters live only in characters.json
+// and movedScenes only in compatibility.json (D39).
 //   node tests/story.test.mjs [repo]      NO_GIT=1 skips the comparison with committed versions (not the git ls-files check)
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import fs from 'node:fs';
@@ -31,7 +32,7 @@ function load(read) {
   const warnings = [];
   const merged = F.mergeStory(main, parts, warnings);
   const story = F.normalizeStory(merged, warnings);
-  return { main, names, story, warnings, merged };
+  return { main, names, parts, story, warnings, merged };
 }
 
 let loaded;
@@ -41,7 +42,7 @@ try {
   check('story-v2.json and its parts load', false, error.message);
   process.exit(1);
 }
-const { main, names, story, warnings } = loaded;
+const { main, names, parts, story, warnings } = loaded;
 const lint = [...warnings, ...F.lintStory(story)];
 check('story-v2.json and its parts: no warnings', lint.length === 0, lint.join('\n     '));
 // The game's own load checks (a start, scenes, a start that resolves): StoryRepository.fromData, as the game runs it.
@@ -52,6 +53,19 @@ try {
   loadError = error.message;
 }
 check('the story loads as the game loads it', !loadError, loadError);
+
+// D39: characters only in characters.json, movedScenes only in compatibility.json, both listed (the working copy only:
+// committed versions before the split hold them in story-v2.json, which the engine still reads).
+const homes = { characters: 'characters.json', movedScenes: 'compatibility.json' };
+const astray = [];
+for (const [key, file] of Object.entries(homes)) {
+  if (!names.includes(file)) astray.push(`${file} is not in story-v2.json's "parts"`);
+  if (key in main) astray.push(`story-v2.json holds "${key}": move it into ${file}`);
+  for (const [name, part] of parts) {
+    if (name !== file && key in part) astray.push(`${name} holds "${key}": move it into ${file}`);
+  }
+}
+check('characters live in characters.json, movedScenes in compatibility.json', astray.length === 0, astray.join('\n     '));
 
 const tracked = new Set(git('ls-files').split('\n').filter(Boolean));
 const referenced = new Set(['public/story/story-v2.json', ...names.map((name) => `public/story/${name}`)]);
@@ -122,7 +136,7 @@ if (process.env.NO_GIT) {
   const gone = [...committedNames].filter(([name]) => F.isName(name) && !currentNames.has(name)).map(([name, commit]) => `${name} (${commit})`);
   check('the newest committed version loads (else the history checks compare nothing)', newestLoads,
     'an engine change that refuses the old files blinds this test: keep reading them');
-  check(`no committed id gone without a movedScenes entry (${compared} versions)`, lost.size === 0, [...lost].join(', '));
+  check(`no committed id gone without a movedScenes entry in compatibility.json (${compared} versions)`, lost.size === 0, [...lost].join(', '));
   check('every committed event name still listed (active, or { "name", "retired": true })', gone.length === 0, gone.join(', '));
   // Saves are placed without marking events: a movedScenes entry may point into an event's scenes (its first scene and
   // what only it leads to) only from an id that was one of that same event's scenes (by name) in a committed version:

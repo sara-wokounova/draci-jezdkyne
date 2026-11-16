@@ -38,8 +38,8 @@ npm run clean-sprites  # strip baked checkerboard from character PNGs (in place;
 npm test               # the node checks in tests/ (story rules, the save, the story files); CI runs them before every deploy
 ```
 
-`npm test` (D38) runs `tests/storyflow.test.mjs`, `tests/autosave.test.mjs`, `tests/story.test.mjs` and
-`tests/story-history.test.mjs` (needs git; its synthetic repos live in the system temp folder, or `STORY_TEST_TMP`: run it
+`npm test` (D38) runs `tests/storyflow.test.mjs`, `tests/autosave.test.mjs`, `tests/story.test.mjs`,
+`tests/act2a.test.mjs` (Act 2a's calendar and text rules, D40) and `tests/story-history.test.mjs` (needs git; its synthetic repos live in the system temp folder, or `STORY_TEST_TMP`: run it
 locally as `STORY_TEST_TMP=C:/tmp/claude/story-test-tmp npm test` in Git Bash (forward slashes: bash eats backslashes),
 `$env:STORY_TEST_TMP='C:\tmp\claude\story-test-tmp'; npm test` in PowerShell, the temp-folder rule); a failure stops the deploy. No linter. The Playwright check scripts (and the node checks for the sprite scripts, the music and the
 sound-effect files, which need ffmpeg) live outside the repo (see the Tests section of workflow.md). Also verify changes by running the game
@@ -109,7 +109,8 @@ src/engine/
 src/styles/main.css        all styling (DOM UI is absolutely positioned over the canvas)
 src/styles/playtest.css    the play-test panel (over main.css)
 vite.config.js             base './'; three build inputs: index.html, playtest.html, playtest/index.html (D33)
-public/story/story-v2.json the story's main file (fetched at runtime, not bundled) and its parts beside it (D37);
+public/story/story-v2.json the story's main file (fetched at runtime, not bundled) and its parts beside it (D37), among
+                           them characters.json and compatibility.json (movedScenes, D39);
                            public/story/story.json is the old story, frozen for cached old tabs (never edited)
 tests/                     the node checks (npm test, D38)
 public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, minigames/dragon-attack/,
@@ -153,22 +154,24 @@ on top with CSS. Layout bugs are almost always in `main.css`; scene-fit bugs in
 ## Story format (`public/story/story-v2.json` and its parts, D37)
 
 ```jsonc
-// story-v2.json: everything but the scenes, and the list of parts (files beside it in public/story/)
+// story-v2.json: id, start, music, assets and the list of parts (files beside it in public/story/)
 {
   "id": "draci-jezdkyne-z-vlpu",          // also the localStorage key: vn:<id>:autosave2
   "start": "forest_flight_01",
   "menuMusic": "village_day",             // music key for the main menu
   "resumeMusic": ["battle"],              // music keys that continue where they were left (D26)
   "assets": { "music": { "village_day": "assets/music/village_day.mp3" } },
-  "characters": {
-    "roza": { "displayName": "Róza", "color": "#d6462f", "hair": "#eac470", "sprites": { "neutral": "...", "happy": "..." } },
-    "jezevec": { "displayName": "Jezevec", "scale": 0.35, "raise": 0.35, "sprites": { "neutral": "..." } }
-  },                                      // scale: rider heights tall; raise: feet that many rider heights higher
-  "movedScenes": { "first_choice": { "scene": "forest_flight_01", "line": 5 } },  // old ids → where saves go on
-  "parts": ["act1.json", "act2a-den1.json", "act2a-den2.json", "act2a-den3.json"]
+  "parts": ["characters.json", "compatibility.json", "act1.json", "act2a.json", "lokace-les.json", "lokace-reka.json",
+            "lokace-hory.json"]
 }
+// characters.json (D39): { "scenes": [], "characters": {
+//   "roza": { "displayName": "Róza", "color": "#d6462f", "hair": "#eac470", "sprites": { "neutral": "...", "happy": "..." } },
+//   "jezevec": { "displayName": "Jezevec", "scale": 0.35, "raise": 0.35, "sprites": { "neutral": "..." } } } }
+//   (scale: rider heights tall; raise: feet that many rider heights higher)
+// compatibility.json (D39): { "scenes": [], "movedScenes": { "first_choice": { "scene": "forest_flight_01", "line": 5 } } }
+//   (old ids → where saves go on; "scenes": [] in both keeps a cached game from before D39 loading, D39)
 // a part: { "scenes": [ … ] }; a location part also { "location": { "id": "hory", "events": [
-//   { "scene": "hory_doupe_01", "if": "vedma_doupe", "first": true }, { "scene": "hory_zubr_01" } ] } }  ("name" only to keep an old one)
+//   { "scene": "hory_doupe", "if": "vedma", "first": true }, { "scene": "hory_zubr" } ] } }  ("name" only to keep an old one)
 {
   "id": "scene_id",                       // one background, its lines until a choice, another scene or a minigame
   "background": { "type": "image", "src": "assets/backgrounds/x.png" },  // or {type:"generated", preset}
@@ -197,9 +200,11 @@ choices, else `next`, else `end` (the next tap opens the end card, or by itself 
 before it: KONEC, "Dobrý/Špatný konec: title", `text`,
 "Zpět na začátek" → reset to `start` + main menu), else a dead end. `"lines": []` with a `next` is a pass-through.
 Galerie lists the endings reached (their end card next; `endings` in the save), in story order. The minigame scene is
-kept out of back-history. Back goes one line back with the memory as it was. Old scene ids live on in `movedScenes`.
+kept out of back-history. Back goes one line back with the memory as it was. Old scene ids live on in `movedScenes`
+(compatibility.json).
 
-Editing the story (D37): write in `story-v2.json` and its parts, never in the frozen `story.json`. `npm test` (CI runs
+Editing the story (D37): write in `story-v2.json` and its parts (characters in characters.json, `movedScenes` in
+compatibility.json: `npm test` refuses them anywhere else, D39), never in the frozen `story.json`. `npm test` (CI runs
 it before every deploy) checks most mistakes and its message says what to do; these it catches:
 - a scene id that doesn't exist (also a scene in a file not listed in `parts`: "not a scene"), a malformed condition, a
   file missing from git;
@@ -215,7 +220,7 @@ it before every deploy) checks most mistakes and its message says what to do; th
 
 And these it can't catch:
 - a scene with no visible choice, no `next` and no `end` (a forgotten `next`): a dead end where a tap does nothing
-  (`act2a_end` is one on purpose until Act 2b); the lint warns only when conditions make a scene's way on vanish;
+  (`a2_konec` is one on purpose until Act 2b); the lint warns only when conditions make a scene's way on vanish;
 - inserting or deleting a line shifts saved positions on that scene (and its `movedScenes` lines): append lines, or
   edit a line's text, instead;
 - splitting a scene in two (its later lines moved into a new scene): saves on the moved lines land on the old scene's
@@ -226,13 +231,22 @@ And these it can't catch:
 - a retired event's scenes aren't reused by another event (its players would replay them);
 - never amend, rebase or force-push the story files once pushed (a deployed commit would vanish from the history).
 
+Act 2a's text rules (D40), checked by `tests/act2a.test.mjs`, whose message says what to do: an event's text names no
+time of day (it can come at any half-day; allowed in the mornings, the night, the evening and the abduction (`a2_vecer3`, `a2_unos`, `a2_konec`), the hub, Soňa's three `les_sona*` scenes, or on
+a line with an `if` on `pul`: inside an event `pul` already counts it, 1 = day 1's morning, 2 = its afternoon … 6 = day
+3's afternoon; "nejkratší noc", the solstice, is no time of day); "Rubínka" only on a line or choice with an `if` on `vedma` (the vědma tells the name);
+no `if` reads a name its own scene sets (always true there); no Act 2a `if` reads `studanka`, `hlas` or `melodie`
+(kept for the finale: read `vily` / `haj_nav` / `haj_zeme` / `zubr` instead); the hub's lines and Triglav's question
+stay ≤ 40 characters; and every path through Act 2a still reaches `a2_konec` with the calendar intact.
+
 Good to know: conditions inside a scene see that scene's own changes (its `set`/`add` apply on entry).
 
 ## Assets
 
 - Backgrounds: 1672×941 PNG (~16:9, ~3.3 MB each). Displayed contain-fit (letterboxed).
-  Act 2a's nine (2026-11-15: `forest_path`, `badger_burrow`, `forest_herbs`, `forest_night_meadow`, `vedma_hut`,
-  `forest_clearing`, `vily_meadow`, `tesak_lair`, `sacred_grove`) were made with Runway's GPT Image model (the style of
+  Act 2a's ten (2026-11-15: `forest_path`, `badger_burrow`, `forest_herbs`, `forest_night_meadow`, `vedma_hut`,
+  `forest_clearing`, `vily_meadow`, `tesak_lair`, `sacred_grove`; 2026-11-16: `mountain_meadow`, its original 1920×1088,
+  cropped to 1920×1080 before the scale) were made with Runway's GPT Image model (the style of
   Sára's ChatGPT originals; `forest_dragon_flight.png` as the style reference; prompts in her words: "manga water color
   style with wide brush, bright colours and warm light"); the full-size originals (2560×1440) are kept in
   `art/backgrounds/` (Sára: ready for reuse), the deployed files scaled with

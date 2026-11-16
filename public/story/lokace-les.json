@@ -1,0 +1,483 @@
+{
+  "location": {
+    "id": "les",
+    "events": [
+      {
+        "scene": "les_sona",
+        "first": true
+      },
+      {
+        "scene": "les_srnce"
+      }
+    ]
+  },
+  "scenes": [
+    {
+      "id": "les_sona",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "add": {
+        "pul": 1
+      },
+      "set": [
+        "sona"
+      ],
+      "choices": [
+        {
+          "text": "Večer ti přiletíme pomoct hledat.",
+          "next": "les_sona_slib",
+          "if": "pul<5"
+        },
+        {
+          "text": "Promiň, Soňo, musíme dál.",
+          "next": "les_sona_ne",
+          "if": "pul<5"
+        },
+        {
+          "text": "Hodně štěstí, Soňo!",
+          "next": "a2_cesta",
+          "if": "pul>=5"
+        }
+      ],
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "text": "Na kraji hlubokého lesa, mezi bylinami vysokými po pás, se skláněla dívka s košíkem. Každý lístek obracela dvakrát a něco si přitom šeptala.",
+          "characters": []
+        },
+        {
+          "speaker": "emma",
+          "text": "Soňo! Co tu děláš tak daleko od hradiště?",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "speaker": "sona",
+          "text": "Holky! Lekla jsem se, až jsem rozsypala mateřídoušku. Hledám stříbrnou třezalku. Hledám ji už kolik dní a ona se přede mnou schovává."
+        },
+        {
+          "speaker": "sona",
+          "text": "Kvete jen v noci, pár dní před slunovratem, a každý rok jinde. Kdo ji utrhne včas, drží v ruce velkou moc. Vědma z ní plete amulety proti zlým kouzlům."
+        },
+        {
+          "speaker": "sona",
+          "text": "Letos mě pro ni poslala samotnou. Poprvé. Jestli se vrátím s prázdným košíkem, budu až do zimy zase jen drtit kopřivy."
+        },
+        {
+          "speaker": "roza",
+          "text": "Soňo, neviděla jsi zrzavou ženu v šarlatových šatech? Hledáme ji po celém lese.",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "sona",
+          "text": "Viděla! Před pár dny přišla za vědmou. Mě poslaly pro vodu, ale já… poslouchala za plotem. Neslyšela jsem nic. Jen vědma potom celý den mlčela a třikrát připálila kaši.",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "nervous"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "emma",
+          "text": "Za vědmou zaletíme, až to půjde.",
+          "if": "pul<6"
+        },
+        {
+          "text": "Soňa se podívala do košíku. Ležely v něm tři lístky máty a jedna zvědavá beruška.",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "sad"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "sona",
+          "text": "Sama ji nikdy nenajdu. Les je tak velký a času tak málo…",
+          "if": "pul<5"
+        },
+        {
+          "speaker": "anna",
+          "text": "A co kdybychom ti s draky pomohly? Z výšky je vidět víc.",
+          "if": "pul<5"
+        },
+        {
+          "speaker": "sona",
+          "text": "Dnes v noci pokvete naposled. Budu hledat sama. Nějak to zvládnu.",
+          "if": "pul>=5"
+        }
+      ]
+    },
+    {
+      "id": "les_sona_slib",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "happy"
+        }
+      ],
+      "set": [
+        "slib"
+      ],
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "speaker": "sona",
+          "text": "Opravdu? Vy byste… na dracích? Se mnou? Ne že bych se bála. Jen jsem ještě nikdy nebyla výš než na hrušce.",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "happy"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "speaker": "emma",
+          "text": "Přiletíme po večeři, až se setmí. Kde tě najdeme?",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "happy"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "sona",
+          "text": "U staré lípy na kraji bažiny. Zapálím tam ohníček, ať mě z výšky vidíte. Malý. Aby se les nezlobil."
+        },
+        {
+          "speaker": "roza",
+          "text": "Platí. A ty si zatím odpočiň, v noci spát nebudeš!",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "happy"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "speaker": "sona",
+          "text": "Odpočívat? Teď? Jdu si natrhat kontryhel proti strachu z výšek. Hodně kontryhele.",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "nervous"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "les_sona_ne",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_herbs.png"
+      },
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "sona",
+          "position": "left",
+          "pose": "sad"
+        }
+      ],
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "speaker": "roza",
+          "text": "Promiň, Soňo. Rády bychom, ale ta čarodějnice na nás nepočká.",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "sad"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "sad"
+            }
+          ]
+        },
+        {
+          "speaker": "sona",
+          "text": "Já vím. Hradiště je důležitější než jedna kytka. To by řekla i vědma. Asi."
+        },
+        {
+          "speaker": "sona",
+          "text": "Jen leťte. Třezalka se schovává před každým, ale já ji stejně najdu. Jsem totiž tvrdohlavější než ona.",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Hodně štěstí, Soňo.",
+          "characters": [
+            {
+              "id": "sona",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "text": "Soňa zamávala a zase se sklonila k bylinám. Když se jezdkyně z výšky ohlédly, pořád ještě obracela každý lístek dvakrát."
+        }
+      ]
+    },
+    {
+      "id": "les_srnce",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_clearing.png"
+      },
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "srnce",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "add": {
+        "pul": 1
+      },
+      "next": "les_srnce_mama",
+      "lines": [
+        {
+          "text": "Na mýtině uprostřed hlubokého lesa stálo srnče s bílými tečkami na hřbetě. Třáslo se tak, že se chvěla i tráva kolem něj."
+        },
+        {
+          "speaker": "srnce",
+          "text": "Vy jste vlci? Maminka říkala, že vlci mají velké zuby. Vy máte velké… všechno."
+        },
+        {
+          "speaker": "anna",
+          "text": "Nejsme vlci. Tohle jsou draci a ti srnčata nejedí. Viď, Buřinoho? …Buřinoho, přestaň se olizovat.",
+          "characters": [
+            {
+              "id": "srnce",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "speaker": "srnce",
+          "text": "Maminka řekla: počkej pod lískou a ani se nehni. Já se hnul jenom trošku. Za zajícem. A pak už nikde nebyla žádná líska, jenom samý les."
+        },
+        {
+          "speaker": "emma",
+          "text": "Ztratilo se. A les je pro něj moc velký, samo cestu zpátky nenajde.",
+          "characters": [
+            {
+              "id": "srnce",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "sad"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "Tak ji najdeme my! Neboj, maličký, najdeme ti maminku. Z dračího hřbetu je vidět každá líska v lese.",
+          "characters": [
+            {
+              "id": "srnce",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "excited"
+            }
+          ]
+        },
+        {
+          "speaker": "srnce",
+          "text": "Na draka nevylezu. Ale můžu tady počkat a nehnout se. To už umím. Skoro."
+        },
+        {
+          "text": "Draci se vznesli a začali nad lesem kroužit, níž a níž, jako tři veliké starostlivé vlaštovky."
+        }
+      ]
+    },
+    {
+      "id": "les_srnce_mama",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_clearing.png"
+      },
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "srna",
+          "position": "left",
+          "pose": "happy"
+        }
+      ],
+      "set": [
+        "srna"
+      ],
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "text": "Kroužily dlouho. Až Emma ukázala dolů: po kraji paseky pobíhala srna, větřila, zastavovala se a zase běžela, jako by hledala něco, co jí upadlo.",
+          "characters": []
+        },
+        {
+          "speaker": "emma",
+          "text": "Tam! Vidíte ji? Běsko, pomalu, ať ji nevylekáme ještě víc.",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "excited"
+            }
+          ]
+        },
+        {
+          "text": "Draci ji opatrně naváděli k mýtině. Srnče vypísklo, přiskákalo k ní a srna ho olízala od uší až po ocásek. Dvakrát. A pak mu vyčinila.",
+          "characters": [
+            {
+              "id": "srna",
+              "position": "left",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "speaker": "srna",
+          "text": "Řekla jsem pod lískou! Pod lískou, ne za zajícem! …Odpusťte, jezdkyně. Srdce mi ještě běhá po lese."
+        },
+        {
+          "speaker": "srna",
+          "text": "Draků se bojí celý les. Já už se vás bát nebudu, a povím to i ostatním."
+        },
+        {
+          "speaker": "srna",
+          "text": "Dlužím vám víc než díky. Znám stezku přes bažiny, kterou neznají lidé ani vlci. Až ji budete potřebovat, zavolejte mě na kraji lesa. Provedu vás suchou nohou."
+        },
+        {
+          "speaker": "anna",
+          "text": "Stezka přes bažiny! To se může hodit. A ty, maličký: příště pod lískou, ano?",
+          "characters": [
+            {
+              "id": "srna",
+              "position": "left",
+              "pose": "happy"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "speaker": "srnce",
+          "text": "Ano. Ale ten zajíc byl opravdu veliký."
+        }
+      ]
+    }
+  ]
+}

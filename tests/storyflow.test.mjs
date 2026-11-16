@@ -57,6 +57,40 @@ t('mergeStory: no parts, a part without scenes, bad names throw', () => {
   assert.throws(() => F.partNames({ parts: 'a.json' }));
   assert.throws(() => F.partNames({ parts: [3] }));
 });
+t('mergeStory: characters and movedScenes from parts (D39): merged after main, the first kept, odd ids and values', () => {
+  const w = [];
+  const parts = new Map([
+    ['c.json', JSON.parse('{"characters":{"b":{"n":2},"a":{"n":9},"__proto__":{"n":3},"constructor":{},"toString":{}}}')],
+    ['m.json', { scenes: [], movedScenes: { old: { scene: 's', line: 0 } } }],
+    ['m2.json', JSON.parse('{"movedScenes":{"old":{"scene":"x","line":1},"__proto__":{"scene":"s","line":0}}}')],
+    ['bad.json', { characters: 'x' }],
+    ['s.json', { scenes: [{ id: 's' }] }],
+  ]);
+  const merged = F.mergeStory({ characters: { a: { n: 1 } }, parts: [...parts.keys()] }, parts, w);
+  assert.deepEqual(Object.keys(merged.characters), ['a', 'b', '__proto__', 'constructor', 'toString']);
+  assert.equal(merged.characters.a.n, 1, "main's entry is the base");
+  assert.equal(Object.getPrototypeOf(merged.characters), Object.prototype);
+  assert.ok(Object.hasOwn(merged.characters, '__proto__'));
+  assert.deepEqual(Object.keys(merged.movedScenes), ['old', '__proto__']);
+  assert.equal(merged.movedScenes.old.scene, 's');
+  assert.deepEqual(merged.scenes.map((s) => s.id), ['s']);
+  assert.deepEqual(w, ['Story part c.json: duplicate characters entry a (the first kept)',
+    'Story part m2.json: duplicate movedScenes entry old (the first kept)', 'Story part bad.json: "characters" is not an object (ignored)']);
+  const s = F.normalizeStory(merged, []);
+  assert.equal(s.movedScenes.get('__proto__').scene, 's');
+});
+t('mergeStory: a part with only characters loads; odd scenes still throw; main odd values warn; absent no warning', () => {
+  const w = [];
+  assert.deepEqual(F.mergeStory({ parts: ['c.json'] }, new Map([['c.json', { characters: { a: {} } }]]), w).characters, { a: {} });
+  assert.deepEqual(w, []);
+  assert.throws(() => F.mergeStory({ parts: ['c.json'] }, new Map([['c.json', { characters: {}, scenes: 'x' }]])));
+  assert.throws(() => F.mergeStory({ parts: ['c.json'] }, new Map([['c.json', { note: 1 }]])));
+  const w2 = [];
+  const m = F.mergeStory({ characters: 'x', movedScenes: [1], parts: ['c.json'] }, new Map([['c.json', { characters: { a: {} } }]]), w2);
+  assert.deepEqual(m.characters, { a: {} });
+  assert.deepEqual(m.movedScenes, {});
+  assert.deepEqual(w2, ['Story file: "characters" is not an object (ignored)', 'Story file: "movedScenes" is not an object (ignored)']);
+});
 
 // --- normalising -------------------------------------------------------------------------------------------------
 t('normalizeStory: old form, both, none, lines not a list, [] , malformed line, minigame, null scene, duplicate', () => {

@@ -55,7 +55,7 @@ Main plot (decided by Sára, 2026-11-15):
   - Animals on the way (Sára, 2026-11-15): a badger and its burrow with young; a lost fox; a lost fawn whose mother
     must be found; the dazed wisent. Mythological creatures (Sára, 2026-11-15): will-o'-the-wisps (bludičky), víly,
     the hejkal; not the vodník.
-  - The trail by days is being planned (Claude's proposal, Sára's changes): day 1 the lost fox, Soňa (and the night
+  - (Superseded by the days and locations below, D40.) The trail by days was planned (Claude's proposal, Sára's changes): day 1 the lost fox, Soňa (and the night
     herb search, the will-o'-the-wisps), the badgers; day 2 the vědma, the hejkal, the fawn; day 3 the dazed wisent, the víly,
     Tesák's lair (optional: the egg), the fox family, the Triglav grove (Bezzubka taken). Every day needs a light stop
     (Sára, 2026-11-15).
@@ -76,35 +76,45 @@ Main plot (decided by Sára, 2026-11-15):
   - The sacred grove: not an old woman again (Sára: not only old women as sources); a carved, talking statue of a
     many-headed god: Triglav (three heads: sky, earth, the underworld; each its own voice), Sára, 2026-11-15.
   - Settled (Sára, 2026-11-15): the world of the dead is Nav; the dragon disease is "popelavka" (a dragon loses its fire,
-    its scales go ash-grey); Bezzubka is taken while the riders are in the grove (dragons wait outside). What Rubínka
+    its scales go ash-grey); Bezzubka is taken while the riders are in the grove (dragons wait outside) — superseded 2026-11-16 (D40): in the
+    evening of day 3 at the gord, whatever the riders did. What Rubínka
     asked the vědma for: where to find dead water (mrtvá voda), an ingredient for opening the gate; dead water springs
     only where the world touches Nav, so the vědma guesses her plan.
-  - The lost fox (day 1) is just for fun, always there (no choice); on day 3, before the grove, the fox comes back with
-    its whole family (Sára, 2026-11-15).
+  - The lost fox (day 1) is just for fun, always there (no choice); on day 3 the fox comes back with its whole family
+    (Sára, 2026-11-15; "before the grove" no longer always holds since D40: the grove can come on day 2).
 
-### Act 2a rewritten into days and locations (Sára, 2026-11-16; to be written after the engine change)
+### Act 2a rewritten into days and locations (Sára, 2026-11-16; built, D40)
 
-The engine supports it (D37: memory, centred hubs, locations); the story text is not rewritten yet. Decided so far:
+Built 2026-11-16 (D40; the scene graph below). Decided:
 - Time: days 1–3 after Act 1 (day 0's morning), two actions a day (half-days, a counter); the night herb search costs
   the next morning. Each morning (and at noon) the riders choose where to fly from the places unlocked so far.
 - Locations, one file each (`lokace-*.json`), each with events the engine picks among: `first` events when available
   (Soňa is always the first character met in the forest; Tesák's lair in the mountains, first once the vědma told of
   it), the rest at random; a played event never comes again; a location with nothing left is no longer offered.
-  Directions to start with: around the dam, deeper in the forest, the mountains (Claude: upstream the dam's water
-  floods the badgers' burrow; below it the river dries and the víly lose their water).
+  Three locations: the deep forest (Soňa, the fawn), the dam (the badger, the víly: both flooded by the dam's water),
+  the mountains (Tesák's lair after the vědma, the wisent); two events each, any day.
 - A played event never comes again, except one lost and then given up: it is offered again later and costs time
   again (Sára, 2026-11-16: "jasně, prohraná událost se nabídne znovu"; the give-up choice has `"giveUp": true`).
 - Soňa is not mandatory: met in the forest on any day; without her the riders never hear of the vědma (the vědma tells
   of the lair).
 - The gate to Nav is not at the dam: dead water is a spring (studánka) impossible to find without a magical being's
   advice (the víly, Triglav…).
-- Bezzubka is always taken on day 3: at the end of a location where the dragons wait outside, else in the evening from
-  the gord while the riders go to supper.
+- Bezzubka is always taken in the evening of day 3 at the gord, while the riders are at supper (Sára, 2026-11-16: "vzdy
+  az na hradisti, nechceme penalzovat hrace za to, ze najde posvatny haj").
+- The calendar: Act 1 is day 0; days 1–3 have two half-days each; the solstice is the night of day 4 (Sára: "4. den").
+- Soňa's night search: a promise; the riders keep the rest of the day, come back after supper, search at night and
+  sleep in the next morning (Sára).
+- Quests have no "move on" choice (Sára: agreed): the trip is the cost.
+- Triglav answers two questions of three; the questions change with what the riders know (Sára: "change texts and
+  options what can players ask based on what they already know"; "it should not be too complicated").
+- The víly showing the gate is fine; their meadow is flooded (Sára). The mountains got their own background
+  (`mountain_meadow`).
 - The worst ending (the gate never found) is worse than the flooded gord: an evil spirit from Nav comes through the gate
   and possesses Rubínka, who becomes the morová panna (the plague maiden with her red scarf) and sends plague on the
   gord (Sára: "to zní dobře").
-- Open: how many events per location and which; whether an event may come on any day; the finale's variants by the
-  helpers and the information found (where the gate is, how to wake Bezzubka, the egg).
+- Open: the finale's variants by the helpers and the information found (Act 2a records them, D40: where the gate is
+  `studanka`, how to wake Bezzubka `hlas` / `melodie`, the egg `vejce`, the helpers `jezevci`, `vily`, `zubr`, `srna`,
+  `amulet`, `vedma_pratele`); whether the fox family stays on day 3's morning (it can come after the grove now; asked).
 
 ## Scene graph
 
@@ -124,14 +134,26 @@ forest_flight_01 (6 lines: the opening, the dragons, the shiny thing; the choice
   └─ "Vrátit se domů na oběd." → village_home → lunch_in_town → flooded_town ☠ END (bad) "Zaplavené hradiště"
 ```
 
-Act 2a (`a2_*`, drafted 2026-11-15, 32 scenes since D37, in `act2a-den1.json` … `den3`; each side quest is a choice
-that rejoins; to be rewritten into days and locations, above):
+Act 2a (D40, 2026-11-16: `act2a.json` and the three `lokace-*.json`; the old draft's ids lead to `act1_end`):
 
 ```
-day 1: a2_fox (fun) → a2_badger (quest) → a2_sona (Soňa; quest: a2_herb, the night search, bludičky choice)
-day 2: a2_day2 → a2_vedma (choice: blame / understand) → a2_hejkal (fun) → a2_fawn (quest)
-day 3: a2_day3 → a2_wisent (quest) → a2_vily (quest) → a2_lair_smell (choice: a2_lair, the egg)
-       → a2_foxfam (fun) → a2_grove (Triglav; Bezzubka taken) → act2a_end (temporary end of the written story)
+act1_end → a2_rano1 (day 1) → a2_liska (the fox, free) → a2_cesta (the router) → a2_kam (the hub, one line per half-day)
+a2_kam: "Do hlubokého lesa" → location les:  les_sona (first: sets sona; promise → les_sona_slib (slib) | no → les_sona_ne)
+                                             les_srnce → les_srnce_mama (srna)
+        "K přehradě"        → location reka: reka_jezevec → reka_jezevec_pomoc (jezevci)
+                                             reka_vily → reka_vily_pomoc (vily, studanka)
+        "Do hor"            → location hory: hory_doupe (first, if vedma) → hory_doupe_vejce (vejce)
+                                             hory_zubr → hory_zubr_pomoc (zubr, melodie)
+        "Za vědmou"  (sona)     → vedma_01 (vedma, haj_znam; blame → vedma_zlost | understand → vedma_pochopeni,
+                                  vedma_pratele) → vedma_voda
+        "Do háje"  (haj_znam)   → haj_01 (haj) → haj_otazka ⇄ haj_nebe / haj_zeme (hlas) / haj_nav (studanka), two of three
+                                  → haj_konec
+        "Odpočinout si"         → a2_odpocinek
+every action costs a half-day (pul) and returns to a2_cesta:
+  pul 6 → a2_vecer3 → a2_unos (Bezzubka taken) → a2_konec (the dead end until Act 2b)
+  the day Soňa was promised help ends → a2_noc (noc, +1 half-day: the morning slept away) → a2_noc_bludicky? →
+                                        a2_noc_trezalka (amulet)
+  day 2 starts → a2_rano2 → a2_hejkal (haj_znam, free);  day 3 starts → a2_rano3 → a2_liskova_rodina (free)
 ```
 
 ## Structure (being planned with Sára, 2026-11-15)
@@ -139,17 +161,17 @@ day 3: a2_day3 → a2_wisent (quest) → a2_vily (quest) → a2_lair_smell (choi
 Three acts, branch and bottleneck, the riders' deadline the summer solstice (Rubínka opens the way to the dead with
 a big water on the shortest night, flooding the riders' gord on the way). Acts 2 and 3: proposed, not confirmed yet.
 
-### Act 1 — the dam (confirmed by Sára, 2026-11-15; new scenes not written yet)
+### Act 1 — the dam (confirmed by Sára, 2026-11-15; written)
 
 - Opening: show the riders' dragons by name and the river that flows down to their gord (new scene(s) after
   `forest_flight_01`).
 - Both branches learn from the beaver that the sorceress spoke an incantation, why ("A proč to udělala?") and what
   she looks like: the persuade branch gets `_05` (the why) and `_06` (the description); the win branch has them
   (`beaver_after_battle_win_04` … `_07`).
-- Bottleneck `dam_deal_01` … `_05` (both branches end there; fixes the `_07` loop and the missing `persuade_05`):
-  the beaver remembers she muttered about a big water and the shortest night; Emma: that is in three days, and the
+- Bottleneck `dam_deal_01` … `_06` (both branches end there; fixes the `_07` loop and the missing `persuade_05`):
+  the beaver remembers she muttered about a big water and the shortest night; Emma: that is in four days (D40), and the
   water would run straight onto our gord; Róza offers the deal (you hold the dam, we find the sorceress and make her
-  shrink you back); the beaver agrees; the act ends on a hook (they will ask around in the forest; three days to the solstice).
+  shrink you back); the beaver agrees; the act ends on a hook (they will ask around in the forest; four days to the solstice, D40).
 - Memory (built, D37): the persuade branch remembers the beavers as friends (`bobri_pratele`) (they help in the finale);
   after the fight they fear the riders (`bobri_porazeni`).
 
@@ -162,13 +184,15 @@ a big water on the shortest night, flooding the riders' gord on the way). Acts 2
 ## Writing status
 
 - Act 1 is written to its end (`act1_end`). The opening's dragon lines (`forest_flight_01a` … `_01c`), persuade
-  `_05`, `_06`, the deal `dam_deal_01` … `_06` and `act1_end` were drafted by Claude on 2026-11-15 for Sára to rewrite.
-- Since D37 the story is in `public/story/story-v2.json` and its parts (`act1.json`, `act2a-den1.json` … `den3`),
+  `_05`, `_06`, the deal `dam_deal_01` … `_06` and `act1_end` were drafted by Claude on 2026-11-15 and rewritten in
+  place by a Fable agent on 2026-11-16 (Sára: "That actually applies for all the dialog texts you have written"), for Sára
+  to rewrite after play-testing.
+- Since D37 the story is in `public/story/story-v2.json` and its parts (`act1.json`, Act 2a's files since D40; since D39
+  the characters in `characters.json`, the old ids in `compatibility.json`),
   scenes with several lines (195 one-line scenes became 45).
-- Act 2a is drafted (`a2_*`, by Claude on 2026-11-15, for Sára to rewrite; to be redone into days and locations, see
-  above). What the draft doesn't do yet (the engine can since D37): the time budget ("too late"), helpers and the egg remembered for the finale,
-  the vědma's help depending on the riders' reaction, asking Triglav's heads by choice (the riders ask all three now).
-  Backgrounds made 2026-11-15 (originals in `art/backgrounds/`). Soňa's sprites (neutral, happy, sad, nervous) and the
+- Act 2a is written as days and locations (D40, 2026-11-16): the structure by Claude, the texts by a Fable agent (Sára: more
+  fairy tale and fantasy, magic and mystery, characters with goals of their own), for Sára to play-test and rewrite.
+  Backgrounds made 2026-11-15 (`mountain_meadow` 2026-11-16) (originals in `art/backgrounds/`). Soňa's sprites (neutral, happy, sad, nervous) and the
   vědma's (neutral, sad, happy) made 2026-11-15, only the poses the text uses (Sára: other characters need only the
   poses they use; a missing pose falls back to neutral); originals in `art/characters/`. Creature sprites made 2026-11-15, only the poses used (jezevec, liska (the cub), srnce, srna, zubr,
   vila, hejkal; the fox family is its own character, `liskova_rodina`, since D37), staged at `left` beside the rider; since
@@ -177,8 +201,9 @@ a big water on the shortest night, flooding the riders' gord on the way). Acts 2
 - Dragons: Róza rides Bezzubka, Emma Běska, Anna Buřinoha (Sára, 2026-11-15).
 - Lunch branch ends with the flooded town (bad ending). Its end-card text was
   drafted by Claude on 2026-10-28; rewrite if wanted.
-- (The music notes below name the old one-line ids, such as `a2_hejkal_04` or `beaver_after_battle_win_*`: since D37
-  these are lines inside merged scenes, each a `movedScenes` key pointing at its scene and line.)
+- (The music notes below name the old one-line ids, such as `beaver_after_battle_win_*`: since D37 these are lines
+  inside merged scenes, each a `movedScenes` key pointing at its scene and line; the old Act 2a ids all point at
+  `act1_end` since D40.)
 - Music (D21): `village_day` on the main menu and the village scenes (`village_home`,
   `lunch_in_town`, `flooded_town`); `dragon_flight` on the flying scenes
   (`forest_flight_01`); `forest_ground` (the girls on
@@ -187,8 +212,8 @@ a big water on the shortest night, flooding the riders' gord on the way). Acts 2
   `beaver_after_battle_win_*`, lose. The minigame `beaver_battle` plays `battle`: battle_01 then
   battle_02, looped as one file (D25); a retry continues it where the last attempt stopped, a new
   game starts it over (D26).
-- Act 2a music (D36, 2026-11-16): `vedma_hut` (a2_vedma_*), `night_forest` (a2_herb_*), `vily_magic` (a2_vily_*,
-  wordless women's voices), `playful` (a2_fox_*, a2_hejkal_04 … _09, a2_foxfam_*), `tesak_lair` (a2_lair_01 … _11),
-  `sacred_grove` (a2_grove_01 … _21, a wordless choir), `danger` (a2_grove_22 … _25, `act2a_end`: Bezzubka taken);
-  the rest of Act 2a (the paths, the badger, the fawn, the wisent, Soňa) keeps `forest_ground`, the flights
-  `dragon_flight`.
+- Act 2a music (D36; since D40 by scene): `vedma_hut` (vedma_*), `night_forest` (a2_noc*), `vily_magic` (reka_vily*,
+  wordless women's voices), `playful` (a2_liska, a2_hejkal from its first line, a2_liskova_rodina), `tesak_lair`
+  (hory_doupe_vejce), `sacred_grove` (haj_*, a wordless choir), `danger` (a2_unos, a2_konec: Bezzubka taken),
+  `village_day` (a2_vecer3, a2_odpocinek: the gord); the rest (Soňa, the fawn, the badger, the wisent, the way to the
+  lair) `forest_ground`, the flights and the hub `dragon_flight`.

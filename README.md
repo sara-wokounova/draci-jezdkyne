@@ -43,18 +43,21 @@ The production build is written to `dist/`.
 The story is split into files in `public/story/` (D37):
 
 ```text
-public/story/story-v2.json        the main file: id, start, music, characters, movedScenes, and the list of parts
+public/story/story-v2.json        the main file: id, start, music, assets, and the list of parts
+public/story/characters.json      a part: { "scenes": [], "characters": {...} } (every character)
+public/story/compatibility.json   a part: { "scenes": [], "movedScenes": {...} } (where old scene ids lead, for saved games)
 public/story/act1.json            a part: { "scenes": [...] }
-public/story/act2a-den1.json      …one file per act or day
-public/story/lokace-<place>.json  a location (none yet): { "location": {...}, "scenes": [...] }
+public/story/act2a.json           Act 2a's days: the hub, the router, the mornings, the vědma, the grove (D40)
+public/story/lokace-<place>.json  a location: { "location": {...}, "scenes": [...] } (les, reka, hory)
 ```
 
-A new part is a file there plus its name in the main file's `"parts"` list (commit both). `public/story/story.json` is
+characters.json and compatibility.json are parts too (D39; their `"scenes": []` keeps an old cached game
+loading). A new part is a file there plus its name in the main file's `"parts"` list (commit both). `public/story/story.json` is
 the old one-line-per-scene story, frozen for cached old tabs: never edit it. `npm test` checks the story (dangling ids,
 malformed conditions, missing files, removed scenes; not a forgotten `next`: a scene with no way on is a dead end) and CI
 runs it before every deploy.
 
-A character with real sprites looks like this:
+A character with real sprites looks like this (inside `"characters"` in `characters.json`):
 
 ```json
 {
@@ -107,7 +110,7 @@ A scene is one background with its lines until a choice, another scene or a mini
 - A choice with `"location"` flies to a location: the engine plays one of its available events (`"first": true`
   ones first, the rest at random) and marks it played by its name; the choice disappears once nothing is left.
   A lost event is offered again by a choice with `"giveUp": true` on its lose scene.
-- Renaming or removing a scene needs a `movedScenes` entry (`"old_id": { "scene": "new_id", "line": 0 }`); inserting
+- Renaming or removing a scene needs a `movedScenes` entry in `compatibility.json` (`"old_id": { "scene": "new_id", "line": 0 }`); inserting
   lines into a scene shifts saved games (appending is safe). `npm test` says when one is missing.
 
 ## Optional image backgrounds

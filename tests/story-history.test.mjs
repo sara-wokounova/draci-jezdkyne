@@ -61,10 +61,18 @@ function makeRepo(name) {
   git('config', 'user.email', 'test@example.invalid');
   git('config', 'user.name', 'test');
   git('config', 'core.autocrlf', 'false');
-  const write = (main, part) => {
-    fs.writeFileSync(path.join(dir, 'public', 'story', 'story-v2.json'),
-      JSON.stringify({ id: 't', start: 'hub', characters: {}, parts: ['les.json'], ...main, scenes: [hub, end] }));
-    fs.writeFileSync(path.join(dir, 'public', 'story', 'les.json'), JSON.stringify(part));
+  // The story as it is laid out since D39: characters.json and compatibility.json (the main's movedScenes) as parts.
+  // legacyWrite: the layout before it, everything in story-v2.json (old commits still hold it).
+  const file = (name, data) => fs.writeFileSync(path.join(dir, 'public', 'story', name), JSON.stringify(data));
+  const write = ({ movedScenes = {}, ...main }, part, parts = ['characters.json', 'compatibility.json', 'les.json']) => {
+    file('story-v2.json', { id: 't', start: 'hub', parts, ...main, scenes: [hub, end] });
+    file('characters.json', { characters: {} });
+    file('compatibility.json', { movedScenes });
+    file('les.json', part);
+  };
+  const legacyWrite = (main, part) => {
+    file('story-v2.json', { id: 't', start: 'hub', characters: {}, parts: ['les.json'], ...main, scenes: [hub, end] });
+    file('les.json', part);
   };
   const commit = (message) => { git('add', '-A'); git('commit', '-q', '-m', message); };
   // The verdict of one of story.test.mjs's checks: 'ok', 'FAIL' or 'missing'.
@@ -86,7 +94,7 @@ function makeRepo(name) {
     if (line.startsWith('FAIL')) return 'FAIL';
     return lintOk ? 'ok' : 'lint';
   };
-  return { dir, git, write, commit, verdict };
+  return { dir, git, write, legacyWrite, commit, verdict };
 }
 const NAMES = 'every committed event name still listed';
 const MOVED = 'movedScenes into an event only from its own old scenes';
@@ -157,6 +165,21 @@ try {
   r.git('checkout', '-q', 'feat');
   r.git('merge', '-q', '-s', 'ours', '-m', 'merge main', 'main');
   expect('a merge that drops a deployed event: fails', r.verdict(NAMES), 'FAIL');
+}
+// The split (D39): an old commit with movedScenes in story-v2.json, a newer one with them in compatibility.json.
+const LOST = 'no committed id gone without a movedScenes entry in compatibility.json';
+{
+  const r = makeRepo('split');
+  r.legacyWrite({}, forest([{ scene: 'a' }], [scene('a'), scene('old')]));
+  r.commit('old id');
+  r.legacyWrite({ movedScenes: { old: { scene: 'hub', line: 0 } } }, forest([{ scene: 'a' }], [scene('a')]));
+  r.commit('old id moved, in story-v2.json');
+  r.write({ movedScenes: { old: { scene: 'hub', line: 0 } } }, forest([{ scene: 'a' }], [scene('a')]));
+  r.commit('split');
+  expect('movedScenes moved from story-v2.json into compatibility.json: passes', r.verdict(LOST), 'ok');
+  r.write({ movedScenes: { old: { scene: 'hub', line: 0 } } }, forest([{ scene: 'a' }], [scene('a')]), ['characters.json', 'les.json']);
+  r.commit('compatibility.json dropped from parts');
+  expect('compatibility.json dropped from parts: fails', r.verdict(LOST), 'FAIL');
 }
 // An invalid committed name was never offered: it may go.
 {

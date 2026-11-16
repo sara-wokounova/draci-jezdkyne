@@ -8,19 +8,23 @@ Severity: **P0** broken for everyone · **P1** blocks play on some setups · **P
 ### P3 — The frozen story.json and its old key stay until a cleanup (D37, 2026-11-16)
 `public/story/story.json` (the old one-line story) stays for cached old tabs and is never edited
 (`tests/story.test.mjs` checks its hash). Remove it in a later cleanup commit, together with: `tests/story.test.mjs`'s two
-checks that read it (its hash, and its ids placing: both can go, every committed `story-v2.json` carries those ids as
+checks that read it (its hash, and its ids placing: both can go, every committed version (story-v2.json and its parts) carries those ids as
 scene ids or `movedScenes` keys and the history check covers them), the check-script lines that still open it (the d33 snapshots,
 `as-test/music.test.mjs` if it still reads it), and `public/assets/characters/liska/liska_happy.png` (only the frozen
-story uses it). Its scene ids must stay as `movedScenes` keys (old-key saves can still arrive).
+story uses it), and the `"scenes": []` of characters.json and compatibility.json (D39). Its scene ids must stay as `movedScenes` keys (old-key saves can still arrive).
 
 ### P3 — The corner choice panel can overlap a tall dialogue panel (found in planning D37, 2026-11-16)
 The 2-choice corner panel sits at a fixed bottom (`calc(clamp(1rem, 4vh, 3rem) + 11rem)`), while the dialogue panel
 grows with its text: at 1280×720 the story's longest lines push the dialogue ~76 px under the panel. The centred panel
 (D37) follows the dialogue's measured top (`--dialogue-top`); the corner panel could use the same variable.
 
-### P3 — The written story ends in a dead end at act2a_end (D37, 2026-11-16)
-`act2a_end` has no `next` and no `end`: a tap does nothing (on purpose until Act 2b; `followUp` warns once).
-Act 2a is to be rewritten into days and locations (story work with Sára, story.md).
+### P3 — Remove the unlisted act2a-den1..3.json (D40, 2026-11-16)
+The old Act 2a draft's parts stay in git, no longer in `parts`, for the deploy of D40: for ~10 minutes Pages' cache can
+still serve the old story-v2.json, which lists them (a part that 404s stops the load). Remove them (`git rm`) in any
+later commit.
+
+### P3 — The written story ends in a dead end at a2_konec (D37, D40, 2026-11-16)
+`a2_konec` has no `next` and no `end`: a tap does nothing (on purpose until Act 2b; `followUp` warns once).
 
 ### P2 — Minigame starts seconds after its HUD appears (verified 2026-10-17)
 Scene preload (D8) only covers backgrounds and characters, so the minigame loads the 7

@@ -1,0 +1,365 @@
+{
+  "location": {
+    "id": "hory",
+    "events": [
+      {
+        "scene": "hory_doupe",
+        "if": "vedma",
+        "first": true
+      },
+      {
+        "scene": "hory_zubr"
+      }
+    ]
+  },
+  "scenes": [
+    {
+      "id": "hory_doupe",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/mountain_meadow.png"
+      },
+      "music": "forest_ground",
+      "characters": [],
+      "add": {
+        "pul": 1
+      },
+      "next": "hory_doupe_vejce",
+      "lines": [
+        {
+          "text": "Vysoko v horách, kde stromy řídnou a vítr voní sněhem i v létě, se draci snesli na louku pod skalami."
+        },
+        {
+          "speaker": "emma",
+          "text": "Tady někde mělo být Tesákovo doupě. V jeskyni nad poslední loukou, říkala vědma. Jenže jeskyní jsou tu desítky.",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "center",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "text": "Bezzubka najednou zvedla hlavu. Zavětřila, tiše zamručela a ocas jí začal bít do trávy.",
+          "characters": []
+        },
+        {
+          "speaker": "roza",
+          "text": "Co je, Bezzubko? Něco cítíš? …Takhle se chová, jen když ucítí jiného draka.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "center",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Jiného draka? Tady už přece rok žádný není.",
+          "characters": [
+            {
+              "id": "anna",
+              "position": "center",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "text": "Bezzubka se nenechala zdržet. Šplhala po skále výš a výš, drápy křesaly o kámen, až se zastavila před černým otvorem. Vítr v něm tiše hučel, jako když někdo dýchá ze spaní.",
+          "characters": []
+        }
+      ]
+    },
+    {
+      "id": "hory_doupe_vejce",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/tesak_lair.png"
+      },
+      "music": "tesak_lair",
+      "characters": [],
+      "set": [
+        "vejce"
+      ],
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "text": "V jeskyni bylo šero a ticho. Na zemi se matně leskly rudé šupiny, staré a zaprášené. Uprostřed leželo hnízdo z větví, veliké jako vůz. Prázdné."
+        },
+        {
+          "speaker": "anna",
+          "text": "Tady spal. A tady u něj nejspíš seděla, když byl nemocný… Je to tu smutné, i když tu nikdo není.",
+          "characters": [
+            {
+              "id": "anna",
+              "position": "center",
+              "pose": "sad"
+            }
+          ]
+        },
+        {
+          "text": "Bezzubka hnízdo obešla, jako by se bála na něj šlápnout, a začala čenichat u úzké pukliny ve skále. Škrábala do ní drápem a kňučela.",
+          "characters": []
+        },
+        {
+          "speaker": "emma",
+          "text": "Něco tam je. Rózo, máš nejdelší ruce. Opatrně!",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "center",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "text": "Hluboko v puklině, zabalené v suchém mechu, leželo vejce. Velké, šedé a studené jako říční kámen.",
+          "characters": []
+        },
+        {
+          "speaker": "roza",
+          "text": "Dračí vejce! Tesák ho tu musel schovat, než… než vyhasl. Schoval ho tak dobře, že ho nenašel nikdo.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "center",
+              "pose": "excited"
+            }
+          ]
+        },
+        {
+          "speaker": "emma",
+          "text": "Je jako led. Ale dračí vejce prý dokáže spát celé roky. Probudí ho jen dračí oheň.",
+          "characters": [
+            {
+              "id": "emma",
+              "position": "center",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "text": "Bezzubka se nad vejcem sklonila a dýchla na něj, zlehka, jako když se fouká do uhlíků. Skořápka zrůžověla, zrudla, rozzářila se… a zevnitř se ozvalo tiché ťuk. A po chvíli znovu. Ťuk.",
+          "characters": []
+        },
+        {
+          "speaker": "anna",
+          "text": "Je živé! Slyšely jste? Ono ťuká!",
+          "characters": [
+            {
+              "id": "anna",
+              "position": "center",
+              "pose": "excited"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "A Rubínka o něm vůbec neví. Celý rok truchlí, a tady na ni zatím někdo čeká.",
+          "if": "vedma"
+        },
+        {
+          "speaker": "roza",
+          "text": "Vezmeme ho s sebou. Zabalte ho do mého pláště. A ty, Bezzubko, ho budeš hřát.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "center",
+              "pose": "happy"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hory_zubr",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/mountain_meadow.png"
+      },
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "add": {
+        "pul": 1
+      },
+      "next": "hory_zubr_pomoc",
+      "lines": [
+        {
+          "text": "Na horské louce stál zubr. Obrovský, tmavý jako skála a právě tak nehybný. Tráva kolem něj byla nedotčená, jako by se už dlouho ani nepásl."
+        },
+        {
+          "speaker": "anna",
+          "text": "Něco s ním není v pořádku. Podívejte se mu na oči. Jsou zakalené jako mlha nad vodou.",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "text": "Buřinoha k němu zvědavě natáhla krk. Zubr zafuněl a ohnal se rohy, až se zachvěly okolní smrky. Ale díval se přitom skrz ni, někam, kde nebylo nic."
+        },
+        {
+          "speaker": "emma",
+          "text": "On nás nevidí. Je omámený. Tohle není nemoc, to je kouzlo. Čarodějné kouzlo.",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Slyšíte? Dole v údolí bučí stádo. Volají ho. A on je neslyší.",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "sad"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "Tak ho probudíme. Takhle ho tu přece nenecháme stát.",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hory_zubr_pomoc",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/mountain_meadow.png"
+      },
+      "music": "forest_ground",
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "happy"
+        }
+      ],
+      "set": [
+        "zubr",
+        "melodie"
+      ],
+      "next": "a2_cesta",
+      "lines": [
+        {
+          "text": "Zubr stál a dýchal ztěžka, jako by nesl na hřbetě celý les.",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "text": "Róza se zhluboka nadechla a zakřičela, až se to rozlehlo po skalách: „Hej, zubře! Probuď se!“",
+          "if": "!haj_zeme"
+        },
+        {
+          "text": "Zubr zařval a vyrazil přímo proti ní. Bezzubka ji v poslední chvíli popadla za plášť a vytáhla do vzduchu.",
+          "if": "!haj_zeme"
+        },
+        {
+          "speaker": "anna",
+          "text": "Křikem to nepůjde! Zkus to potichu, Rózo. Jako když konejšíš Bezzubku po bouřce.",
+          "if": "!haj_zeme"
+        },
+        {
+          "speaker": "anna",
+          "text": "Počkej, Rózo. Triglav říkal: klidný hlas, ne křik.",
+          "if": "haj_zeme"
+        },
+        {
+          "text": "Róza seskočila z Bezzubky na zem. Šla pomalu, s prázdnýma rukama, a tiše začala zpívat ukolébavku, kterou jí zpívala máma a mámě zase její máma: o měsíci, co pase hvězdy na nebeské louce.",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "text": "Zubr přestal funět. Uši se mu pohnuly. Mlha v jeho očích zřídla, roztrhala se jako pára nad hrncem – a pak zamrkal.",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "happy"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "speaker": "zubr",
+          "text": "Kde to… Stál jsem na louce. Přišla zrzavá žena a zpívala. Krásně zpívala. A pak už nic, jen ten zpěv, pořád dokola, a nešlo z něj ven."
+        },
+        {
+          "speaker": "zubr",
+          "text": "Tvoje píseň byla tišší než její, a přece mě dovedla domů. Vrátila jsi mi rozum, maličká. Až budete potřebovat něco prorazit, vyvrátit nebo rozdupat, zubří stádo přijde."
+        },
+        {
+          "speaker": "roza",
+          "text": "Tichá písnička zmůže víc než všechen křik světa. To si zapamatuju. I tu melodii."
+        }
+      ]
+    }
+  ]
+}

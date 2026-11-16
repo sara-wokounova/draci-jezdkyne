@@ -45,23 +45,46 @@ export function partNames(main, warnings = []) {
   return names;
 }
 
-/** One story from the main file and its parts (a Map name → parsed JSON): the main file's scenes, then each part's. */
+// Objects a part may carry besides scenes (D39: characters.json, compatibility.json), merged into the main file's own
+// (the base: the main file may still hold them, as committed versions and test stories do), the first entry kept.
+const MERGED = ['characters', 'movedScenes'];
+
+/**
+ * One story from the main file and its parts (a Map name → parsed JSON): the main file's scenes, then each part's; a
+ * part's location; the main file's characters and movedScenes, then each part's.
+ */
 export function mergeStory(main, parts, warnings = []) {
   if (!isObject(main)) throw new Error('Story file is not a JSON object.');
   const scenes = Array.isArray(main.scenes) ? [...main.scenes] : [];
   const locations = [];
   if ('location' in main) warnings.push('A location in the main file is ignored (it belongs in a part of its own)');
+  const merged = new Map(MERGED.map((key) => [key, new Map()])); // entries kept as a Map: `__proto__` is just an id
+  const take = (key, value, where) => {
+    if (value === undefined) return;
+    if (!isObject(value)) {
+      warnings.push(`${where}: "${key}" is not an object (ignored)`);
+      return;
+    }
+    for (const [id, entry] of Object.entries(value)) {
+      if (merged.get(key).has(id)) warnings.push(`${where}: duplicate ${key} entry ${id} (the first kept)`);
+      else merged.get(key).set(id, entry);
+    }
+  };
+  for (const key of MERGED) take(key, main[key], 'Story file');
   for (const name of partNames(main, warnings)) {
     const part = parts.get(name);
-    const scenesOk = isObject(part) && (Array.isArray(part.scenes) || ('location' in part && part.scenes === undefined));
+    const scenesOk = isObject(part) && (Array.isArray(part.scenes)
+        || (part.scenes === undefined && ['location', ...MERGED].some((key) => key in part)));
     if (!scenesOk) throw new Error(`Story part ${name} has no "scenes" list.`);
-    const extra = Object.keys(part).filter((key) => key !== 'scenes' && key !== 'location');
+    const extra = Object.keys(part).filter((key) => key !== 'scenes' && key !== 'location' && !MERGED.includes(key));
     if (extra.length > 0) warnings.push(`Story part ${name}: ignored ${extra.join(', ')}`);
     scenes.push(...(part.scenes ?? []));
     if ('location' in part) locations.push(part.location);
+    for (const key of MERGED) take(key, part[key], `Story part ${name}`);
   }
   const { parts: _parts, location: _location, ...rest } = main;
-  return { ...rest, scenes, locations };
+  const shared = Object.fromEntries([...merged].map(([key, entries]) => [key, Object.fromEntries(entries)]));
+  return { ...rest, scenes, locations, ...shared };
 }
 
 // --- normalising ---------------------------------------------------------------------------------------------------
@@ -84,7 +107,7 @@ export function normalizeStory(data, warnings = []) {
   if (isObject(data.movedScenes)) {
     for (const [id, place] of Object.entries(data.movedScenes)) {
       if (isObject(place) && typeof place.scene === 'string' && isWhole(place.line)) movedScenes.set(id, place);
-      else warnings.push(`movedScenes: malformed entry for ${id}`);
+      else warnings.push(`movedScenes: malformed entry for ${id} (in compatibility.json)`);
     }
   }
   // Locations (D37): by id, in part order; each with its events list (entries checked where they are read).
@@ -762,11 +785,11 @@ export function lintStory(story) {
   }
 
   for (const [id, place] of story.movedScenes) {
-    if (story.scenes.has(id)) warnings.push(`movedScenes: "${id}" is also a scene (its entry is ignored)`);
+    if (story.scenes.has(id)) warnings.push(`movedScenes: "${id}" is also a scene (its entry is ignored; in compatibility.json)`);
     const target = story.scenes.get(place.scene);
-    if (!target) warnings.push(`movedScenes: ${id} → "${place.scene}" is not a scene`);
+    if (!target) warnings.push(`movedScenes: ${id} → "${place.scene}" is not a scene (in compatibility.json)`);
     else if (place.line >= Math.max(1, target.lines.length)) {
-      warnings.push(`movedScenes: ${id} → ${place.scene} line ${place.line} is out of range`);
+      warnings.push(`movedScenes: ${id} → ${place.scene} line ${place.line} is out of range (in compatibility.json)`);
     }
   }
   // Names the story itself changes: an event must not share one (a set or a positive add would count it as played
