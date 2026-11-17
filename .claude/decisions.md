@@ -1034,3 +1034,16 @@ with them), then go (issues.md). For ~10 minutes after the deploy a stale cache 
 `act1.json` or the reverse: a dead end at `act1_end` for that visit. A night-search minigame can't use a give-up choice
 inside `a2_noc` (it is in no event's scenes): that feature plans a loss another way. Once deployed, the new scene ids and
 event names are permanent; Sára's text rewrites edit lines in place, or insert them only where nobody is saved yet.
+
+## D41 — The fox family comes right before the grove (2026-11-17) — Accepted
+Supersedes: D40's light stop of day 3 (the fox family on day 3's morning).
+Decision: the fox family (`haj_lisky`, the scene formerly `a2_liskova_rodina`) plays when the riders fly to Triglav's
+grove, on the path just before it, whatever the day; `a2_rano3` goes straight to the hub. The old id leads to
+`a2_rano3`'s last line (`compatibility.json`), so a save on it goes on to the hub, not into a grove nobody chose. Its first
+and last lines were rewritten by the Fable agent for the new place.
+Why: decided by Sára ("dat ji pred haj"): the grove can come on day 2 since D40, and the family was meant to come
+before the grove (story.md, 2026-11-15).
+Consequences: day 3 has no fixed light stop any more (story.md's "every day needs a light stop" no longer holds for it; said to
+Sára); a player who never flies to the grove never meets the fox family. Players of the day-old D40 build who met the
+family on day 3's morning meet it again before the grove. `tests/act2a.test.mjs` checks that the grove is entered only
+through it.

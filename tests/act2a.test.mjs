@@ -90,7 +90,7 @@ const problem = (message) => {
 };
 const get = (memory, name) => memory.get(name) ?? 0;
 
-function enter(id, memory, taps) {
+function enter(id, memory, taps, from = null) {
   const land = F.resolveEntry(story, id, memory);
   if (land.dead) return problem(`dead end into ${id}`);
   if (land.scene.lines.length === 0) return problem(`a pass-through shown: ${land.scene.id}`);
@@ -109,6 +109,7 @@ function enter(id, memory, taps) {
     if (get(m, 'pul') !== 6) problem(`Bezzubka taken at pul ${get(m, 'pul')}`);
   }
   if (sid === 'a2_kam' && get(m, 'unos')) problem('the hub after the abduction');
+  if (sid === 'haj_01' && from !== 'haj_lisky') problem('the grove entered without the fox family before it (D41)');
   if (sid === 'haj_konec' && ['haj_nebe', 'haj_zeme', 'haj_nav'].filter((h) => get(m, h)).length !== 2) {
     problem('the grove visit did not unveil exactly two distinct heads');
   }
@@ -167,7 +168,7 @@ function walk(scene, line, memory, taps) {
     });
   }) : after.kind === 'next' ? [[after.id, memory]] : [];
   if (targets.length === 0) problem(`stuck at ${scene.id} (${after.kind})`);
-  for (const [id, m] of targets) enter(id, m, taps);
+  for (const [id, m] of targets) enter(id, m, taps, scene.id);
   onPath.delete(k);
 }
 

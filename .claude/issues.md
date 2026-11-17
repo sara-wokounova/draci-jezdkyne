@@ -18,11 +18,6 @@ The 2-choice corner panel sits at a fixed bottom (`calc(clamp(1rem, 4vh, 3rem) +
 grows with its text: at 1280×720 the story's longest lines push the dialogue ~76 px under the panel. The centred panel
 (D37) follows the dialogue's measured top (`--dialogue-top`); the corner panel could use the same variable.
 
-### P3 — Remove the unlisted act2a-den1..3.json (D40, 2026-11-16)
-The old Act 2a draft's parts stay in git, no longer in `parts`, for the deploy of D40: for ~10 minutes Pages' cache can
-still serve the old story-v2.json, which lists them (a part that 404s stops the load). Remove them (`git rm`) in any
-later commit.
-
 ### P3 — The written story ends in a dead end at a2_konec (D37, D40, 2026-11-16)
 `a2_konec` has no `next` and no `end`: a tap does nothing (on purpose until Act 2b; `followUp` warns once).
 
@@ -212,6 +207,9 @@ the volume: there it can sound for up to ~400 ms. Check that it stays silent els
 `music-race.mjs` "switch while starting".
 
 ## Fixed
+
+### P3 — Remove the unlisted act2a-den1..3.json (D40, 2026-11-16) — fixed 2026-11-17
+The old Act 2a draft's parts stayed in git, unlisted, for D40's deploy (Pages' cache window); removed (`git rm`) the day after.
 
 ### P2 — The tap that showed choices or the end card pressed what appeared under the finger (found in planning D37, verified 2026-11-16) — fixed 2026-11-16 in `30224d0` (D37), verified live
 On touch, the story advances on the root's `pointerup`, and the click of that same tap went to a button inserted under

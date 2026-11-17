@@ -728,6 +728,10 @@
     "act2a_end": {
       "scene": "act1_end",
       "line": 0
+    },
+    "a2_liskova_rodina": {
+      "scene": "a2_rano3",
+      "line": 2
     }
   }
 }

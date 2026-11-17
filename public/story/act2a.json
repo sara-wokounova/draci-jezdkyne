@@ -256,7 +256,7 @@
         },
         {
           "text": "Do posvátného háje",
-          "next": "haj_01",
+          "next": "haj_lisky",
           "if": [
             "haj_znam",
             "!haj"
@@ -440,7 +440,7 @@
       "set": [
         "rano3"
       ],
-      "next": "a2_liskova_rodina",
+      "next": "a2_cesta",
       "lines": [
         {
           "text": "Po noci strávené hledáním se Soňou spaly jezdkyně až do poledne a draci chrápali ještě o chvíli déle.",
@@ -457,101 +457,6 @@
               "id": "roza",
               "position": "center",
               "pose": "nervous"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "a2_liskova_rodina",
-      "background": {
-        "type": "image",
-        "src": "assets/backgrounds/forest_path.png"
-      },
-      "music": "playful",
-      "characters": [
-        {
-          "id": "liskova_rodina",
-          "position": "left",
-          "pose": "neutral"
-        }
-      ],
-      "next": "a2_cesta",
-      "lines": [
-        {
-          "text": "Na lesní pěšině se zavlnilo kapradí a vykoukl z něj známý zrzavý ocásek. A za ním druhý. A třetí. A čtvrtý.",
-          "characters": []
-        },
-        {
-          "speaker": "anna",
-          "text": "To je náš lovec motýlů! A přivedl celou rodinu!",
-          "characters": [
-            {
-              "id": "liskova_rodina",
-              "position": "left",
-              "pose": "neutral"
-            },
-            {
-              "id": "anna",
-              "position": "right",
-              "pose": "excited"
-            }
-          ]
-        },
-        {
-          "speaker": "liska",
-          "text": "Vidíte? To jsou oni! Tahle umí kýchat oheň a tamta má na ocase trny. A všichni jsou moji kamarádi!"
-        },
-        {
-          "text": "Liščata se přikutálela k drakům. Dvě tahala Buřinohu za ocas, jedno ochutnávalo Bezzubčin dráp a to nejmenší vylezlo Běsce až na hlavu."
-        },
-        {
-          "speaker": "emma",
-          "text": "Běsko, ani se nehni! A hlavně nekýchej, nebo ho shodíš.",
-          "characters": [
-            {
-              "id": "liskova_rodina",
-              "position": "left",
-              "pose": "neutral"
-            },
-            {
-              "id": "emma",
-              "position": "right",
-              "pose": "nervous"
-            }
-          ]
-        },
-        {
-          "text": "Stará liška seděla opodál, rovná a tichá. Dlouho se na jezdkyně dívala. Pak pomalu sklonila hlavu – jednou, hluboko, jako se klaní jen sobě rovným."
-        },
-        {
-          "speaker": "anna",
-          "text": "Viděly jste? Poklonila se! Tak přece.",
-          "characters": [
-            {
-              "id": "liskova_rodina",
-              "position": "left",
-              "pose": "neutral"
-            },
-            {
-              "id": "anna",
-              "position": "right",
-              "pose": "happy"
-            }
-          ]
-        },
-        {
-          "text": "Liška krátce štěkla a celá zrzavá rodina zmizela v kapradí. To nejmenší se ještě ohlédlo a zamávalo ocáskem.",
-          "characters": []
-        },
-        {
-          "speaker": "roza",
-          "text": "Tak, a teď dál.",
-          "characters": [
-            {
-              "id": "roza",
-              "position": "right",
-              "pose": "happy"
             }
           ]
         }
@@ -1285,6 +1190,101 @@
         {
           "speaker": "vedma",
           "text": "Leťte opatrně, děvčata. A kdybyste ji potkaly, řekněte jí, že… Ne. Neříkejte nic. To jí musím říct sama."
+        }
+      ]
+    },
+    {
+      "id": "haj_lisky",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/forest_path.png"
+      },
+      "music": "playful",
+      "characters": [
+        {
+          "id": "liskova_rodina",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "next": "haj_01",
+      "lines": [
+        {
+          "text": "Draci dosedli na lesní pěšinu kousek před posvátným hájem. Vtom se zavlnilo kapradí a vykoukl z něj známý zrzavý ocásek. A za ním druhý. A třetí. A čtvrtý.",
+          "characters": []
+        },
+        {
+          "speaker": "anna",
+          "text": "To je náš lovec motýlů! A přivedl celou rodinu!",
+          "characters": [
+            {
+              "id": "liskova_rodina",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "excited"
+            }
+          ]
+        },
+        {
+          "speaker": "liska",
+          "text": "Vidíte? To jsou oni! Tahle umí kýchat oheň a tamta má na ocase trny. A všichni jsou moji kamarádi!"
+        },
+        {
+          "text": "Liščata se přikutálela k drakům. Dvě tahala Buřinohu za ocas, jedno ochutnávalo Bezzubčin dráp a to nejmenší vylezlo Běsce až na hlavu."
+        },
+        {
+          "speaker": "emma",
+          "text": "Běsko, ani se nehni! A hlavně nekýchej, nebo ho shodíš.",
+          "characters": [
+            {
+              "id": "liskova_rodina",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "text": "Stará liška seděla opodál, rovná a tichá. Dlouho se na jezdkyně dívala. Pak pomalu sklonila hlavu – jednou, hluboko, jako se klaní jen sobě rovným."
+        },
+        {
+          "speaker": "anna",
+          "text": "Viděly jste? Poklonila se! Tak přece.",
+          "characters": [
+            {
+              "id": "liskova_rodina",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "text": "Liška krátce štěkla a celá zrzavá rodina zmizela v kapradí. To nejmenší se ještě ohlédlo a zamávalo ocáskem.",
+          "characters": []
+        },
+        {
+          "speaker": "roza",
+          "text": "Tak, holky, a teď do posvátného háje.",
+          "characters": [
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
         }
       ]
     },

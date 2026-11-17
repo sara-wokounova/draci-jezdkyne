@@ -57,7 +57,7 @@ Main plot (decided by Sára, 2026-11-15):
     the hejkal; not the vodník.
   - (Superseded by the days and locations below, D40.) The trail by days was planned (Claude's proposal, Sára's changes): day 1 the lost fox, Soňa (and the night
     herb search, the will-o'-the-wisps), the badgers; day 2 the vědma, the hejkal, the fawn; day 3 the dazed wisent, the víly,
-    Tesák's lair (optional: the egg), the fox family, the Triglav grove (Bezzubka taken). Every day needs a light stop
+    Tesák's lair (optional: the egg), the fox family (since D41 right before the grove), the Triglav grove (Bezzubka taken). Every day needs a light stop
     (Sára, 2026-11-15).
   - Creatures as sprites (Sára, 2026-11-15): small animals stand a little higher in the picture, behind the riders
     ("A – trochu výš"), so they show above the dialogue panel.
@@ -81,7 +81,7 @@ Main plot (decided by Sára, 2026-11-15):
     asked the vědma for: where to find dead water (mrtvá voda), an ingredient for opening the gate; dead water springs
     only where the world touches Nav, so the vědma guesses her plan.
   - The lost fox (day 1) is just for fun, always there (no choice); on day 3 the fox comes back with its whole family
-    (Sára, 2026-11-15; "before the grove" no longer always holds since D40: the grove can come on day 2).
+    (Sára, 2026-11-15); since D41 it comes right before the grove, whatever the day (Sára: "dat ji pred haj").
 
 ### Act 2a rewritten into days and locations (Sára, 2026-11-16; built, D40)
 
@@ -114,7 +114,7 @@ Built 2026-11-16 (D40; the scene graph below). Decided:
   gord (Sára: "to zní dobře").
 - Open: the finale's variants by the helpers and the information found (Act 2a records them, D40: where the gate is
   `studanka`, how to wake Bezzubka `hlas` / `melodie`, the egg `vejce`, the helpers `jezevci`, `vily`, `zubr`, `srna`,
-  `amulet`, `vedma_pratele`); whether the fox family stays on day 3's morning (it can come after the grove now; asked).
+  `amulet`, `vedma_pratele`). The fox family comes right before the grove (Sára, 2026-11-17, D41).
 
 ## Scene graph
 
@@ -146,14 +146,14 @@ a2_kam: "Do hlubokého lesa" → location les:  les_sona (first: sets sona; prom
                                              hory_zubr → hory_zubr_pomoc (zubr, melodie)
         "Za vědmou"  (sona)     → vedma_01 (vedma, haj_znam; blame → vedma_zlost | understand → vedma_pochopeni,
                                   vedma_pratele) → vedma_voda
-        "Do háje"  (haj_znam)   → haj_01 (haj) → haj_otazka ⇄ haj_nebe / haj_zeme (hlas) / haj_nav (studanka), two of three
+        "Do háje"  (haj_znam)   → haj_lisky (the fox family, free, D41) → haj_01 (haj) → haj_otazka ⇄ haj_nebe / haj_zeme (hlas) / haj_nav (studanka), two of three
                                   → haj_konec
         "Odpočinout si"         → a2_odpocinek
 every action costs a half-day (pul) and returns to a2_cesta:
   pul 6 → a2_vecer3 → a2_unos (Bezzubka taken) → a2_konec (the dead end until Act 2b)
   the day Soňa was promised help ends → a2_noc (noc, +1 half-day: the morning slept away) → a2_noc_bludicky? →
                                         a2_noc_trezalka (amulet)
-  day 2 starts → a2_rano2 → a2_hejkal (haj_znam, free);  day 3 starts → a2_rano3 → a2_liskova_rodina (free)
+  day 2 starts → a2_rano2 → a2_hejkal (haj_znam, free);  day 3 starts → a2_rano3
 ```
 
 ## Structure (being planned with Sára, 2026-11-15)
@@ -213,7 +213,7 @@ a big water on the shortest night, flooding the riders' gord on the way). Acts 2
   battle_02, looped as one file (D25); a retry continues it where the last attempt stopped, a new
   game starts it over (D26).
 - Act 2a music (D36; since D40 by scene): `vedma_hut` (vedma_*), `night_forest` (a2_noc*), `vily_magic` (reka_vily*,
-  wordless women's voices), `playful` (a2_liska, a2_hejkal from its first line, a2_liskova_rodina), `tesak_lair`
+  wordless women's voices), `playful` (a2_liska, a2_hejkal from its first line, haj_lisky), `tesak_lair`
   (hory_doupe_vejce), `sacred_grove` (haj_*, a wordless choir), `danger` (a2_unos, a2_konec: Bezzubka taken),
   `village_day` (a2_vecer3, a2_odpocinek: the gord); the rest (Soňa, the fawn, the badger, the wisent, the way to the
   lair) `forest_ground`, the flights and the hub `dragon_flight`.
