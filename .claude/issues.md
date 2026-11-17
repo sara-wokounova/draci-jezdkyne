@@ -5,6 +5,19 @@ Severity: **P0** broken for everyone · **P1** blocks play on some setups · **P
 
 ## Open
 
+### P2 — Most repeatable checks live outside the repo (Sára, 2026-11-17)
+Sára: "všechny testy, které nejsou dočasné a měly by se pouštět opakovaně, by měly být v adresáři tests v repository
+hry". Since D42 `tests/browser/badger.test.mjs` and `tests/mutate/badgerRules.mutate.mjs` are in the repo
+(`playwright-core` a devDependency); the rest of the Playwright suite (`C:\tmp\claude\mobile-check`, `as-test`, `ff`)
+and the mutation runners for current checks are to move into `tests/` as their own change, the reliable and fast
+browser checks run in CI before every deploy (Sára's answers), the slow ones and those needing ffmpeg or Firefox via
+an npm script. One-off measurements and the old snapshots (`*.d32.mjs`, `*.d33.mjs`) stay out.
+
+### P3 — The badger rescue isn't in the story yet (D42, 2026-11-17)
+Step 2 of D42: `reka_jezevec` still goes straight to `reka_jezevec_pomoc`; the minigame is only on the play-test page
+(`…/playtest/?game=jezevci`). To do after Sára has played it: the minigame scene and a lose scene (retry, give up),
+the Fable texts, the six sound effects (`sounds` in badgerRules.js's DEFAULTS are all `null`).
+
 ### P3 — The frozen story.json and its old key stay until a cleanup (D37, 2026-11-16)
 `public/story/story.json` (the old one-line story) stays for cached old tabs and is never edited
 (`tests/story.test.mjs` checks its hash). Remove it in a later cleanup commit, together with: `tests/story.test.mjs`'s two
@@ -33,6 +46,8 @@ in Firefox. Since D31 the sheets are the smaller part (~1.7 MB), so on a slow li
 (Emma's strips add ~0.7 MB since D32). A
 resumed battle (D26) buffers at its position first (a range request): in Chrome on a slow link ~3–4 s instead of ~1 s.
 Rest of the fix: preload the sheets (and start the battle music's download) from the scenes before `beaver_battle`.
+The badger rescue (D42) is lighter: its 8 sprites ~0.8 MB, the dragons' fly strips, and `zachrana.mp3` (3.5 MB,
+streamed); its background is the scene's own (preloaded with the scene, once step 2 puts it in the story).
 
 ### P2 — Minigame art missing → 404s (verified 2026-10-17; partly fixed 2026-10-28, 2026-10-30 and 2026-10-31 in `57d6432`, verified live)
 DEFAULTS in `dragonAttack.js` pointed to `background.png`, `dragon_{roza,emma,anna}.png`,
@@ -72,9 +87,9 @@ change the same rule in `src/playtest.js` (its keydown listener; `playtest.mjs` 
 `…/playtest/` is deployed with the game, for Sára's testers. Remove `playtest.html`, `playtest/`, `src/playtest.js`,
 `src/styles/playtest.css` and their two Vite inputs when the testing is over (Sára decides). Meanwhile: `src/playtest.js`
 hard-codes the story id (`draci-jezdkyne-z-vlpu`, for the saved volumes), `assets/music/battle.mp3` and
-`assets/backgrounds/dam_02.png`; renaming any of them (Pages' cache has made renames necessary before, D31) means updating
+`assets/backgrounds/dam_02.png` (since D42 also `assets/music/zachrana.mp3` and `assets/backgrounds/badger_flood.png`); renaming any of them (Pages' cache has made renames necessary before, D31) means updating
 it there too, or the page loses its music, background (the generated fallback, D20) or the saved volumes. Once the page
-goes, `export` on dragonAttack.js's `DEFAULTS` and `worldScale` has no other user.
+goes, `export` on dragonAttack.js's `worldScale` has no other user (`DEFAULTS` is also read by badgerRescue.js, D42).
 
 ### P3 — Engine UI is English, story is Czech
 `index.html` has `lang="en"` and title "Visual Novel Starter"; the "← Back" button

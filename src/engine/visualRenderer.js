@@ -206,13 +206,17 @@ function scaleCharacter(sprite, width, height, target) {
   sprite.scale.set(Number.isFinite(scale) ? scale : 1);
 }
 
+/** Where a picture of contentWidth × contentHeight sits contain-fit in width × height: its scale and top-left corner
+ *  (also the badger rescue's field, D42, which must line up with the scene's background). */
+export function containRect(width, height, contentWidth, contentHeight) {
+  const scale = Math.min(width / contentWidth, height / contentHeight);
+  return { scale, x: (width - contentWidth * scale) / 2, y: (height - contentHeight * scale) / 2 };
+}
+
 function contain(sprite, width, height) {
   // Scale so the entire image fits inside the screen (letter-/pillar-boxed),
   // centered. Leftover space is filled by the stage's black background.
-  const scale = Math.min(
-      width / sprite.texture.width,
-      height / sprite.texture.height,
-  );
+  const { scale } = containRect(width, height, sprite.texture.width, sprite.texture.height);
 
   sprite.anchor.set(0.5);
   sprite.scale.set(scale);

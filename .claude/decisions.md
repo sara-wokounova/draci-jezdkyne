@@ -1047,3 +1047,66 @@ Consequences: day 3 has no fixed light stop any more (story.md's "every day need
 Sára); a player who never flies to the grove never meets the fox family. Players of the day-old D40 build who met the
 family on day 3's morning meet it again before the grove. `tests/act2a.test.mjs` checks that the grove is entered only
 through it.
+
+## D42 — The badger cubs rescue minigame, first on the play-test page (2026-11-17) — Accepted
+Supersedes: D38's "moving them [the Playwright checks into the repo] is a separate step" for new checks (they go into
+`tests/` now); D23's `mergeConfig` (it now skips a JSON `__proto__` key).
+Decision: a second minigame, `badgerRescue` (the badger event's quest, D40), built in two steps: first the game, its art
+and music and its play-test page (`playtest.html?game=jezevci`), then (after Sára has played it) the story wiring, the
+Fable texts and the sound effects. The game: the riverbank burrow (`badger_flood.png`) with five holes on the left and
+the river to the right; the water rises from the painted water line, flooding the holes from the lowest-right one,
+`firstFlood` 6 s then every `floodGap` 7 s; a flooded hole's cubs climb one by one (`cubGap` 2.5 s) onto branches that
+the current carries right (`currentSpeed` by difficulty: Lehká 45, Normální 60, Těžká 80 px/s, each piece ± 15 %); two
+bare logs drift too. `holeCubs` [1, 1, 1, 2, 2] (7 cubs; the play-test page also offers [1, 1, 2, 2, 3], 9). The three
+dragons fly in from the right in turns, as in the beaver game, 140 game px wide; a tap or key makes the flying dragon dive
+straight down (0.35 s each way, the flight paused, wing-up frame, tilted 10°): a cub's branch under its claws (any part,
+or 12 px past its ends) is caught and the cub flies to the father at the new burrow up the bank; a log there is a bump
+(no dive for 1.5 s after the dive ends), nothing a splash (1.0 s). A log never blocks a cub in reach; the nearest cub is
+caught. A branch reaching the right edge waits while a dive is going down (at most `dive.down`, 0.35 s; the round is never
+lost under the claws: two branches held by one dive, it catches the nearest and the other goes on as the dive turns up); otherwise the mother on her boulder saves it while she has strength (`motherSaves`: Lehká 2,
+Normální 1, Těžká 0), then rests (on Těžká she only watches), and the next cub floating away loses the round. Won when every cub is safe (Sára: always all of them). The result waits
+for the caught cubs' flight and the mother's trips; meanwhile the field keeps moving (the dragon flies on, the logs and
+branches drift; a branch stops at the edge; a lost cub floats away past the edge, the result once its branch is out of sight: 1.2 s at least,
+5 s at most; the water stops rising, so no hole floods meanwhile). A cub the mother saves counts in the score, and the
+status says she can't help any more, once she has brought it back (`motherView`). The river's last stretch runs in front of the
+mother's boulder, so a catch there can be seen. HUD: "V bezpečí: 3 z 7", the status "Máma pomůže: 2×" / "Máma už
+nemůže" / "Zachraň všechna!" (no mother: by `motherSaves`, not by the level's name), the loss "Jezevče odplavalo".
+The rules are a pure state machine (`badgerRules.js`: `normalize`, `createState`, `step`), the Pixi class only draws it
+and feeds taps (stepped at most 1/60 s at a time), so the node checks play the game itself; the shared config helpers
+moved to `configRules.js` (where `mergeConfig` now skips a JSON `__proto__` key, for the beaver game too: it set the
+merged object's prototype), and `dragonAttack.js` exports what the new game reuses (its `DEFAULTS` for the dragons' art, `NOT_ATTACK_KEYS`,
+`loadStrip`, `showFrame`, `tryLoadTexture`, `soundEntry`, `createDragonGraphic`). `MinigameManager.register` takes the game's own HUD texts as a
+third argument (a scene's `labels` and `instructions` still win). The field is the background's contain rectangle (the
+scene draws the same picture behind it), 600 game px tall, so the holes and the father sit on the painted bank on every
+screen; the play-test link carries no field size. The music `zachrana` (Lyria; water, danger, the strain of the rescue).
+Why: Sára's design answers (2026-11-17): save all cubs always, the levels differing in how long a cub holds on; the
+mother saves one (Normální) or two (Lehká) and then lies exhausted on the bank; burrows only on the left, water to the
+right; seven cubs, or nine as 1-1-2-2-3, adjustable on the test page; after a loss no text, just a retry without
+penalty and a way to fly back (giving up the half-day without the helper; step 2); a new track evoking water, danger and
+the strain of a rescue; art and music from Runway; "testovací stránku pro minihru s nastavením chci hned" (hence the play-
+test page first). The pure rules make balance testable: 500 seeded rounds per player type through `step()` (a masher,
+a masher with a reaction delay, careful players with an aim error), measured with the committed values: mashing
+Normální ~10–15 %, careful σ 25 px Normální 100 %, σ 50 Těžká ~62 %. The water band is drawn over the dragons, so a
+dive dips into it. The catch point is each fly strip's lowest opaque point on its wing-up frame (measured from the
+committed strips; `tests/badgerRules.test.mjs` measures it again, so a re-packed strip fails the test until updated);
+the dive's tilt turns the art around that point (the eye moved so the claws stay put), so the claws reach the water
+right where the rules catch. Drawn sizes are config (`sizes`), to resize by eye as for the creatures (D37).
+Consequences: step 2 (the story) is still to do: `reka_jezevec` → the minigame → `reka_jezevec_pomoc` or a lose scene
+with a retry and a give-up choice, the Fable texts, six sound effects (the `sounds` keys exist, all `null`). Until then
+the game is reachable only from the play-test page. Těžká's 0 saves is Claude's choice (Sára named Normální and Lehká).
+The game's numbers are tuned on 1280×720 thinking but the field is screen-independent (one field size everywhere,
+unlike the beaver game, D33). A dragon whose fly strip fails draws the vector placeholder and catches with the same
+offsets (approximate: the placeholder's shape isn't the art's). `tests/badgerRules.test.mjs` reads the fly strips'
+`bodyWidth`s from `dragonAttack.js` as text (that module needs a DOM): it needs three plain numbers and fails, saying
+so, otherwise; the fly strips' specs it reads the same way for the catch-point check. The round pauses while the skip menu is open (a cub floats away in seconds; the beaver game runs on). The result of a round ended by an error (D24's backstop) still says "Jezevče odplavalo". On the smallest
+phones (568×270) the instructions pill covers the starting water line until the first dive (it hides then, as D31's).
+Tests in the repo (Sára, 2026-11-17: "všechny testy, které nejsou dočasné a měly by se pouštět opakovaně, by měly být
+v adresáři tests"; supersedes D38's "moving them is a separate step" for new checks): the game's browser check is
+`tests/browser/badger.test.mjs` and its rules test's fail-before runner `tests/mutate/badgerRules.mutate.mjs`, both run
+by hand for now (not in `npm test` or CI); `playwright-core` is a devDependency (the installed Chrome, no browser
+download, no install scripts; the version the outside suite already used, 1.64.1). The runner copies the files it
+needs into the system temp folder or `MUTATE_TMP`, never inside the project by real path, links `node_modules` there
+and removes the copy after. Moving the older suite in, with the reliable browser checks in CI, is issues.md's P2. Not
+built from the plan's browser list: the field at seven viewports and after resizes (two sizes are checked), the
+result guard (the HUD's own, checked by the beaver game's checks), the tilt's clearance under the claws, and a check that `cropBadgerSprites.mjs` rebuilds the committed sprites
+byte for byte (it needs ffmpeg; done by hand on 2026-11-17: identical).

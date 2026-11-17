@@ -129,6 +129,10 @@ export class MinigameHud {
     this.skipMenu.classList.toggle('hidden', !open);
   }
 
+  skipMenuOpen() {
+    return !this.skipMenu.classList.contains('hidden');
+  }
+
   setScore(value) {
     if (this.scoreEl) this.scoreEl.textContent = `${this.labels.score}: ${value}`;
   }

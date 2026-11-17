@@ -17,7 +17,8 @@
       "playful": "assets/music/playful.mp3",
       "tesak_lair": "assets/music/tesak_lair.mp3",
       "sacred_grove": "assets/music/sacred_grove.mp3",
-      "danger": "assets/music/danger.mp3"
+      "danger": "assets/music/danger.mp3",
+      "zachrana": "assets/music/zachrana.mp3"
     }
   },
   "parts": [

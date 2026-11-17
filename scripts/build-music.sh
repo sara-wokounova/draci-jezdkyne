@@ -18,3 +18,4 @@ ffmpeg -y -i art/music/playful.mp3 -af volume=-9dB $E -b:a 192k public/assets/mu
 ffmpeg -y -i art/music/tesak_lair.mp3 -af volume=-9dB $E -b:a 192k public/assets/music/tesak_lair.mp3
 ffmpeg -y -i art/music/sacred_grove.mp3 -af volume=-9dB $E -b:a 192k public/assets/music/sacred_grove.mp3
 ffmpeg -y -i art/music/danger.mp3 -af volume=-9dB $E -b:a 192k public/assets/music/danger.mp3
+ffmpeg -y -i art/music/zachrana.mp3 -af volume=-9dB $E -b:a 192k public/assets/music/zachrana.mp3

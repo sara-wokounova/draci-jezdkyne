@@ -197,7 +197,8 @@ a big water on the shortest night, flooding the riders' gord on the way). Acts 2
   poses they use; a missing pose falls back to neutral); originals in `art/characters/`. Creature sprites made 2026-11-15, only the poses used (jezevec, liska (the cub), srnce, srna, zubr,
   vila, hejkal; the fox family is its own character, `liskova_rodina`, since D37), staged at `left` beside the rider; since
   D37 each has its `scale` and `raise` (Sára's sizes as a start, to adjust by eye), small animals standing higher, behind
-  the riders. No new minigames yet.
+  the riders. The badger cubs rescue (D42) is built and on the play-test page (`…/playtest/?game=jezevci`), not yet in
+  the story; the other three minigames not yet.
 - Dragons: Róza rides Bezzubka, Emma Běska, Anna Buřinoha (Sára, 2026-11-15).
 - Lunch branch ends with the flooded town (bad ending). Its end-card text was
   drafted by Claude on 2026-10-28; rewrite if wanted.

@@ -4,14 +4,16 @@ import { createPixiStage } from './engine/pixiStage.js';
 import { VisualRenderer } from './engine/visualRenderer.js';
 import { MinigameManager } from './engine/minigames/minigameManager.js';
 import { DEFAULTS, worldScale } from './engine/minigames/dragonAttack.js';
+import { DEFAULTS as BADGER } from './engine/minigames/badgerRules.js';
 import { AudioManager } from './engine/audioManager.js';
 import { setEffectsVolume } from './engine/sfx.js';
 import { AutoSave } from './engine/autoSave.js';
 import { fullscreenOnTap } from './engine/inputController.js';
 import { TAP_GUARD_MS } from './engine/uiController.js';
 
-// The play-test page (D33): one round of the beaver minigame at a time, its main numbers on sliders, the URL the
-// only state (a tester sends Sára the link). Nothing is sent anywhere or stored.
+// The play-test page (D33): one round of a minigame at a time, its main numbers on sliders, the URL the only state (a
+// tester sends Sára the link). Nothing is sent anywhere or stored. `?game=jezevci` plays the badger cubs rescue (D42);
+// without it, the beaver battle, as before.
 
 const [ROZA, EMMA, ANNA] = DEFAULTS.dragons; // in DEFAULTS' order (spec() too)
 // [group, URL key, label, min, max, step, default, hint]; spec() passes each value into the game's config.
@@ -32,7 +34,44 @@ const SLIDERS = [
   ['Anna', 'annaGravity', 'Tíže trnu', 300, 1500, 20, ANNA.attack.gravity],
   ['Anna', 'annaWait', 'Čekání mezi trny (%)', 0, 100, 1, Math.round(ANNA.attack.refireAfter * 100), '% doby letu trnu'],
 ];
-const DAM = { background: { type: 'image', src: 'assets/backgrounds/dam_02.png' } }; // behind the battle in the game
+const NINE_CUBS = [1, 1, 2, 2, 3]; // Sára's other layout (D42)
+const sum = (list) => list.reduce((a, b) => a + b, 0);
+const BADGER_SLIDERS = [
+  ['Kolo', 'cubs', 'Jezevčat (7 nebo 9)', 7, 9, 2, sum(BADGER.holeCubs), `7 = ${BADGER.holeCubs.join('-')}, 9 = ${NINE_CUBS.join('-')}`],
+  ['Kolo', 'current', 'Rychlost proudu (px/s)', 20, 150, 5, BADGER.currentSpeed.normal],
+  ['Kolo', 'mother', 'Máma zachrání', 0, 3, 1, BADGER.motherSaves.normal],
+  ['Voda', 'firstFlood', 'První zaplavení (s)', 2, 15, 0.5, BADGER.firstFlood],
+  ['Voda', 'floodGap', 'Mezi zaplaveními (s)', 3, 15, 0.5, BADGER.floodGap],
+  ['Voda', 'cubGap', 'Mezi jezevčaty z jedné nory (s)', 1, 6, 0.25, BADGER.cubGap],
+  ['Chytání', 'branch', 'Délka větve (px)', 50, 160, 5, BADGER.branchLength],
+  ['Chytání', 'reach', 'Dosah za konec větve (px)', 0, 40, 1, BADGER.reach],
+  ['Chytání', 'dive', 'Doba střemhlavého letu (s)', 0.15, 1, 0.05, BADGER.dive.down],
+  ['Chytání', 'miss', 'Čekání po minutí (s)', 0, 3, 0.1, BADGER.dive.missCooldown],
+  ['Draci', 'rozaFly', 'Róza: rychlost letu (px/s)', 120, 500, 10, BADGER.dragons[0].speed],
+  ['Draci', 'emmaFly', 'Emma: rychlost letu (px/s)', 120, 500, 10, BADGER.dragons[1].speed],
+  ['Draci', 'annaFly', 'Anna: rychlost letu (px/s)', 120, 500, 10, BADGER.dragons[2].speed],
+];
+const GAMES = {
+  beavers: {
+    game: 'beavers', // never written into its URL: the page as before D42
+    sliders: SLIDERS,
+    scene: { background: { type: 'image', src: 'assets/backgrounds/dam_02.png' } }, // behind the battle in the game
+    music: ['battle', 'assets/music/battle.mp3'],
+    heading: 'Zkušební nálet na bobry',
+    field: true,
+    spec: beaverSpec,
+  },
+  jezevci: {
+    game: 'jezevci',
+    sliders: BADGER_SLIDERS,
+    scene: { background: { type: 'image', src: 'assets/backgrounds/badger_flood.png' } }, // the game draws on it
+    music: ['zachrana', 'assets/music/zachrana.mp3'],
+    heading: 'Zkušební záchrana jezevčat',
+    field: false, // the field is always the background's rectangle
+    spec: badgerSpec,
+  },
+};
+const GAME = new URLSearchParams(location.search).get('game') === 'jezevci' ? GAMES.jezevci : GAMES.beavers;
 
 const root = document.querySelector('#game-root');
 const panel = document.querySelector('#pt-panel');
@@ -40,6 +79,13 @@ const play = document.querySelector('#pt-play');
 const link = document.querySelector('#pt-link');
 const copied = document.querySelector('#pt-copied');
 
+document.title = GAME.heading;
+document.querySelector('#pt-heading').textContent = GAME.heading;
+root.setAttribute('aria-label', GAME.heading);
+document.querySelector('#pt-field-note').hidden = !GAME.field;
+const inUrl = GAME !== GAMES.beavers; // the beaver page's links stay as they were before D42
+document.querySelector('#pt-defaults').href = inUrl ? `playtest.html?game=${GAME.game}` : 'playtest.html';
+document.querySelector(`#pt-switch [data-game="${GAME.game}"]`).setAttribute('aria-current', 'page');
 const inputs = buildSliders(document.querySelector('#pt-sliders'));
 readUrl();
 
@@ -48,20 +94,20 @@ const visuals = new VisualRenderer(stage, { characters: {} });
 const minigames = new MinigameManager(stage, { root });
 // The game's own saved volumes, read only (same origin, the story id): this page never saves.
 const volumes = AutoSave.readSettings('draci-jezdkyne-z-vlpu'); // read only: both save keys stay as they are
-const audio = new AudioManager({ battle: 'assets/music/battle.mp3' }, volumes.musicVolume);
+const audio = new AudioManager({ [GAME.music[0]]: GAME.music[1] }, volumes.musicVolume);
 setEffectsVolume(volumes.effectsVolume);
-audio.playMusic('battle'); // starts with the page's first input (D22) and loops for the whole visit
+audio.playMusic(GAME.music[0]); // starts with the page's first input (D22) and loops for the whole visit
 fullscreenOnTap(); // Android testers play the game's field (D12)
 window.__vn = { stage, minigames, audio }; // the check scripts' hook, as in the game
 
-visuals.render(DAM);
+visuals.render(GAME.scene);
 writeUrl();
 // Pixi applies a new size a frame after the resize event, so the background and the link's field size follow then.
 let resizeFrame = 0;
 window.addEventListener('resize', () => {
   cancelAnimationFrame(resizeFrame);
   resizeFrame = requestAnimationFrame(() => {
-    visuals.render(DAM);
+    visuals.render(GAME.scene);
     updateLink();
   });
 });
@@ -96,7 +142,7 @@ play.addEventListener('click', async () => {
   if (playing) return; // Enter, an attack key, would otherwise start a second round
   playing = true;
   panel.hidden = true;
-  await minigames.run(spec(), { difficulty: 'normal' }); // the goal slider is winPercent.normal
+  await minigames.run(GAME.spec(), { difficulty: 'normal' }); // the sliders set the normal level's values
   panel.hidden = false;
   guardPanel();
   playing = false;
@@ -105,7 +151,7 @@ play.addEventListener('click', async () => {
 function buildSliders(container) {
   const found = {};
   const groups = new Map();
-  for (const [group, key, label, min, max, step, value, hint] of SLIDERS) {
+  for (const [group, key, label, min, max, step, value, hint] of GAME.sliders) {
     if (!groups.has(group)) {
       const section = document.createElement('section');
       section.className = 'pt-group';
@@ -143,7 +189,8 @@ function readUrl() {
 }
 
 function query() {
-  return new URLSearchParams(Object.entries(inputs).map(([key, input]) => [key, input.value]));
+  const values = Object.entries(inputs).map(([key, input]) => [key, input.value]);
+  return new URLSearchParams(inUrl ? [['game', GAME.game], ...values] : values);
 }
 
 /** The values into the address bar (written on `change`, not on every `input`: Safari throws after 100 history
@@ -160,15 +207,43 @@ function writeUrl() {
 /** The link to send: always playtest.html, the sliders' values, and the tester's field in game px (information
  *  for Sára, never read back: the game plays somewhat differently by screen, D33). */
 function updateLink() {
-  const { width, height } = stage.app.screen;
-  const scale = worldScale(height);
   const url = new URL('playtest.html', location.href);
-  url.search = `${query()}&field=${Math.round(width / scale)}x${Math.round(height / scale)}`;
+  url.search = String(query());
+  if (GAME.field) {
+    const { width, height } = stage.app.screen;
+    const scale = worldScale(height);
+    url.search += `&field=${Math.round(width / scale)}x${Math.round(height / scale)}`;
+  }
   link.value = url.href;
 }
 
-function spec() {
-  const value = (key) => Number(inputs[key].value);
+function value(key) {
+  return Number(inputs[key].value);
+}
+
+function badgerSpec() {
+  // New objects: BADGER (the game's DEFAULTS) is never written to.
+  const speeds = [value('rozaFly'), value('emmaFly'), value('annaFly')];
+  return {
+    type: 'badgerRescue',
+    title: 'Záchrana jezevčat',
+    allowSkip: true,
+    config: {
+      holeCubs: value('cubs') === 9 ? NINE_CUBS : BADGER.holeCubs,
+      currentSpeed: { normal: value('current') },
+      motherSaves: { normal: value('mother') },
+      firstFlood: value('firstFlood'),
+      floodGap: value('floodGap'),
+      cubGap: value('cubGap'),
+      branchLength: value('branch'),
+      reach: value('reach'),
+      dive: { ...BADGER.dive, down: value('dive'), up: value('dive'), missCooldown: value('miss') },
+      dragons: BADGER.dragons.map((dragon, i) => ({ ...dragon, speed: speeds[i] })),
+    },
+  };
+}
+
+function beaverSpec() {
   // New objects: DEFAULTS is never written to.
   const [roza, emma, anna] = DEFAULTS.dragons.map((dragon) => ({ ...dragon, attack: { ...dragon.attack } }));
   roza.speed = value('rozaFly');

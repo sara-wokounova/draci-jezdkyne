@@ -1,5 +1,6 @@
 import { MinigameHud } from './minigameHud.js';
 import { DragonAttackMinigame } from './dragonAttack.js';
+import { BadgerRescueMinigame, HUD_TEXTS as BADGER_HUD } from './badgerRescue.js';
 
 /**
  * Manages the registry of available minigames and runs them as part of the
@@ -30,15 +31,18 @@ export class MinigameManager {
 
     // Built-in minigames.
     this.register('dragonAttack', (context) => new DragonAttackMinigame(context));
+    this.register('badgerRescue', (context) => new BadgerRescueMinigame(context), BADGER_HUD);
   }
 
   /**
    * Register a minigame factory under a type name.
    * @param {string} type
    * @param {(context: object) => { start: Function, destroy: Function }} factory
+   * @param {{ labels?: object }} [hudTexts] The game's own HUD labels (`instructions` among them); a scene's `labels` and
+   *   `instructions` still override them (D42).
    */
-  register(type, factory) {
-    this.registry.set(type, factory);
+  register(type, factory, hudTexts) {
+    this.registry.set(type, { factory, hudTexts: hudTexts ?? {} });
   }
 
   isRegistered(type) {
@@ -65,7 +69,7 @@ export class MinigameManager {
    * @returns {Promise<'victory'|'failure'>}
    */
   async run(spec, options = {}) {
-    const factory = this.registry.get(spec.type);
+    const { factory, hudTexts: texts } = this.registry.get(spec.type) ?? {};
 
     if (!factory) {
       console.warn(`Unknown minigame type "${spec.type}" — defaulting to failure.`);
@@ -77,8 +81,9 @@ export class MinigameManager {
     const hud = new MinigameHud(this.root, {
       title: spec.title,
       allowSkip: spec.allowSkip !== false,
-      instructions: spec.instructions,
-      labels: spec.labels,
+      instructions: spec.instructions, // the HUD takes text only, else its labels.instructions
+      // A scene's labels win where they are text (anything else would drop the game's own label for the HUD's default).
+      labels: { ...texts.labels, ...Object.fromEntries(Object.entries(spec.labels ?? {}).filter(([, v]) => typeof v === 'string')) },
     });
 
     const outcome = await new Promise((resolve) => {

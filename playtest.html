@@ -10,13 +10,14 @@
     <meta name="robots" content="noindex" /><!-- for a few testers, for a while -->
   </head>
   <body>
-    <!-- The play-test page (D33): the beaver minigame with its main numbers on sliders, handed out as …/playtest/. -->
+    <!-- The play-test page (D33): a minigame with its main numbers on sliders, handed out as …/playtest/ (D42: ?game=jezevci). -->
     <main id="game-root" aria-label="Zkušební nálet na bobry">
       <section id="pixi-host" aria-hidden="true"></section>
 
       <section id="pt-panel" class="glass-panel">
-        <h1>Zkušební nálet na bobry</h1>
-        <p class="pt-intro">Nastav hodnoty, zahraj si a pošli odkaz s nastavením, které se ti hrálo nejlépe. Odkaz obsahuje i velikost tvé obrazovky.</p>
+        <nav id="pt-switch" aria-label="Minihra"><a href="playtest.html" data-game="beavers">Bobři</a> · <a href="playtest.html?game=jezevci" data-game="jezevci">Jezevčata</a></nav>
+        <h1 id="pt-heading">Zkušební nálet na bobry</h1>
+        <p class="pt-intro">Nastav hodnoty, zahraj si a pošli odkaz s nastavením, které se ti hrálo nejlépe.<span id="pt-field-note"> Odkaz obsahuje i velikost tvé obrazovky.</span></p>
         <div id="pt-sliders"></div>
         <div class="pt-actions">
           <button id="pt-play" class="choice-button" type="button">Hrát</button>

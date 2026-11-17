@@ -102,3 +102,18 @@
   user-select: text; /* #game-root has none */
   -webkit-user-select: text;
 }
+
+/* The game switch (D42). */
+#pt-switch {
+  font-size: 0.95rem;
+  margin-bottom: 0.25rem;
+}
+
+#pt-switch a {
+  color: inherit;
+}
+
+#pt-switch a[aria-current="page"] {
+  font-weight: 700;
+  text-decoration: none;
+}

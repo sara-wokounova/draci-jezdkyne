@@ -1,6 +1,7 @@
 import { Assets, Container, Graphics, Rectangle, Sprite, Texture } from 'pixi.js';
 import { resolveAssetPath } from '../assetPath.js';
 import { EFFECT_MIX, keepAudioAwake, playSound, resumeAudio, sound } from '../sfx.js';
+import { isPlainObject, mergeConfig, nonNegative, positive } from './configRules.js';
 
 /**
  * Dragon attack minigame.
@@ -296,6 +297,9 @@ const MAX_FLIGHT_SECONDS = 30; // a flight ends by then even if the dragon never
 const MAX_HIT_SECONDS = 5; // a hit beaver runs by then even with a tiny hitFps (a lost round waits for it, D31)
 const WALK_DRAWN_AT = 90; // px/second the beaver sheets' walk cycle matches at walkFps (the feet don't slide, D33)
 
+/** Keys that never attack (modifiers, Tab, Escape); every other key does (badgerRescue.js too). */
+export const NOT_ATTACK_KEYS = ['Shift', 'Control', 'Alt', 'Meta', 'Tab', 'Escape'];
+
 export class DragonAttackMinigame {
   /**
    * @param {object} context
@@ -540,7 +544,7 @@ export class DragonAttackMinigame {
     resumeAudio();
     if (event.repeat) return;
     // Ignore pure modifier keys; everything else counts as an attack.
-    if (['Shift', 'Control', 'Alt', 'Meta', 'Tab', 'Escape'].includes(event.key)) return;
+    if (NOT_ATTACK_KEYS.includes(event.key)) return;
     if (event.key === ' ') event.preventDefault();
     this.attack();
   }
@@ -1205,22 +1209,6 @@ export function worldScale(height, designHeight = DEFAULTS.designHeight) {
   return Math.min(1, height / positive(designHeight, 600));
 }
 
-function mergeConfig(defaults, override) {
-  // Arrays are replaced wholesale (so a custom `dragons` list fully overrides
-  // the defaults); plain objects are merged deeply.
-  if (Array.isArray(defaults)) {
-    return Array.isArray(override) ? override.map((item) => item) : defaults;
-  }
-  if (isPlainObject(defaults) && isPlainObject(override)) {
-    const result = { ...defaults };
-    for (const key of Object.keys(override)) {
-      result[key] = mergeConfig(defaults[key], override[key]);
-    }
-    return result;
-  }
-  return override === undefined ? defaults : override;
-}
-
 /** Dragon y in game px: `flightY` of the height, but never behind the HUD top bar (D15).
  *  Animated art keeps its real extent above its anchor (the attack strip's included) below it. */
 function flightY(dragon, size) {
@@ -1245,7 +1233,7 @@ async function loadDragonArt(dragon) {
 }
 
 /** A one-row strip of `frames` equal frames, or null. */
-async function loadStrip(spec) {
+export async function loadStrip(spec) {
   const base = await tryLoadTexture(spec?.src);
   if (!base) return null;
   // At least 1 px per frame, so a typo (2e6) can't allocate millions of textures.
@@ -1267,21 +1255,11 @@ async function loadStrip(spec) {
 
 /** Shows a strip's frame. Sets the anchor too: Pixi's texture setter ignores the texture's
  *  own anchor, and the strips' anchors differ, so the eye (Emma in her attack) would jump on every switch. */
-function showFrame(view, strip, index) {
+export function showFrame(view, strip, index) {
   // Integers only: a config typo like "length" must not reach the texture setter (it would throw
   // in the ticker and freeze the game).
   view.texture = (Number.isInteger(index) && strip.frames[index]) || strip.frames[0];
   view.anchor.set(strip.anchor[0], strip.anchor[1]);
-}
-
-/** A positive number from the config, or the fallback (a typo like 0, -5 or "three" would stop an
- *  animation or a cap for good). */
-function positive(value, fallback) {
-  return Number.isFinite(value) && value > 0 ? value : fallback;
-}
-
-function nonNegative(value, fallback) {
-  return Number.isFinite(value) && value >= 0 ? value : fallback;
 }
 
 /** Seconds from a tap to the launch frame of the dragon's attack animation. */
@@ -1352,13 +1330,9 @@ function orientStrip(shot) {
   shot.view.rotation = Math.atan2(shot.vy, vx) - (shot.dir > 0 ? art : Math.PI - art);
 }
 
-function isPlainObject(value) {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
-}
-
 /** A sound from the config as { src, volume }, or null: `{ src, volume }`, a bare path or null (none). Left out
  *  means silent; anything without a path warns (a typo). The volume is clamped to 0–1, else EFFECT_MIX. */
-function soundEntry(entry, name) {
+export function soundEntry(entry, name) {
   if (entry === undefined || entry === null) return null;
   const src = typeof entry === 'string' ? entry : isPlainObject(entry) ? entry.src : undefined;
   if (typeof src !== 'string') {
@@ -1369,7 +1343,7 @@ function soundEntry(entry, name) {
   return { src, volume };
 }
 
-async function tryLoadTexture(src) {
+export async function tryLoadTexture(src) {
   if (!src) return null;
   try {
     return await Assets.load(resolveAssetPath(src));
@@ -1406,7 +1380,7 @@ function createBeaverGraphic(radius, color) {
   return g;
 }
 
-function createDragonGraphic(width, height, color, direction) {
+export function createDragonGraphic(width, height, color, direction) {
   const g = new Graphics();
   const fill = parseHexColor(color);
   const w = width / 2;

@@ -35,14 +35,19 @@ npm run dev            # Vite dev server (the play-test page: /playtest.html)
 npm run build          # production build into dist/ (CI runs this)
 npm run preview        # serve dist/
 npm run clean-sprites  # strip baked checkerboard from character PNGs (in place; skips already-transparent files)
-npm test               # the node checks in tests/ (story rules, the save, the story files); CI runs them before every deploy
+npm test               # the node checks in tests/ (story rules, the save, the story files, the badger rescue); CI runs them before every deploy
+node tests/browser/badger.test.mjs <base url>   # the badger rescue in Chrome (Playwright; a running server)
+node tests/mutate/badgerRules.mutate.mjs        # fail-before for its rules test (MUTATE_TMP: where its copy goes)
+                                                # (npm test also runs tests/cropBadgerSprites.test.mjs: its art/ guard)
 ```
 
 `npm test` (D38) runs `tests/storyflow.test.mjs`, `tests/autosave.test.mjs`, `tests/story.test.mjs`,
-`tests/act2a.test.mjs` (Act 2a's calendar and text rules, D40) and `tests/story-history.test.mjs` (needs git; its synthetic repos live in the system temp folder, or `STORY_TEST_TMP`: run it
+`tests/act2a.test.mjs` (Act 2a's calendar and text rules, D40), `tests/badgerRules.test.mjs` (the badger rescue's rules
+and balance, D42), `tests/cropBadgerSprites.test.mjs` (that script's `art/` guard, D42; its fake repo in the same temp folder) and `tests/story-history.test.mjs` (needs git; its synthetic repos live in the system temp folder, or `STORY_TEST_TMP`: run it
 locally as `STORY_TEST_TMP=C:/tmp/claude/story-test-tmp npm test` in Git Bash (forward slashes: bash eats backslashes),
-`$env:STORY_TEST_TMP='C:\tmp\claude\story-test-tmp'; npm test` in PowerShell, the temp-folder rule); a failure stops the deploy. No linter. The Playwright check scripts (and the node checks for the sprite scripts, the music and the
-sound-effect files, which need ffmpeg) live outside the repo (see the Tests section of workflow.md). Also verify changes by running the game
+`$env:STORY_TEST_TMP='C:\tmp\claude\story-test-tmp'; npm test` in PowerShell, the temp-folder rule); a failure stops the deploy. No linter. Most Playwright check scripts (and the node checks for the sprite scripts, the music and the
+sound-effect files, which need ffmpeg) still live outside the repo (see the Tests section of workflow.md; moving them
+in is issues.md's P2); the badger rescue's are in tests/browser/ and tests/mutate/. Also verify changes by running the game
 (`npm run dev`) in a browser, including a phone-sized viewport.
 
 ## Architecture
@@ -52,10 +57,12 @@ index.html                 DOM shell: #pixi-host canvas, #top-controls (← Back
                            #end-card, #main-menu (main page: Pokračovat / Nová hra / Nastavení / Galerie; pages:
                            Nová hra confirmation, Nastavení, Galerie);
                            #rotate-hint (portrait phones, outside #game-root); links public/manifest.webmanifest
-playtest.html              the play-test page (D33): #pixi-host, the slider panel #pt-panel, #rotate-hint; no manifest
+playtest.html              the play-test page (D33): #pixi-host, the slider panel #pt-panel (#pt-switch: Bobři / Jezevčata,
+                           D42), #rotate-hint; no manifest
 playtest/index.html        …/playtest/ (the address handed out): a redirect to ../playtest.html keeping the query
 src/main.js                wires DOM elements → startVisualNovel()
-src/playtest.js            the play-test page: 15 sliders (beavers, goal, flights, each dragon's speeds, Anna's thorn),
+src/playtest.js            the play-test page: `?game=jezevci` the badger rescue (13 sliders, no field= in its link,
+                           D42), else the beavers: 15 sliders (beavers, goal, flights, each dragon's speeds, Anna's thorn),
                            the URL as its only state (+ field=WxH in the copied link), one round per "Hrát", the panel
                            inert 500 ms after it; the game's saved volumes read, never written; window.__vn (the test
                            hook, as in the game)
@@ -94,11 +101,21 @@ src/engine/
                            safety limiter (a soft clipper after Howler's master gain, ceiling −3.2 dBFS, D31)
   effects/atmosphereEffects.js   sunsetGlow, wind, snow
   minigames/
-    minigameManager.js     registry; run(spec, { difficulty }) → 'victory' | 'failure' (a throwing game → 'failure', D24;
-                           a throwing clean-up can't leave the HUD up, D27)
+    minigameManager.js     registry (register(type, factory, hudTexts), D42); run(spec, { difficulty }) → 'victory' |
+                           'failure' (a throwing game → 'failure', D24; a throwing clean-up can't leave the HUD up, D27)
+    configRules.js         positive, nonNegative, isPlainObject, mergeConfig: shared by the minigames, pure (D42)
+    badgerRules.js         the badger cubs rescue's rules, pure (D42): DEFAULTS, normalize (typos → defaults), the water,
+                           createState / step (the floods, the cubs, the current, the dive, the mother, the end),
+                           catchOffsets, statusText, motherView, hudView; played by tests/badgerRules.test.mjs
+    badgerRescue.js        the badger cubs rescue in Pixi (D42): its field the contain rectangle of badger_flood.png
+                           (visualRenderer's containRect), the tilted dive turned around the claws, art
+                           from public/assets/minigames/badger-rescue/, the dragons' fly strips from dragonAttack's
+                           DEFAULTS, step() at most 1/60 s at a time; HUD_TEXTS (registered with it)
     minigameHud.js         DOM overlay: title, score, skip menu, result dialog (Czech labels; the hits line; its
                            Pokračovat behind guardTaps; the top bar hidden under it, D33)
-    dragonAttack.js        the "Dračí nálet na bobry" minigame (all tunables in DEFAULTS, exported for the play-test page;
+    dragonAttack.js        the "Dračí nálet na bobry" minigame (all tunables in DEFAULTS, exported for the play-test page
+                           and badgerRescue.js, which also imports NOT_ATTACK_KEYS, loadStrip, showFrame, tryLoadTexture,
+                           soundEntry and createDragonGraphic, D42;
                            safety caps beside it, D24): 30 beavers in one line walking in from the left, coming round
                            again, faster with every hit, their logs fading; all dragons from the right; win by the share
                            hit when the flights run out (winPercent by difficulty, D33); Róza,
@@ -112,8 +129,9 @@ vite.config.js             base './'; three build inputs: index.html, playtest.h
 public/story/story-v2.json the story's main file (fetched at runtime, not bundled) and its parts beside it (D37), among
                            them characters.json and compatibility.json (movedScenes, D39);
                            public/story/story.json is the old story, frozen for cached old tabs (never edited)
-tests/                     the node checks (npm test, D38)
-public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, minigames/dragon-attack/,
+tests/                     the node checks (npm test, D38); tests/browser/ (Playwright, D42: badger.test.mjs) and
+                           tests/mutate/ (fail-before runners, D42); the rest of the Playwright suite still in C:\tmp\claude
+public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, minigames/dragon-attack/, minigames/badger-rescue/,
                            minigames/dragon-attack/sfx/ (the effects, mp3, ≤ 15 KB each), music/ (mp3, ~3.6–4.8 MB
                            each, streamed)
 scripts/removeCheckerboard.mjs   flood-fills light-gray checkerboard to alpha (--enclosed, --glow, --force); --black keys a sheet
@@ -126,8 +144,10 @@ scripts/cleanBeavers.mjs         the beaver sheets cut by their own pieces into 
 scripts/reexportCreatures.mjs    a creature's poses on one canvas (D37): node scripts/reexportCreatures.mjs <id>…; reads art/
                                  only, writes public/assets/characters/<id>/ (every pose of the creature together)
 scripts/measureEmmaAnchors.mjs   prints Emma's attack anchors, found from her face in each attack frame (D32; no arguments)
+scripts/cropBadgerSprites.mjs    the badger rescue's 8 sprites from art/ and jezevec_neutral.png (D42; no arguments; ffmpeg)
 art/                             source art kept in git but not deployed (originals of the packed strips, Emma's flight
-                                 poses and their frames list, the beaver sheets, the music and the sound effects)
+                                 poses and their frames list, the beaver sheets, the badger rescue's sprites
+                                 (minigames/badger-rescue/), the backgrounds, the music and the sound effects)
 .github/workflows/deploy.yml     push to main → npm ci → npm test → build → GitHub Pages
 ```
 
@@ -270,6 +290,13 @@ Good to know: conditions inside a scene see that scene's own changes (its `set`/
   pieces (the art isn't on the grid), puts row 2 on the walkers' ground and frame 8's log under frame 7's falling log,
   and halves the result (D31). It stops, writing nothing, if a sheet doesn't have the 13 pieces it expects (new art:
   check it by eye and update its `PIECES` list) or a piece doesn't fit its padded cell.
+- The badger rescue's art (D42, 2026-11-17): `badger_flood.png` (Runway's GPT Image model, the Act 2a style; original
+  1920×1088 in `art/backgrounds/`, cropped to 1920×1080 and scaled as above) and the sprites in
+  `public/assets/minigames/badger-rescue/` (Runway, transparent: `gpt-image-2.6-flare`, since `gpt-image-2` refuses a
+  transparent picture with a style reference; originals in `art/minigames/badger-rescue/`), each cropped to its alpha
+  box and scaled with ffmpeg lanczos to its width (cub_branch 256, cub_peek 128, cub_fly 160, log 256, mother_watch and
+  mother_rest 320, boulder 240); `father.png` is `jezevec_neutral.png` cropped the same way (320). Made by
+  `node scripts/cropBadgerSprites.mjs` (no arguments; reads art/ and characters/jezevec, writes the 8 files).
 - Music: `public/assets/music/*.mp3` (~3.6–4.8 MB each, streamed as HTML5 audio), referenced
   by key from `story.assets.music`; scenes pick a track with `music`, the menu with
   `menuMusic` (D21, D22). Every deployed track is made from its original in `art/music/`, **9 dB quieter**
@@ -280,7 +307,8 @@ Good to know: conditions inside a scene see that scene's own changes (its `set`/
   lose it, and `-vn -map_metadata -1` keep a future song's cover art and text tags out of them. Act 2a's seven tracks (D36: `vedma_hut`, `night_forest`, `vily_magic`,
   `playful`, `tesak_lair`, `sacred_grove`, `danger`) were made with Runway's music tool (AI-generated, 192 kbps,
   −14.3 dB mean like the older originals) in early-medieval Slavic folk style (Sára: flutes, cimbalom, no piano, simple
-  melodies, no lyrics; the víly and the grove with wordless voices); their style is in D36. A new track: put the
+  melodies, no lyrics; the víly and the grove with wordless voices); their style is in D36. `zachrana` (the badger rescue,
+  D42: water, danger, a rescue under strain) was made with Runway's `lyria-3-pro` (146.7 s, 192 kbps). A new track: put the
   original in `art/music/` and add its line to the script (its own bit rate, from `ffprobe`).
 - Sound effects (D29): `public/assets/minigames/dragon-attack/sfx/*.mp3`, made from Sára's picks in
   `art/minigames/dragon-attack/sfx/` (Runway's sound-effect tool, AI-generated), mono, levelled to an RMS
