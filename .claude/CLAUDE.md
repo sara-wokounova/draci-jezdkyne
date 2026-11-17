@@ -5,7 +5,8 @@ Plain JavaScript + Vite, rendered with PixiJS, deployed to GitHub Pages.
 
 - Live: https://sara-wokounova.github.io/draci-jezdkyne/
 - Repo: `git@github.com:sara-wokounova/draci-jezdkyne.git`, branch `main`
-- Status: early development. Story is partially written; one minigame exists.
+- Status: early development. Story is partially written; two minigames exist, both in the story
+  (the badger rescue since D45).
 
 More docs in this directory (keep them current):
 
@@ -37,17 +38,22 @@ npm run preview        # serve dist/
 npm run clean-sprites  # strip baked checkerboard from character PNGs (in place; skips already-transparent files)
 npm test               # the node checks in tests/ (story rules, the save, the story files, the badger rescue); CI runs them before every deploy
 node tests/browser/badger.test.mjs <base url>   # the badger rescue in Chrome (Playwright; a running server)
+node tests/browser/badgerStory.test.mjs <base url>   # the badger rescue in the story (D45: the lose screen, give-up, sounds)
 node tests/mutate/badgerRules.mutate.mjs        # fail-before for its rules test (MUTATE_TMP: where its copy goes)
+node tests/mutate/act2a.mutate.mjs             # fail-before for act2a.test.mjs's badger checks (D45; same MUTATE_TMP)
+node tests/badgerSfx.test.mjs                  # the badger rescue's sounds (ffmpeg; levels, rebuild, stacks, headroom)
+bash scripts/build-badger-sfx.sh [--measure]   # the badger rescue's sounds from Sára's picks (PICK in the script, D45)
                                                 # (npm test also runs tests/cropBadgerSprites.test.mjs: its art/ guard)
 ```
 
 `npm test` (D38) runs `tests/storyflow.test.mjs`, `tests/autosave.test.mjs`, `tests/story.test.mjs`,
-`tests/act2a.test.mjs` (Act 2a's calendar and text rules, D40), `tests/badgerRules.test.mjs` (the badger rescue's rules
+`tests/act2a.test.mjs` (Act 2a's calendar and text rules, D40; the badger rescue's minigame paths and cub count, D45), `tests/badgerRules.test.mjs` (the badger rescue's rules
 and balance, D42), `tests/cropBadgerSprites.test.mjs` (that script's `art/` guard, D42; its fake repo in the same temp folder) and `tests/story-history.test.mjs` (needs git; its synthetic repos live in the system temp folder, or `STORY_TEST_TMP`: run it
 locally as `STORY_TEST_TMP=C:/tmp/claude/story-test-tmp npm test` in Git Bash (forward slashes: bash eats backslashes),
 `$env:STORY_TEST_TMP='C:\tmp\claude\story-test-tmp'; npm test` in PowerShell, the temp-folder rule); a failure stops the deploy. No linter. Most Playwright check scripts (and the node checks for the sprite scripts, the music and the
 sound-effect files, which need ffmpeg) still live outside the repo (see the Tests section of workflow.md; moving them
-in is issues.md's P2); the badger rescue's are in tests/browser/ and tests/mutate/. Also verify changes by running the game
+in is issues.md's P2); the badger rescue's are in tests/browser/ and tests/mutate/ (with act2a's runner), its sounds'
+check in tests/badgerSfx.test.mjs (ffmpeg, by hand). Also verify changes by running the game
 (`npm run dev`) in a browser, including a phone-sized viewport.
 
 ## Architecture
@@ -87,7 +93,8 @@ src/engine/
   inputController.js       click/tap anywhere = advance; keys: Space/Enter, 1-9, Backspace/←, Esc (menu); Space/Enter
                            left to a focused button in the menu, end card or minigame result; number keys behind the
                            choice guard (D37); a key held from a button
-                           never repeats into the story (D33); fullscreenOnTap (D16, also the play-test page)
+                           never repeats into the story (D33); after a minigame Back by key waits for a press after 500 ms of key quiet
+                           (holdBackUntilQuiet, D45); fullscreenOnTap (D16, also the play-test page)
   visualRenderer.js        Pixi: background (contain-fit), character sprites (scale, raise, numeric positions, flip, the
                            top cap: D37), placeholders, preload(items)
   assetPath.js             resolveAssetPath (story paths → base URL) and backgroundImage (which backgrounds are files)
@@ -102,7 +109,8 @@ src/engine/
   effects/atmosphereEffects.js   sunsetGlow, wind, snow
   minigames/
     minigameManager.js     registry (register(type, factory, hudTexts), D42); run(spec, { difficulty }) → 'victory' |
-                           'failure' (a throwing game → 'failure', D24; a throwing clean-up can't leave the HUD up, D27)
+                           'failure' (a throwing game → 'failure', D24; a throwing clean-up can't leave the HUD up, D27);
+                           a loss with the scene's `loseResult: false` settles at once, without the result dialog (D45)
     configRules.js         positive, nonNegative, isPlainObject, mergeConfig: shared by the minigames, pure (D42)
     badgerRules.js         the badger cubs rescue's rules, pure (D42): DEFAULTS, normalize (typos → defaults), the water,
                            createState / step (the floods, the cubs, the current, the dive, the mother, the end; no
@@ -134,10 +142,12 @@ vite.config.js             base './'; three build inputs: index.html, playtest.h
 public/story/story-v2.json the story's main file (fetched at runtime, not bundled) and its parts beside it (D37), among
                            them characters.json and compatibility.json (movedScenes, D39);
                            public/story/story.json is the old story, frozen for cached old tabs (never edited)
-tests/                     the node checks (npm test, D38); tests/browser/ (Playwright, D42: badger.test.mjs) and
-                           tests/mutate/ (fail-before runners, D42); the rest of the Playwright suite still in C:\tmp\claude
+tests/                     the node checks (npm test, D38); tests/browser/ (Playwright, D42: badger.test.mjs,
+                           badgerStory.test.mjs) and tests/mutate/ (fail-before runners sharing runMutations.mjs, D42,
+                           D45); the rest of the Playwright suite still in C:\tmp\claude
 public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, minigames/dragon-attack/, minigames/badger-rescue/,
-                           minigames/dragon-attack/sfx/ (the effects, mp3, ≤ 15 KB each), music/ (mp3, ~3.6–4.8 MB
+                           minigames/dragon-attack/sfx/ (the effects, mp3, ≤ 15 KB each; the badger rescue's in
+                           minigames/badger-rescue/sfx/ once picked, ≤ 20 KB, D45), music/ (mp3, ~3.6–4.8 MB
                            each, streamed)
 scripts/removeCheckerboard.mjs   flood-fills light-gray checkerboard to alpha (--enclosed, --glow, --force); --black keys a sheet
                                  painted on black (D30)
@@ -145,6 +155,7 @@ scripts/packFrames.mjs           scattered sheet frames → one-row strip, ancho
                                  or a frames list of separate pictures (`*.frames.json`, resampled by their scales, D32)
 scripts/build-music.sh           the deployed music from art/music/ (9 dB quieter, D29)
 scripts/build-sfx.sh             the minigame's sound effects from art/minigames/dragon-attack/sfx/ (D29)
+scripts/build-badger-sfx.sh      the badger rescue's from Sára's picks in art/minigames/badger-rescue/sfx/variants/ (D45)
 scripts/cleanBeavers.mjs         the beaver sheets cut by their own pieces into padded cells (D31; no arguments)
 scripts/reexportCreatures.mjs    a creature's poses on one canvas (D37): node scripts/reexportCreatures.mjs <id>…; reads art/
                                  only, writes public/assets/characters/<id>/ (every pose of the creature together)
@@ -213,7 +224,8 @@ on top with CSS. Layout bugs are almost always in `main.css`; scene-fit bugs in
   "choiceLayout": "center",               // the choices as a big centred panel (automatic with 3 or more)
   "next": "other_scene",                  // or a list: [{ "if": "pul>=6", "next": "evening" }, { "next": "hub" }]
   "minigame": { "type": "dragonAttack", "title": "…", "allowSkip": true,
-                "onVictory": "id", "onFailure": "id", "config": {} },   // a scene of its own, no lines
+                "onVictory": "id", "onFailure": "id", "config": {},
+                "loseResult": false },   // a scene of its own, no lines; loseResult false: a loss shows no dialog (D45)
   "end": { "good": false, "title": "…", "text": "…" }
 }
 ```
@@ -334,6 +346,13 @@ Good to know: conditions inside a scene see that scene's own changes (its `set`/
   sound tied to something the game draws (the log landing) is played by the game at that moment instead. Renaming `fireball_hit.mp3`: it is
   also Nastavení's test sound (`TEST_SOUND_SRC` in `sfx.js`). Every effect plays at 0.7
   (`EFFECT_MIX`) × the effects slider; set per sound in the minigame config (README).
+- The badger rescue's sound effects (D45): six (`dive`, `splash`, `bump`, `caught`, `mother`, `lost`), three Runway variants
+  each (three prompts) in `art/minigames/badger-rescue/sfx/variants/<sound>_<a|b|c>.mp3`, committed as downloaded (Runway's files carry no C2PA data). Sára picks;
+  `bash scripts/build-badger-sfx.sh` (its `PICK` table set; it refuses while a pick is "?") builds them into
+  `public/assets/minigames/badger-rescue/sfx/<sound>.mp3`: mono, leading and trailing silence trimmed, cut to each sound's
+  target length (`LEN`), RMS −14 dBFS by a gain per variant (`GAIN`, from `--measure`), limited to −1 dBFS, 96 kbps; then
+  `DEFAULTS.sounds` in badgerRules.js points at them (until then `null`: silent). A re-rolled variant: add it, `--measure`,
+  pin its gain. The play-test page plays them too (the same DEFAULTS).
 - The dragons' minigame strips (`public/assets/minigames/dragon-attack/roza_{fly,attack,fireball}.png`,
   `emma_{fly,attack,bolt}.png`, `anna_{fly,attack,thorn}.png`) are generated from the originals in
   `art/minigames/dragon-attack/` (D23, D32, D30), one file at a time (Emma's and Anna's sheets are already transparent and

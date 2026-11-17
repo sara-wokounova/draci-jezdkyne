@@ -1,37 +1,18 @@
 // Fail-before for tests/badgerRules.test.mjs (D42): breaks one rule at a time in a copy of the files it needs and runs
 // the test there; every mutation must make it fail (a control run without a mutation must pass).
 //   node tests/mutate/badgerRules.mutate.mjs [part of a mutation name]
-// The copy lives in the system temp folder, or MUTATE_TMP (never inside the project; its node_modules is a link to the
-// project's). On Windows in Git Bash: MUTATE_TMP=C:/tmp/claude/mutate node tests/mutate/badgerRules.mutate.mjs
+// The copy: see runMutations.mjs. On Windows in Git Bash: MUTATE_TMP=C:/tmp/claude/mutate node tests/mutate/badgerRules.mutate.mjs
 import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { execFileSync } from 'node:child_process';
-const REPO = path.resolve(fileURLToPath(new URL('../..', import.meta.url))).replaceAll('\\', '/');
-// The copy is deleted again and again: never inside the project. Checked on the path as given before anything is
-// created, then on the real paths (links, junctions and short names resolved) before anything is copied or deleted.
-const isInside = (from, to) => {
-  const rel = path.relative(from, to);
-  return rel === '' || (!path.isAbsolute(rel) && rel.split(/[\\/]/)[0] !== '..');
-};
-const refuse = (where) => {
-  console.log(`refusing to put the copy inside the project: ${where}`);
-  process.exit(1);
-};
-const BASE = path.resolve(process.env.MUTATE_TMP ?? os.tmpdir());
-if (isInside(REPO, BASE)) refuse(BASE);
-fs.mkdirSync(BASE, { recursive: true });
-const realBase = fs.realpathSync.native(BASE);
-if (isInside(fs.realpathSync.native(REPO), realBase)) refuse(realBase);
+import { REPO, runMutations } from './runMutations.mjs';
+const SFX = 'public/assets/minigames/badger-rescue/sfx';
 const files = ['src/engine/minigames/badgerRules.js', 'src/engine/minigames/configRules.js', 'src/engine/minigames/dragonAttack.js',
-  'tests/badgerRules.test.mjs', 'public/assets/backgrounds/badger_flood.png',
+  'public/assets/backgrounds/badger_flood.png',
   'public/assets/minigames/dragon-attack/roza_fly.png', 'public/assets/minigames/dragon-attack/emma_fly.png',
   'public/assets/minigames/dragon-attack/anna_fly.png',
   ...fs.readdirSync(`${REPO}/public/assets/minigames/badger-rescue`).filter((n) => n.endsWith('.png'))
-    .map((n) => `public/assets/minigames/badger-rescue/${n}`)];
-// A folder of its own (never one that happens to be there already), removed again at the end.
-const COPY = fs.mkdtempSync(path.join(realBase, 'badger-rules-mutate-')).replaceAll('\\', '/');
+    .map((n) => `public/assets/minigames/badger-rescue/${n}`),
+  // the sound effects (D45), once built
+  ...(fs.existsSync(`${REPO}/${SFX}`) ? fs.readdirSync(`${REPO}/${SFX}`).map((n) => `${SFX}/${n}`) : [])];
 const DRAGON = 'src/engine/minigames/dragonAttack.js';
 const RULES = 'src/engine/minigames/badgerRules.js';
 const MUTATIONS = [
@@ -90,50 +71,7 @@ const MUTATIONS = [
   ['the phase ignored', RULES, '(((t + phase) % (play + pause))', '(((t) % (play + pause))'],
   ['BRANCH_LINE off the picture', RULES, 'export const BRANCH_LINE = 0.58;', 'export const BRANCH_LINE = 0.7;'],
   ['the log wait never reset', RULES, '    if (logs.length === 0) cub.logWaitSince = null; // LOG_WAIT_MAX counts from the start of each block by logs\n', ''],
+  ['a sound path to no file', RULES, "    dive: 'assets/minigames/badger-rescue/sfx/dive.mp3',", "    dive: 'assets/minigames/badger-rescue/sfx/nope.mp3',"],
   ['two cubs lost on one step', RULES, '    if (state.outcome || piece.x < W - half) continue;', '    if (decided || piece.x < W - half) continue;'],
 ];
-const only = process.argv[2];
-let missed = 0;
-const control = () => {
-  fs.rmSync(COPY, { recursive: true, force: true });
-  for (const f of files) {
-    fs.mkdirSync(`${COPY}/${f.replace(/\/[^/]+$/, '')}`, { recursive: true });
-    fs.copyFileSync(`${REPO}/${f}`, `${COPY}/${f}`);
-  }
-  fs.symlinkSync(`${REPO}/node_modules`, `${COPY}/node_modules`, 'junction');
-};
-let lastOutput = '';
-const run = () => {
-  try {
-    // A run takes a few seconds; a mutation that hangs the test counts as caught (it doesn't pass) after 5 minutes.
-    execFileSync(process.execPath, [`${COPY}/tests/badgerRules.test.mjs`, COPY],
-      { env: { ...process.env, NO_GIT: '1' }, stdio: 'pipe', timeout: 5 * 60 * 1000 });
-    return true;
-  } catch (error) {
-    lastOutput = `${error.code === 'ETIMEDOUT' ? 'TIMED OUT\n' : ''}${error.stdout ?? ''}${error.stderr ?? ''}`;
-    return false;
-  }
-};
-try {
-  control();
-  if (!run()) {
-    // A module the test needs and the copy lacks (the files list above) shows up here.
-    console.log(`CONTROL FAILED (the test fails on the unchanged copy):\n${lastOutput}`);
-    missed = 1;
-  } else {
-    console.log('control passes');
-    for (const [name, file, from, to] of MUTATIONS) {
-      if (only && !name.includes(only)) continue;
-      control();
-      const text = fs.readFileSync(`${COPY}/${file}`, 'utf8').replaceAll('\r\n', '\n');
-      if (!text.includes(from)) { console.log(`ANCHOR ${name}`); missed += 1; continue; }
-      fs.writeFileSync(`${COPY}/${file}`, text.replace(from, to));
-      const passed = run();
-      console.log(`${passed ? 'MISSED' : 'caught'} ${name}`);
-      if (passed) missed += 1;
-    }
-  }
-} finally {
-  fs.rmSync(COPY, { recursive: true, force: true }); // with its link to node_modules (rmSync removes the link, not its target)
-}
-process.exit(missed ? 1 : 0);
+runMutations({ prefix: 'badger-rules-mutate', files, test: 'tests/badgerRules.test.mjs', env: { NO_GIT: '1' }, mutations: MUTATIONS });

@@ -140,7 +140,11 @@ Act 2a (D40, 2026-11-16: `act2a.json` and the three `lokace-*.json`; the old dra
 act1_end → a2_rano1 (day 1) → a2_liska (the fox, free) → a2_cesta (the router) → a2_kam (the hub, one line per half-day)
 a2_kam: "Do hlubokého lesa" → location les:  les_sona (first: sets sona; promise → les_sona_slib (slib) | no → les_sona_ne)
                                              les_srnce → les_srnce_mama (srna)
-        "K přehradě"        → location reka: reka_jezevec → reka_jezevec_pomoc (jezevci)
+        "K přehradě"        → location reka: reka_jezevec → reka_jezevec_zachrana [minigame, D45]
+                                               ├─ victory → reka_jezevec_pomoc (jezevci)
+                                               └─ failure → reka_jezevec_prohra (no line): retry → the minigame |
+                                                  "Odletět a vrátit se později." (giveUp, jezevci_prohra) → a2_cesta
+                                             (back after giving up: reka_jezevec shows its lines 8–10 instead of 0–7)
                                              reka_vily → reka_vily_pomoc (vily, studanka)
         "Do hor"            → location hory: hory_doupe (first, if vedma) → hory_doupe_vejce (vejce)
                                              hory_zubr → hory_zubr_pomoc (zubr, melodie)
@@ -197,8 +201,9 @@ a big water on the shortest night, flooding the riders' gord on the way). Acts 2
   poses they use; a missing pose falls back to neutral); originals in `art/characters/`. Creature sprites made 2026-11-15, only the poses used (jezevec, liska (the cub), srnce, srna, zubr,
   vila, hejkal; the fox family is its own character, `liskova_rodina`, since D37), staged at `left` beside the rider; since
   D37 each has its `scale` and `raise` (Sára's sizes as a start, to adjust by eye), small animals standing higher, behind
-  the riders. The badger cubs rescue (D42) is built and on the play-test page (`…/playtest/?game=jezevci`), not yet in
-  the story; the other three minigames not yet.
+  the riders. The badger cubs rescue (D42) is in the story since D45 (the badger event; its texts by the Fable agent, the
+  lose screen without a line; its six sounds wait for Sára's picks) and on the play-test page
+  (`…/playtest/?game=jezevci`); the other three minigames not yet.
 - Dragons: Róza rides Bezzubka, Emma Běska, Anna Buřinoha (Sára, 2026-11-15).
 - Lunch branch ends with the flooded town (bad ending). Its end-card text was
   drafted by Claude on 2026-10-28; rewrite if wanted.
@@ -216,5 +221,6 @@ a big water on the shortest night, flooding the riders' gord on the way). Acts 2
 - Act 2a music (D36; since D40 by scene): `vedma_hut` (vedma_*), `night_forest` (a2_noc*), `vily_magic` (reka_vily*,
   wordless women's voices), `playful` (a2_liska, a2_hejkal from its first line, haj_lisky), `tesak_lair`
   (hory_doupe_vejce), `sacred_grove` (haj_*, a wordless choir), `danger` (a2_unos, a2_konec: Bezzubka taken),
-  `village_day` (a2_vecer3, a2_odpocinek: the gord); the rest (Soňa, the fawn, the badger, the wisent, the way to the
+  `village_day` (a2_vecer3, a2_odpocinek: the gord), `zachrana` (the badger rescue and its lose screen,
+  reka_jezevec_zachrana, reka_jezevec_prohra, D45); the rest (Soňa, the fawn, the badger, the wisent, the way to the
   lair) `forest_ground`, the flights and the hub `dragon_flight`.

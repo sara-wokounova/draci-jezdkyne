@@ -58,6 +58,7 @@ export class MinigameManager {
    *   "type": "dragonAttack",
    *   "title": "Dračí nálet",
    *   "allowSkip": true,
+   *   "loseResult": false,  // optional: a lost round goes on at once, without the result dialog (D45)
    *   "onVictory": "scene_id_when_won",
    *   "onFailure": "scene_id_when_lost",
    *   "config": { ...minigame specific numbers... }
@@ -108,9 +109,10 @@ export class MinigameManager {
             hud,
             difficulty: options.difficulty,
             // The game reports its natural end here; we show the result screen and
-            // only settle once the player presses continue.
+            // only settle once the player presses continue (a loss with `loseResult: false` at once, D45).
             onComplete: (result, details) => {
-              hud.showResult(result, details, () => settle(result));
+              if (result !== 'victory' && spec.loseResult === false) settle(result);
+              else hud.showResult(result, details, () => settle(result));
             },
           });
           return this.activeGame.start();

@@ -125,7 +125,8 @@ await t('normalize: typos fall back, caps hold, arrays are never written', () =>
   // A JSON "__proto__" key in the story config sets nothing (mergeConfig skips it).
   const proto = R.normalize(JSON.parse('{"__proto__": {"floodGap": 2}, "sounds": {"__proto__": {"dive": "x.mp3"}}}'));
   assert.equal(proto.floodGap, 3);
-  assert.equal(proto.sounds.dive, null);
+  assert.equal(proto.sounds.dive, R.DEFAULTS.sounds.dive);
+  assert.notEqual(proto.sounds.dive, 'x.mp3');
   assert.equal(Object.getPrototypeOf(proto.sounds), Object.prototype);
   const state = R.createState(n, null, rng(1));
   for (let i = 0; i < 600; i += 1) R.step(state, DT, { dive: true });
@@ -714,6 +715,14 @@ await t("BRANCH_LINE is cub_branch.png's branch line (the middle of its rows wit
   assert.ok(rows.length > 0, 'no row of cub_branch.png is 220 px wide: a new picture, re-measure BRANCH_LINE');
   const line = (rows[0] + rows.at(-1)) / 2 / png.height;
   assert.ok(Math.abs(line - R.BRANCH_LINE) <= 0.02, `measured ${line.toFixed(3)}, BRANCH_LINE is ${R.BRANCH_LINE}: put the measured line in badgerRules.js`);
+});
+await t('every sound in DEFAULTS is a file of at most 20 KB (D45: short effects; null plays nothing)', () => {
+  for (const [name, src] of Object.entries(R.DEFAULTS.sounds)) {
+    if (src === null) continue;
+    const file = `${root}/public/${src}`;
+    assert.ok(fs.existsSync(file), `sounds.${name}: ${src} is missing (build it with scripts/build-badger-sfx.sh)`);
+    assert.ok(fs.statSync(file).size <= 20 * 1024, `sounds.${name}: ${src} is over 20 KB (trim it in scripts/build-badger-sfx.sh)`);
+  }
 });
 if (!process.env.NO_GIT) {
   await t('every asset path in DEFAULTS is in git', () => {

@@ -162,6 +162,8 @@ export async function startVisualNovel(config) {
 
     minigameActive = false;
     storyPausedAt = performance.now();
+    input.holdBackUntilQuiet(); // a child still mashing ← from the round never steps Back (D45; `input` is built below,
+    // before any position is shown)
     // Back on now, not only by the next scene: a typo in onVictory/onFailure shows none (Menu works too).
     ui.setBackAvailable(history.length > 0);
 
@@ -349,14 +351,15 @@ export async function startVisualNovel(config) {
     getEndScenes: () => endScenes(story, save.endings),
   });
 
-  new InputController({
+  const input = new InputController({
     root: config.ui.root,
     onAdvance: advance,
     onChoiceNumber: (index) => ui.pickChoice(index),
     onBack: goBack,
     onEscape: escape,
     choiceGuard: ui.choiceGuard,
-  }).connect();
+  });
+  input.connect();
 
   // Re-fit the scene (background letterboxing, character positions) whenever
   // the viewport size or aspect ratio changes.

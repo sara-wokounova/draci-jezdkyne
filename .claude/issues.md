@@ -13,11 +13,6 @@ and the mutation runners for current checks are to move into `tests/` as their o
 browser checks run in CI before every deploy (Sára's answers), the slow ones and those needing ffmpeg or Firefox via
 an npm script. One-off measurements and the old snapshots (`*.d32.mjs`, `*.d33.mjs`) stay out.
 
-### P3 — The badger rescue isn't in the story yet (D42, 2026-11-17)
-Step 2 of D42: `reka_jezevec` still goes straight to `reka_jezevec_pomoc`; the minigame is only on the play-test page
-(`…/playtest/?game=jezevci`). To do after Sára has played it: the minigame scene and a lose scene (retry, give up),
-the Fable texts, the six sound effects (`sounds` in badgerRules.js's DEFAULTS are all `null`).
-
 ### P3 — The frozen story.json and its old key stay until a cleanup (D37, 2026-11-16)
 `public/story/story.json` (the old one-line story) stays for cached old tabs and is never edited
 (`tests/story.test.mjs` checks its hash). Remove it in a later cleanup commit, together with: `tests/story.test.mjs`'s two
@@ -47,7 +42,7 @@ in Firefox. Since D31 the sheets are the smaller part (~1.7 MB), so on a slow li
 resumed battle (D26) buffers at its position first (a range request): in Chrome on a slow link ~3–4 s instead of ~1 s.
 Rest of the fix: preload the sheets (and start the battle music's download) from the scenes before `beaver_battle`.
 The badger rescue (D42) is lighter: its 15 sprites ~1.7 MB (with D43's 7 frames), the dragons' fly strips, and `zachrana.mp3` (3.5 MB,
-streamed); its background is the scene's own (preloaded with the scene, once step 2 puts it in the story).
+streamed); its background is the scene's own (preloaded with the scene, D45), its art and sounds load at the round's start.
 
 ### P2 — Minigame art missing → 404s (verified 2026-10-17; partly fixed 2026-10-28, 2026-10-30 and 2026-10-31 in `57d6432`, verified live)
 DEFAULTS in `dragonAttack.js` pointed to `background.png`, `dragon_{roza,emma,anna}.png`,
@@ -106,7 +101,8 @@ Beaver lines show a dragon rider's sprite instead.
 
 ### P3 — Continue hint shown when there's nothing to continue to
 Choice scenes and dead-end scenes still say "Click, tap, Space, or Enter to continue".
-On phones (D14 layout) it is hidden on choice scenes (also under the centred choices, D37). Desktop and dead ends still show it.
+On phones (D14 layout) it is hidden on choice scenes (also under the centred choices, D37). Desktop and dead ends still show it
+(not under centred choices with no line, D45: the whole dialogue panel is hidden there).
 (On `end` scenes the hint is right: the tap opens the end card.)
 
 ### P3 — No `webkitRequestFullscreen` fallback (2026-10-17)
@@ -222,6 +218,12 @@ the volume: there it can sound for up to ~400 ms. Check that it stays silent els
 `music-race.mjs` "switch while starting".
 
 ## Fixed
+
+### P3 — The badger rescue wasn't in the story (D42, 2026-11-17) — fixed 2026-11-17 (D45), not yet live
+Step 2 of D42: `reka_jezevec` went straight to `reka_jezevec_pomoc`. Fix (D45): `reka_jezevec` → the minigame
+(`reka_jezevec_zachrana`) → `reka_jezevec_pomoc` or the lose screen `reka_jezevec_prohra` (a free retry, a give-up), the
+Fable texts, the sounds' variants (the picks: the fixed P3 above). Checks: `tests/act2a.test.mjs`,
+`tests/browser/badgerStory.test.mjs`.
 
 ### P3 — Remove the unlisted act2a-den1..3.json (D40, 2026-11-16) — fixed 2026-11-17
 The old Act 2a draft's parts stayed in git, unlisted, for D40's deploy (Pages' cache window); removed (`git rm`) the day after.

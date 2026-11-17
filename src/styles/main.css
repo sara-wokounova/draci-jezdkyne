@@ -148,6 +148,20 @@ button {
   font-size: clamp(1.15rem, 2.25vw, 1.8rem);
 }
 
+/* Centred choices with no line (a lose screen, D45; also a line whose text is empty): no empty dialogue box
+   (visibility, so --dialogue-top is still measured), and the panel down to the dialogue panel's usual bottom
+   (#dialogue-panel's, above; under 720 px wide that panel sits lower, 0.75rem, so this ends ~1–2rem above it). Not on phones (the D14 query at the end of this file, negated): their centred
+   panel already takes the whole height (D37). */
+#game-root.choices-center:has(#dialogue-text:empty) #dialogue-panel {
+  visibility: hidden;
+}
+
+@media not all and (orientation: landscape) and (max-height: 500px) {
+  #game-root.choices-center:has(#dialogue-text:empty) #choice-panel {
+    bottom: max(clamp(1rem, 4vh, 3rem), env(safe-area-inset-bottom));
+  }
+}
+
 /* The choice guard (D37): dimmed while a tap would be ignored. */
 #choice-panel.waiting .choice-button,
 #end-home.waiting {

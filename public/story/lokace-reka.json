@@ -28,22 +28,32 @@
       "add": {
         "pul": 1
       },
-      "next": "reka_jezevec_pomoc",
+      "next": "reka_jezevec_zachrana",
       "lines": [
         {
           "text": "Podél řeky bylo vidět, co bobří přehrada dělá. Voda za ní stoupala, tiše a trpělivě, a ukusovala břeh pod starými duby.",
+          "if": "!jezevci_prohra",
           "characters": []
         },
         {
           "text": "Na hrázi stál bobr veliký jako medvěd. Když uviděl draky, zvedl tlapu a zamával jim.",
-          "if": "bobri_pratele"
+          "if": [
+            "bobri_pratele",
+            "!jezevci_prohra"
+          ],
+          "characters": []
         },
         {
           "text": "Bobři na hrázi se přikrčili, sotva na vodu padl dračí stín. Jeden po druhém zmizeli pod hladinou.",
-          "if": "bobri_porazeni"
+          "if": [
+            "bobri_porazeni",
+            "!jezevci_prohra"
+          ],
+          "characters": []
         },
         {
-          "text": "Na břehu zuřivě hrabal jezevec. Bláto od něj lítalo na všechny strany a mezi hrabáním nadával tak, že se i Buřinoha začervenala.",
+          "text": "Vysoko na stráni zuřivě hrabal jezevec novou noru. Hlína od něj lítala na všechny strany a mezi hrabáním nadával tak, že se i Buřinoha začervenala.",
+          "if": "!jezevci_prohra",
           "characters": [
             {
               "id": "jezevec",
@@ -54,11 +64,20 @@
         },
         {
           "speaker": "jezevec",
-          "text": "Čtyřicet zim tu bydlel můj děd! Po něm můj otec! Nejlepší nora na celém břehu, suchá, na jih! A teď mi do ní teče řeka!"
+          "text": "Čtyřicet zim tu bydlel můj děd! Po něm můj otec! Nejlepší nora na celém břehu, suchá, na jih! A teď mi do ní teče řeka!",
+          "if": "!jezevci_prohra",
+          "characters": [
+            {
+              "id": "jezevec",
+              "position": "left",
+              "pose": "neutral"
+            }
+          ]
         },
         {
           "speaker": "emma",
           "text": "Voda vám teče do nory? Je tam ještě někdo?",
+          "if": "!jezevci_prohra",
           "characters": [
             {
               "id": "jezevec",
@@ -74,11 +93,65 @@
         },
         {
           "speaker": "jezevec",
-          "text": "Pět jezevčat! Dvě vynesu v zubech, ale pět? A voda stoupá rychleji, než stačím hrabat. Tak tam nestůjte a neokounějte… Totiž. Prosím."
+          "text": "Devět jezevčat! Až je voda vyžene z děr, chytí se plovoucích větví a proud je ponese pryč. Žena hlídá dole na balvanu, ale všech devět sama z vody nevytáhne. Tak tam nestůjte a neokounějte… Totiž. Prosím.",
+          "if": "!jezevci_prohra",
+          "characters": [
+            {
+              "id": "jezevec",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
         },
         {
           "speaker": "roza",
-          "text": "Pomůžeme vám! Holky, dolů z draků. Bezzubko, zadrž tu vodu!",
+          "text": "Pomůžeme vám! Holky, zůstaňte v sedlech. Sebereme je z větví rovnou v letu. Bezzubko, k vodě!",
+          "if": "!jezevci_prohra",
+          "characters": [
+            {
+              "id": "jezevec",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "excited"
+            }
+          ]
+        },
+        {
+          "text": "Řeka byla zase o kus výš. Jezevec na stráni pořád hrabal a jezevčice stála na svém balvanu a nespouštěla oči z hladiny.",
+          "if": "jezevci_prohra",
+          "characters": [
+            {
+              "id": "jezevec",
+              "position": "left",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "jezevec",
+          "text": "No to je dost! Jen tak si odletět, když jezevci teče do nory řeka… Totiž. Dobře, že jste zpátky. Jezevčata se zatím krčí v norách, ale voda stoupá dál.",
+          "if": "jezevci_prohra",
+          "characters": [
+            {
+              "id": "jezevec",
+              "position": "left",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "Tak zpátky do vzduchu, holky! Tentokrát je dostaneme všechna.",
+          "if": "jezevci_prohra",
           "characters": [
             {
               "id": "jezevec",
@@ -93,6 +166,23 @@
           ]
         }
       ]
+    },
+    {
+      "id": "reka_jezevec_zachrana",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_flood.png"
+      },
+      "music": "zachrana",
+      "minigame": {
+        "type": "badgerRescue",
+        "title": "Záchrana jezevčat",
+        "allowSkip": true,
+        "loseResult": false,
+        "onVictory": "reka_jezevec_pomoc",
+        "onFailure": "reka_jezevec_prohra",
+        "config": {}
+      }
     },
     {
       "id": "reka_jezevec_pomoc",
@@ -114,7 +204,7 @@
       "next": "a2_cesta",
       "lines": [
         {
-          "text": "Draci roztáhli křídla nad vodou jako tři hráze. Holky lezly do nory po břiše a jedno po druhém podávaly ven mokrá, zablácená, prskající jezevčata.",
+          "text": "Draci se střídali nad řekou, snášeli se k hladině a brali jezevčata z větví do drápů. Mokrá, prskající klubíčka pak obloukem přistávala v mechu na stráni, přímo u jezevcových tlap.",
           "characters": [
             {
               "id": "jezevec",
@@ -125,7 +215,7 @@
         },
         {
           "speaker": "anna",
-          "text": "Páté! Kouše, takže je živé. Au. Hodně živé.",
+          "text": "Deváté! Kouše, takže mu nic není. Au. Vůbec nic mu není.",
           "characters": [
             {
               "id": "jezevec",
@@ -141,7 +231,7 @@
         },
         {
           "speaker": "jezevec",
-          "text": "To má po mně. Počkat. Raz, dva, tři, čtyři… pět. Pět! Všechna!",
+          "text": "To má po mně. Počkat, nehýbejte se, počítám! … Devět. Devět! Všechna!",
           "characters": [
             {
               "id": "jezevec",
@@ -156,7 +246,7 @@
           ]
         },
         {
-          "text": "Pak draci vyhrabali novou noru vysoko na stráni. Jezevec jim do toho celou dobu mluvil: vchod víc k jihu, komoru hlubší, a tohle že má být chodba?"
+          "text": "Zatímco jezevčice olizovala jedno mládě po druhém, draci dohrabali noru, kterou jezevec na stráni začal. Celou dobu jim do toho mluvil: vchod víc k jihu, komoru hlubší, a tohle že má být chodba?"
         },
         {
           "speaker": "jezevec",
@@ -180,7 +270,32 @@
         },
         {
           "speaker": "roza",
-          "text": "Budeme si to pamatovat. A dejte pozor na to páté!"
+          "text": "Budeme si to pamatovat. A dejte pozor na to deváté!"
+        }
+      ]
+    },
+    {
+      "id": "reka_jezevec_prohra",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/badger_flood.png"
+      },
+      "music": "zachrana",
+      "characters": [],
+      "choiceLayout": "center",
+      "lines": [],
+      "choices": [
+        {
+          "text": "Zkusit to znovu.",
+          "next": "reka_jezevec_zachrana"
+        },
+        {
+          "text": "Odletět a vrátit se později.",
+          "next": "a2_cesta",
+          "giveUp": true,
+          "set": [
+            "jezevci_prohra"
+          ]
         }
       ]
     },

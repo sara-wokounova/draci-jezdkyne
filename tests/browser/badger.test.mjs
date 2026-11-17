@@ -285,7 +285,7 @@ await check('round: skip while loading leaves no ticker and no listeners', async
   // The art held until after the skip; then start() carries on after its await and must stop there.
   const held = [];
   let released = false;
-  await page.route('**/badger-rescue/**', (route) => { if (released) route.continue(); else held.push(route); });
+  await page.route('**/badger-rescue/*.png', (route) => { if (released) route.continue(); else held.push(route); });
   await open(page, `${base}playtest.html?game=jezevci`);
   const cdp = await page.context().newCDPSession(page);
   const scripts = new Map();
@@ -413,7 +413,7 @@ await check('flightY: a big value in a story config still flies above the dive b
   assert.ok(r.y <= r.bottom - 39, `the flight line ${r.y.toFixed(1)} is not above the dive's bottom ${r.bottom.toFixed(1)}`);
 });
 await check('art missing: every badger sprite and fly strip 404 → placeholders, the round plays to its result', async (page) => {
-  await page.route('**/minigames/badger-rescue/**', (route) => route.fulfill({ status: 404 }));
+  await page.route('**/minigames/badger-rescue/*.png', (route) => route.fulfill({ status: 404 }));
   await page.route('**/minigames/dragon-attack/*_fly.png', (route) => route.fulfill({ status: 404 }));
   await startRound(page, '&mother=0&current=150&firstFlood=2');
   // The placeholders on the water line: a floating cub's bar centred just under it, a cub waiting for the mother there too.

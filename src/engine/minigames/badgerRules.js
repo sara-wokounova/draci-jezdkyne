@@ -36,7 +36,9 @@ export const EVENT_SOUNDS = { dive: 'dive', splash: 'splash', bump: 'bump', catc
 export const DEFAULTS = {
   // Field fractions, measured on badger_flood.png (2026-11-17). The holes in flood order: holeCubs[i] belongs to holes[i].
   holes: [[0.42, 0.80], [0.35, 0.785], [0.28, 0.77], [0.21, 0.73], [0.13, 0.68]],
-  holeCubs: [1, 1, 2, 2, 3], // Sára: 9 cubs (D44; the play-test page also offers the 7 of D42, [1, 1, 1, 2, 2])
+  // Sára: 9 cubs (D44; the play-test page also offers the 7 of D42, [1, 1, 1, 2, 2]). The story's texts say nine
+  // (lokace-reka.json, D45; tests/act2a.test.mjs ties them to this sum): a new default means new texts.
+  holeCubs: [1, 1, 2, 2, 3],
   burrow: [0.12, 0.47], // the new burrow, where the father waits
   waterStart: 0.86, // the painted water line; the game's band rises from here to the last hole
   firstFlood: 2, // s (Sára's play-test values, D44)
@@ -90,7 +92,15 @@ export const DEFAULTS = {
     motherHead: 'assets/minigames/badger-rescue/mother_watch_head.png',
     motherHeadTail: 'assets/minigames/badger-rescue/mother_watch_headtail.png',
   },
-  sounds: { dive: null, splash: null, bump: null, caught: null, mother: null, lost: null }, // step 2 (D42)
+  // Sára's picks, built by scripts/build-badger-sfx.sh into public/assets/minigames/badger-rescue/sfx/ (D45); null: silent.
+  sounds: {
+    dive: 'assets/minigames/badger-rescue/sfx/dive.mp3',
+    splash: 'assets/minigames/badger-rescue/sfx/splash.mp3',
+    bump: 'assets/minigames/badger-rescue/sfx/bump.mp3',
+    caught: 'assets/minigames/badger-rescue/sfx/caught.mp3',
+    mother: 'assets/minigames/badger-rescue/sfx/mother.mp3',
+    lost: 'assets/minigames/badger-rescue/sfx/lost.mp3',
+  },
 };
 
 const finite01 = (v, fallback) => (Number.isFinite(v) && v >= 0 && v <= 1 ? v : fallback);

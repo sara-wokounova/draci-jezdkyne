@@ -1189,3 +1189,85 @@ Consequences: balance (500 seeded rounds): masher Normální 0 %, Lehká 29.6 %,
 Normální 93.2 %, Těžká 53.8 %, σ 50 Normální 35.2 % (Těžká ~10 %: its floor is now σ 25 ≥ 45 %). All five holes are
 flooded 14 s into a round (D42: 34 s). The rules' checks written for D42's timing pin it (`D42_TIMING` in
 `tests/badgerRules.test.mjs`). Old play-test links keep their own values (every value is in the link).
+
+## D45 — The badger cubs rescue in the story: no word after a loss, a free retry, a give-up (2026-11-17) — Accepted
+Supersedes: D42's "step 2 (the story) is still to do" and its "the result of a round ended by an error still says
+Jezevče odplavalo" (in the story it goes silently to the lose screen); D42's `sounds` "all `null`" (now Sára's picks).
+Decision:
+- `reka_jezevec` (lines 0–7 keep their indices, texts edited in place) → `reka_jezevec_zachrana` (a minigame scene, no
+  `lines` key, background `badger_flood.png`, music `zachrana`, `config: {}`) → won (or skipped as won, D37):
+  `reka_jezevec_pomoc` (its texts edited in place for the dive rescue and nine cubs; still `set: ["jezevci"]`) → lost:
+  `reka_jezevec_prohra`: no line, no stage, `choiceLayout: "center"`, two choices: "Zkusit to znovu." (back to the
+  minigame, no `set`/`add`, no time) and "Odletět a vrátit se později." (`"giveUp": true`, `set: ["jezevci_prohra"]` →
+  `a2_cesta`: the half-day stays spent, no helper, the event offered again by the dam's pick while a half-day is left).
+- After a loss nothing is said: a scene's `minigame.loseResult: false` (read by `MinigameManager.run`) settles a lost
+  round at once instead of showing the result dialog; a win still shows it. The beaver game and the play-test page
+  don't set it (the testers keep "Jezevče odplavalo" and the cubs line). The rules still hold the end 1.2–5 s until the
+  lost cub's branch is out of sight (D42), so the loss is seen. A round ended by D24's backstop goes silently to the lose
+  screen too (a story typo that makes `step()` throw makes every retry an instant loss; the give-up is the way on).
+- The way to end a round early is the skip menu, as in every minigame (Sára: no extra button).
+- After any minigame, Back by key (← and Backspace, presses and repeats) waits for a fresh press that comes after
+  `TAP_GUARD_MS` (500 ms) without any keydown, repeats included, as `choiceGuard` and `guardTaps` count keys
+  (`InputController.holdBackUntilQuiet()`, called by `runMinigame`); that press goes Back, and any quiet press ends the
+  wait. Not in the menu (its sliders step on arrows); the top bar's Back button is
+  unchanged. Without it a ← or Backspace held or mashed through a lost round (no result dialog to take the focus) stepped
+  Back off the lose screen 500 ms after the round and on through `reka_jezevec`, the hub and earlier choices, undoing
+  half-days and events (found by the coordinator after the review panel). The víly-ditch plan's first rule (a key
+  pressed during a minigame never repeats into the story, `heldFromButton` generalised) was built, measured and dropped:
+  this rule alone already stops the held keys too (a held key's repeats never end the wait), and its own check passed
+  with it removed, so it guarded nothing the story can show.
+  Accepted edges (the delta's review): the wait ends once, so a child who pauses 500 ms mid-mash and mashes on steps
+  Back again; a ← right after other keys (a held Space let go) can need a second press; the top bar's Back button tapped
+  by pointer isn't held (it sits under the HUD's top bar during a round).
+- The return after giving up (`jezevci_prohra`) has its own lines: `"!jezevci_prohra"` on lines 0–7 (1 and 2 as lists),
+  three lines appended after them with `"if": "jezevci_prohra"`; the stage copied onto lines 1, 2, 4 and 6 (D37's lint:
+  a conditional line that sets the stage needs the next one to set its own), so a first visit looks as before.
+- No empty dialogue box under centred choices with no line: two CSS rules
+  (`#game-root.choices-center:has(#dialogue-text:empty)`): the dialogue panel `visibility: hidden` (still measured for
+  `--dialogue-top`) and, except on phones (their centred panel already takes the whole height, D37), the choice
+  panel down to the dialogue panel's own bottom. A visible line with empty text would hide the box too (none exists).
+- The texts by the Fable agent (planning, 2026-11-17); Sára's choices: no line on the lose screen, the give-up text,
+  shorter lines for the return, the count kept at nine. `tests/act2a.test.mjs` ties the count words in the badger
+  event's texts (5–15 as cardinals, ordinals, collectives, or digits) to the minigame's cub count (`holeCubs`' sum, or
+  the scene's own config): a new default fails it until the texts say the new number (or the scene pins `holeCubs`).
+- Six sound effects from Runway's sound-effect tool, three variants each (three different prompts, 24 credits),
+  committed as downloaded in `art/minigames/badger-rescue/sfx/variants/` (`<sound>_<a|b|c>.mp3`; Runway's sound files carry
+  no C2PA data, unlike its pictures); Sára picks on a listening
+  page; `scripts/build-badger-sfx.sh` (its own script: `build-sfx.sh`'s check rebuilds that one on a copy holding only
+  the dragon-attack sources) builds the picks: mono, leading silence trimmed, cut to the target length (dive 0.6,
+  splash 0.8, bump 0.8, caught 1.0, mother 1.2, lost 1.5 s) with a 50 ms fade-out, trailing silence trimmed, RMS
+  −14 dBFS by a gain measured per variant (`--measure`, pinned in the script), limited to −1 dBFS, 96 kbps, into
+  `public/assets/minigames/badger-rescue/sfx/<sound>.mp3`; it refuses to run while a pick is "?". Each plays on its
+  event as the game already did (`EVENT_SOUNDS`), `mother` too. Sára's picks (2026-11-17): dive c, splash c, bump c,
+  caught a, mother b, lost c.
+- The act2a walker now walks minigame scenes (both outcomes, the memory unchanged), no-line choice scenes, a retry from
+  the minigame's own lose scene (ending that branch, not a loop) and give-up choices (`giveUpMemory`, as the engine).
+  The fail-before runners share `tests/mutate/runMutations.mjs`.
+Why: Sára (2026-11-17): "zapoj minihru do příběhu"; her rule for this step: "po prohře to nic neřekne, jen nabídne
+opakovat. Tady bych dala opakování bez penalizace. Také možnost minihru ukončit a odletět zpátky. Tím se přijde o půl
+den bez získání pomocníka"; her answers on the plan: "úplně bez textu je asi lepší", "může být odletět a vrátit se
+později", "24 kreditů je v pohodě", "když tak se to pak přepíše, kdyby se počet ještě měnil", "jo kratší úvod asi dává
+smysl", "tlačítko přeskočit by mělo být ve všech minihrách stejné". The plan went through 7 disprover rounds.
+`loseResult` on the scene, not in `register()`: it is a story choice, and the play-test page needs the dialog. The
+lose screen draws no badger: the sprite would stand over the painted holes and water.
+Consequences: on the last half-day the give-up text ("vrátit se později") is untrue (the router goes on to the evening):
+accepted by Sára. Back from `reka_jezevec_pomoc` after lose → retry → win lands on the lose screen (the retry put it in
+the history); giving up there un-plays the won event with the memory Back restored: consistent (D37's "Back undoes the
+memory"). Line 6's "Žena hlídá dole na balvanu, ale všech devět sama z vody nevytáhne" hints she saves some, while on
+Těžká she saves none (literally true); the return says the river is higher while the next round starts at the painted
+water line. With the defaults' `zachrana.mp3` (true peak −8.3 dBFS) the limiter's ceiling + the music at 75 reach
+−0.19 dBFS, 0.01 dB over D31's −0.2 rule (never past full scale; accepted; `tests/badgerSfx.test.mjs` asserts
+≤ −0.15). The six sounds load at the round's start and are never awaited (D29): on slow data the first dive of the first
+round can be silent. A save inside a queue of the mother's trips plays `mother` at the save, up to `motherReturn` before
+her leap (rare: the waiting-cub spot, D43, makes a queued save unusual). The play-test page plays the sounds
+too (same DEFAULTS). The minigame's art (~1.7 MB) and `zachrana` load when the round starts (issues.md P2's preload).
+For ~10 minutes after the deploy a cached old bundle can run with the new `lokace-reka.json` (parts are fetched
+no-cache, the bundle isn't): a loss then shows the old dialog and the lose screen an empty dialogue box with the English
+hint; the game still works. Once deployed, `reka_jezevec_zachrana`, `reka_jezevec_prohra` and `jezevci_prohra` are
+permanent. Checks: `tests/act2a.test.mjs` (its fail-before `tests/mutate/act2a.mutate.mjs`: D40's 28 mutations moved in from `C:\tmp\claude\act2a-build`, 14 for D45, 3 controls),
+`tests/badgerRules.test.mjs` (the sounds' files), `tests/browser/badgerStory.test.mjs` (23 checks, the real game; the six for Back each fail with `holdBackUntilQuiet()`
+removed, the hold-then-mash one also with repeats left out of the key quiet),
+`tests/badgerSfx.test.mjs` (hand-run, ffmpeg; its RMS window −18 to −12.5 dBFS rather than the plan's −14 ± 1.5: the −1 dBFS
+limiter takes a peaky clip lower, as D29 found for Anna's hit, −16.9); `tests/browser/badger.test.mjs`'s art routes narrowed to `*.png`. The
+sound checks in the browser use six existing dragon-attack files through the routed scene config (the play-test page
+can't set `sounds`), so they test the wiring before Sára's picks exist.

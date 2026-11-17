@@ -157,6 +157,8 @@ Add a minigame to the flow by giving a scene a `minigame` field instead of
 
 - `onVictory` / `onFailure` — scene id to jump to for each outcome.
 - `allowSkip` — set to `false` to remove the skip button.
+- `loseResult` — set to `false` to go on to `onFailure` as soon as a round is lost, without the result dialog (the
+  badger rescue in the story, D45); a win still shows it.
 - `config` — minigame-specific numbers (everything is configurable; anything you
   omit uses the default).
 
@@ -298,7 +300,12 @@ on fly frame `diveFrame`), `dragonWidth`,
 come from `HUD_TEXTS` in badgerRescue.js, overridden by a scene's `labels`), `assets` (the stills and the animation
 frames `father2`, `father3`, `cubBranch2`, `cubBranch3`, `motherTail`, `motherHead`, `motherHeadTail`: each frame the
 size of its still, or it is drawn at the still's width; an animal plays its still when a frame it needs is missing) and `sounds` (`dive`, `splash`, `bump`,
-`caught`, `mother`, `lost`; each `{ src, volume }`, a bare path or `null`, as in the beaver game; none yet). A typo falls back to the default.
+`caught`, `mother`, `lost`; each `{ src, volume }`, a bare path or `null`, as in the beaver game; `null` until Sára has picked
+from the Runway variants in `art/minigames/badger-rescue/sfx/variants/`, then built by `scripts/build-badger-sfx.sh`, D45). A typo falls back to the default.
+
+In the story (D45) it is the badger event's quest: `reka_jezevec` → `reka_jezevec_zachrana` (the minigame, `loseResult: false`)
+→ `reka_jezevec_pomoc` (won, or skipped as won), or `reka_jezevec_prohra`: no line, a free retry and a give-up choice
+(`"giveUp": true`, which costs the half-day without the helper and offers the event again later).
 
 ### Play-test page
 
