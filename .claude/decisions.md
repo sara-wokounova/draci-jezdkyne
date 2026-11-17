@@ -1172,3 +1172,20 @@ jezevec makes them stale (the alignment check fails). ~0.9 MB more to download (
 `sizes.motherCub` are gone. Checks: `tests/badgerRules.test.mjs` (the rules, the frames' sizes and alignment,
 `BRANCH_LINE`), 55 mutations in `tests/mutate/badgerRules.mutate.mjs`, 22 browser checks (each D43 one shown failing
 with its fix reverted).
+
+## D44 — The badger rescue tuned from Sára's play-test; the mother in the moss (2026-11-17) — Accepted
+Supersedes: D42's 7 cubs, its floods (`firstFlood` 6 s, `floodGap` 7 s) and its currents (Lehká 45, Normální 60 px/s),
+its balance floor for Těžká (σ 50 ≥ 40 %); D43's `currentRise` (`{ easy: 1, normal: 1.3, hard: 1.3 }`) and its
+mother's place on her rock (10 % of the rock's height under its top).
+Decision: the defaults are Sára's play-test values on Normální: 9 cubs (`holeCubs` [1, 1, 2, 2, 3]), the first flood at
+2 s, then every 3 s (every level), the current 70 px/s, the mother saving 1, the speed-up × 2 at the highest water.
+Lehká: current 50, the mother saving 2, no speed-up; Těžká: current 80, no mother, × 1.8. The play-test page's cubs
+slider offers D42's 7 ([1, 1, 1, 2, 2]) as the other layout. The mother stands 15 % of her rock's height under its top,
+in the moss (at 10 % she floated over the grass).
+Why: Sára (2026-11-17): "this is better values, I sometimes do not win" (her link: cubs=9, current=70, mother=1,
+firstFlood=2, floodGap=3, rise=2, the rest the defaults); her answers to the proposal for the other levels: yes, with
+Těžká's speed-up 1.8 instead of the proposed 1.5; "máma jezevčice vypadá, že trochu levituje, když stojí".
+Consequences: balance (500 seeded rounds): masher Normální 0 %, Lehká 29.6 %, jittery masher Normální 0 %, careful σ 25
+Normální 93.2 %, Těžká 53.8 %, σ 50 Normální 35.2 % (Těžká ~10 %: its floor is now σ 25 ≥ 45 %). All five holes are
+flooded 14 s into a round (D42: 34 s). The rules' checks written for D42's timing pin it (`D42_TIMING` in
+`tests/badgerRules.test.mjs`). Old play-test links keep their own values (every value is in the link).

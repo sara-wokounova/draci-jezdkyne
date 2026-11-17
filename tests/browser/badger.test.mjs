@@ -75,10 +75,10 @@ await check('page: the switch, heading, sliders, link without field=, defaults l
   assert.equal(await page.isVisible('#pt-field-note'), false);
   assert.equal(await page.getAttribute('#pt-defaults', 'href'), 'playtest.html?game=jezevci');
   const link = await page.inputValue('#pt-link');
-  assert.match(link, /playtest\.html\?game=jezevci&cubs=7&current=60&mother=1&/);
-  assert.match(link, /&rise=1\.3$/, 'the current speed-up last in the link (D43)');
+  assert.match(link, /playtest\.html\?game=jezevci&cubs=9&current=70&mother=1&/);
+  assert.match(link, /&rise=2$/, 'the current speed-up last in the link (D43)');
   assert.doesNotMatch(link, /field=/);
-  assert.match(page.url(), /\?game=jezevci&cubs=7/);
+  assert.match(page.url(), /\?game=jezevci&cubs=9/);
 });
 await check('page: the beaver page without game is as before (switch on Bobři, field= in the link)', async (page) => {
   await open(page, `${base}playtest.html?count=40`);
@@ -94,12 +94,12 @@ await check('page: the beaver page without game is as before (switch on Bobři, 
   await open(page, `${base}playtest.html?game=nonsense&count=40`); // an unknown game: the beavers
   assert.equal(await page.title(), 'Zkušební nálet na bobry');
 });
-await check('URL in: the sliders, 9 cubs, the values in the game config; a slider change keeps game=', async (page) => {
-  await startRound(page, '&cubs=9&current=100&mother=0&branch=120&reach=20&dive=0.5&miss=2&rozaFly=400&firstFlood=3&floodGap=4&cubGap=1&rise=2');
+await check('URL in: the sliders, 7 cubs (the D42 layout), the values in the game config; a slider change keeps game=', async (page) => {
+  await startRound(page, '&cubs=7&current=100&mother=0&branch=120&reach=20&dive=0.5&miss=2&rozaFly=400&firstFlood=3&floodGap=4&cubGap=1&rise=2.5');
   const { cfg } = await game(page);
-  assert.equal(cfg.currentRise, 2);
-  assert.deepEqual(cfg.holeCubs, [1, 1, 2, 2, 3]);
-  assert.equal(cfg.total, 9);
+  assert.equal(cfg.currentRise, 2.5);
+  assert.deepEqual(cfg.holeCubs, [1, 1, 1, 2, 2]);
+  assert.equal(cfg.total, 7);
   assert.equal(cfg.currentSpeed, 100);
   assert.equal(cfg.motherSaves, 0);
   assert.equal(cfg.branchLength, 120);
@@ -111,7 +111,7 @@ await check('URL in: the sliders, 9 cubs, the values in the game config; a slide
   assert.equal(cfg.firstFlood, 3);
   assert.equal(cfg.floodGap, 4);
   assert.equal(cfg.cubGap, 1);
-  assert.equal(await page.textContent('.mg-score'), 'V bezpečí: 0 z 9');
+  assert.equal(await page.textContent('.mg-score'), 'V bezpečí: 0 z 7');
   assert.equal(await page.textContent('.mg-status'), 'Zachraň všechna!');
   // cubs=8 rounds to the slider's step: 7 or 9.
   await open(page, `${base}playtest.html?game=jezevci&cubs=8`);
@@ -123,14 +123,14 @@ await check('URL in: the sliders, 9 cubs, the values in the game config; a slide
 await check('round: the HUD at the start, the instructions hide after the first dive, a catch counts', async (page) => {
   await startRound(page);
   assert.equal(await page.textContent('.mg-title'), 'Záchrana jezevčat');
-  assert.equal(await page.textContent('.mg-score'), 'V bezpečí: 0 z 7');
+  assert.equal(await page.textContent('.mg-score'), 'V bezpečí: 0 z 9');
   assert.equal(await page.textContent('.mg-status'), 'Máma pomůže: 1×');
   assert.match(await page.textContent('.mg-instructions'), /drak skočí pro jezevče/);
   assert.equal(await page.isVisible('.mg-instructions'), true);
   await catchOne(page);
   await page.waitForFunction(() => window.__vn.minigames.activeGame.state.safe === 1);
   assert.equal(await page.isVisible('.mg-instructions'), false);
-  await page.waitForFunction(() => document.querySelector('.mg-score').textContent === 'V bezpečí: 1 z 7');
+  await page.waitForFunction(() => document.querySelector('.mg-score').textContent === 'V bezpečí: 1 z 9');
   // The cub flies to the father, then sits at the new burrow.
   await page.waitForFunction(() => window.__vn.minigames.activeGame.home.children.length === 1, null, { timeout: 5000 });
 });
@@ -144,7 +144,7 @@ await check('round: a win shows Vítězství! and the cubs line; Pokračovat bri
   await catchOne(page);
   await page.waitForSelector('.mg-result:not(.hidden)', { timeout: 5000 });
   assert.equal(await page.textContent('.mg-result-title'), 'Vítězství!');
-  assert.equal(await page.textContent('.mg-result-hits'), 'V bezpečí: 7 z 7');
+  assert.equal(await page.textContent('.mg-result-hits'), 'V bezpečí: 9 z 9');
   assert.equal(await page.textContent('.mg-result-score'), '');
   await page.waitForTimeout(700);
   await page.click('.mg-result-continue');
@@ -154,7 +154,7 @@ await check('round: with no mother and a fast current the first cub floats away:
   await startRound(page, '&mother=0&current=150&firstFlood=2');
   await page.waitForSelector('.mg-result:not(.hidden)', { timeout: 20000 });
   assert.equal(await page.textContent('.mg-result-title'), 'Jezevče odplavalo');
-  assert.equal(await page.textContent('.mg-result-hits'), 'V bezpečí: 0 z 7');
+  assert.equal(await page.textContent('.mg-result-hits'), 'V bezpečí: 0 z 9');
 });
 await check('round: the mother saves one, rests after it, and the status follows her picture', async (page) => {
   await startRound(page, '&current=150&firstFlood=2');
@@ -162,10 +162,10 @@ await check('round: the mother saves one, rests after it, and the status follows
   // While she leaps for the cub the HUD still says she helps and doesn't count it; once she is back (and rests) it
   // says she can't, and the cub counts.
   assert.equal(await page.textContent('.mg-status'), 'Máma pomůže: 1×');
-  assert.equal(await page.textContent('.mg-score'), 'V bezpečí: 0 z 7');
+  assert.equal(await page.textContent('.mg-score'), 'V bezpečí: 0 z 9');
   await page.waitForFunction(() => window.__vn.minigames.activeGame?.motherRest?.visible, null, { timeout: 5000 });
   await page.waitForFunction(() => document.querySelector('.mg-status').textContent === 'Máma už nemůže', null, { timeout: 2000 });
-  assert.equal(await page.textContent('.mg-score'), 'V bezpečí: 1 z 7');
+  assert.equal(await page.textContent('.mg-score'), 'V bezpečí: 1 z 9');
 });
 await check('round: the cub the mother saved flies from her to the father once she is back; nothing sits on her rock (D43)', async (page) => {
   await startRound(page, '&current=150&firstFlood=2');
@@ -380,10 +380,10 @@ await check('labels: a scene\'s text labels win over the game\'s own, anything e
     window.__vn.minigames.run({ type: 'badgerRescue', title: 'T', config: { motherSaves: { normal: 0 }, currentSpeed: { normal: 150 }, firstFlood: 2 },
       labels: { score: 'Doma', resultLose: 5, resultHits: null } }, { difficulty: 'normal' });
   });
-  await page.waitForFunction(() => document.querySelector('.mg-score')?.textContent === 'Doma: 0 z 7');
+  await page.waitForFunction(() => document.querySelector('.mg-score')?.textContent === 'Doma: 0 z 9');
   await page.waitForSelector('.mg-result:not(.hidden)', { timeout: 20000 });
   assert.equal(await page.textContent('.mg-result-title'), 'Jezevče odplavalo', 'a non-text scene label replaced the game\'s');
-  assert.equal(await page.textContent('.mg-result-hits'), 'V bezpečí: 0 z 7');
+  assert.equal(await page.textContent('.mg-result-hits'), 'V bezpečí: 0 z 9');
 });
 await check('skip menu: the round pauses while it is open, and goes on after Zrušit', async (page) => {
   await startRound(page);

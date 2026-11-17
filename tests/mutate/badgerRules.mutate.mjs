@@ -50,7 +50,7 @@ const MUTATIONS = [
   ['a typo in holeCubs kept', RULES, '&& c.holeCubs.every((n) => Number.isInteger(n) && n >= 1 && n <= MAX_PER_HOLE)', ''],
   ['dives slower (balance)', RULES, 'dive: { down: 0.35, up: 0.35, missCooldown: 1.0', 'dive: { down: 0.8, up: 0.8, missCooldown: 1.0'],
   ['a wide branch (mashing wins)', RULES, 'branchLength: 90,', 'branchLength: 220,'],
-  ['the current too fast on Těžká', RULES, 'currentSpeed: { easy: 45, normal: 60, hard: 80 }', 'currentSpeed: { easy: 45, normal: 60, hard: 200 }'],
+  ['the current too fast on Těžká', RULES, 'currentSpeed: { easy: 50, normal: 70, hard: 80 }', 'currentSpeed: { easy: 50, normal: 70, hard: 200 }'],
   ['the result does not wait for the arcs', RULES, 'state.endAt = Math.max(arcsEnd, state.mother.busyUntil);', 'state.endAt = state.t;'],
   ['no bump cooldown', RULES, "d.lastResult === 'bump' ? cfg.dive.bumpCooldown", "d.lastResult === 'bump' ? 0"],
   ['a bodyWidth the reader cannot see', DRAGON, 'bodyWidth: 194,', 'bodyWidth: 97 * 2,'],
@@ -67,7 +67,7 @@ const MUTATIONS = [
   // D43
   ['the current not speeding up', RULES, '  return 1 + (cfg.currentRise - 1) * rise;', '  return 1;'],
   ['the current speeding up after the decision', RULES, '(cfg.waterStart - roundWater(state))', '(cfg.waterStart - waterLevel(cfg, state.t))'],
-  ['Lehká speeding up', RULES, 'currentRise: { easy: 1, normal: 1.3, hard: 1.3 }', 'currentRise: { easy: 1.3, normal: 1.3, hard: 1.3 }'],
+  ['Lehká speeding up', RULES, 'currentRise: { easy: 1, normal: 2, hard: 1.8 }', 'currentRise: { easy: 1.3, normal: 2, hard: 1.8 }'],
   ['no guard for holes below the water start', RULES, '  if (!(cfg.waterStart > top)) return 1;\n', ''],
   ['currentRise clamped instead of falling back', RULES, '(Number.isFinite(v) && v >= 1 && v <= 3 ? v : fallback)', '(Number.isFinite(v) ? Math.min(3, Math.max(1, v)) : fallback)'],
   ['no passing off', RULES, '    return ahead ? Math.max(piece.x, Math.min(x, ahead.x - (halfLength(ahead, cfg) + halfLength(piece, cfg)))) : x;', '    return x;'],

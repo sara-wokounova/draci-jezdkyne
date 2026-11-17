@@ -133,8 +133,9 @@ export class BadgerRescueMinigame {
   /** The mother's place on her rock (her feet). */
   motherTop() {
     const H = R.FIELD_HEIGHT;
-    // She stands on the stone, a little under the grass on its top (the art rises ~10 % above it).
-    return { x: this.cfg.mother.x * R.FIELD_WIDTH, y: this.cfg.mother.top * H + 0.1 * (H - this.cfg.mother.top * H) };
+    // She stands in the moss on the stone's top (the art's grass rises ~15 % of the rock above it; at 10 % she floated
+    // over it, Sára 2026-11-17).
+    return { x: this.cfg.mother.x * R.FIELD_WIDTH, y: this.cfg.mother.top * H + 0.15 * (H - this.cfg.mother.top * H) };
   }
 
   /** Where a cub rides on the mother standing at (x, y): also where a saved cub's flight to the father starts. */

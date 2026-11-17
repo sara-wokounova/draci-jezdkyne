@@ -48,6 +48,9 @@ if (BODY.length !== 3 || !BODY.every((w) => Number.isFinite(w) && w > 0)) {
   process.exit(1);
 }
 const DT = R.STEP; // as the game steps the rules
+// D42's cubs and floods (7 cubs, the first flood at 6 s, then every 7 s): the rules' checks written for that timing pin it
+// (the defaults since D44 flood much faster: 9 cubs, 2 s, then every 3 s).
+const D42_TIMING = { holeCubs: [1, 1, 1, 2, 2], firstFlood: 6, floodGap: 7 };
 
 /** One round; `player(state, r)` returns true to tap. Returns the outcome. */
 function play(cfg, player, seed) {
@@ -90,25 +93,25 @@ function winRate(cfg, makePlayer, rounds = 500) {
 // --- normalising ---------------------------------------------------------------------------------------------------
 await t('normalize: defaults, levels, an unknown difficulty plays as normal', () => {
   const n = R.normalize({}, 'normal');
-  assert.equal(n.total, 7);
-  assert.equal(n.currentSpeed, 60);
-  assert.equal(R.normalize({}, 'easy').currentSpeed, 45);
+  assert.equal(n.total, 9);
+  assert.equal(n.currentSpeed, 70);
+  assert.equal(R.normalize({}, 'easy').currentSpeed, 50);
   assert.equal(R.normalize({}, 'hard').currentSpeed, 80);
   assert.equal(R.normalize({ currentSpeed: 70, motherSaves: 3 }, 'easy').currentSpeed, 70); // one number: every level
   assert.equal(R.normalize({ currentSpeed: 70, motherSaves: 3 }, 'hard').motherSaves, 3);
   assert.equal(n.motherSaves, 1);
   assert.equal(R.normalize({}, 'easy').motherSaves, 2);
   assert.equal(R.normalize({}, 'hard').motherSaves, 0);
-  assert.equal(R.normalize({}, 'extreme').currentSpeed, 60); // played as normal
-  assert.equal(R.normalize({ holeCubs: [1, 1, 2, 2, 3] }).total, 9);
+  assert.equal(R.normalize({}, 'extreme').currentSpeed, 70); // played as normal
+  assert.equal(R.normalize({ holeCubs: [1, 1, 1, 2, 2] }).total, 7);
 });
 await t('normalize: typos fall back, caps hold, arrays are never written', () => {
   const before = JSON.stringify(R.DEFAULTS);
   for (const holeCubs of [[], [1, 1, 1], [0, 1, 1, 1, 1], [1, 1, 1, 1, 'x'], [5, 5, 5, 5, 5], null, 'x']) {
-    assert.equal(R.normalize({ holeCubs }).total, 7, JSON.stringify(holeCubs));
+    assert.equal(R.normalize({ holeCubs }).total, 9, JSON.stringify(holeCubs));
   }
   const n = R.normalize({ floodGap: -3, cubGap: 'x', currentSpeed: { normal: 1e9 }, branchLength: 0, reach: -1, holes: [[2, 2]], dragons: 'x', dive: { down: 0 } });
-  assert.equal(n.floodGap, 7);
+  assert.equal(n.floodGap, 3);
   assert.equal(n.cubGap, 2.5);
   assert.equal(n.currentSpeed, 400);
   assert.equal(n.branchLength, 90);
@@ -121,7 +124,7 @@ await t('normalize: typos fall back, caps hold, arrays are never written', () =>
   assert.deepEqual(slow.dragons[0].catchPoint, R.DEFAULTS.dragons[0].catchPoint);
   // A JSON "__proto__" key in the story config sets nothing (mergeConfig skips it).
   const proto = R.normalize(JSON.parse('{"__proto__": {"floodGap": 2}, "sounds": {"__proto__": {"dive": "x.mp3"}}}'));
-  assert.equal(proto.floodGap, 7);
+  assert.equal(proto.floodGap, 3);
   assert.equal(proto.sounds.dive, null);
   assert.equal(Object.getPrototypeOf(proto.sounds), Object.prototype);
   const state = R.createState(n, null, rng(1));
@@ -141,13 +144,13 @@ await t('normalize: a hole above the last or out of order: the water never goes 
 // --- the rules -----------------------------------------------------------------------------------------------------
 await t('floods every floodGap; the water reaches each hole at its flood time', () => {
   const n = R.normalize({});
-  assert.deepEqual(R.floodTimes(n), [6, 13, 20, 27, 34]);
+  assert.deepEqual(R.floodTimes(n), [2, 5, 8, 11, 14]);
   R.floodTimes(n).forEach((time, i) => assert.ok(Math.abs(R.waterLevel(n, time) - n.holeY[i]) < 1e-9));
   assert.ok(Math.abs(R.waterLevel(n, 0) - n.waterStart) < 1e-9);
 });
 await t("a hole's cubs climb out one by one, every cubGap, onto branches at the hole", () => {
   // The mother saves them all: every release is seen. No logs: a log at a hole would make a cub wait or board it (D43).
-  const n = R.normalize({ motherSaves: { normal: 10 }, logs: [] });
+  const n = R.normalize({ ...D42_TIMING, motherSaves: { normal: 10 }, logs: [] });
   const state = R.createState(n, null, rng(2));
   const releases = [];
   for (let i = 0; i < 60 * 60 && !R.finished(state); i += 1) {
@@ -175,7 +178,7 @@ await t('the mother saves motherSaves cubs, then the next one floating away is l
   }
 });
 await t('a dive catches a cub in reach, bumps a log, splashes on nothing; cooldowns from the dive end', () => {
-  const n = R.normalize({ logs: [] });
+  const n = R.normalize({ ...D42_TIMING, logs: [] });
   const state = R.createState(n, { catch: n.dragons.map(() => ({ dx: 0, dy: 0 })) }, rng(4));
   // A branch with a cub right under the dragon at the dive's bottom.
   state.t = 10;
@@ -299,7 +302,7 @@ await t('won only when every cub is safe; the result waits for the arcs and the 
   assert.ok(!R.finished(again), 'finished on the same step as the last catch');
 });
 await t("motherView: one save at a time; a saved cub counts, and her strength is spent, once she is back; she rests after the last", () => {
-  const n = R.normalize({ logs: [] }, 'easy'); // two saves
+  const n = R.normalize({ ...D42_TIMING, logs: [] }, 'easy'); // two saves
   const state = R.createState(n, { catch: n.dragons.map(() => ({ dx: 0, dy: 0 })) }, rng(12));
   state.dragon.x = -1000;
   state.cubs[0].status = 'float';
@@ -338,7 +341,7 @@ await t("motherView: one save at a time; a saved cub counts, and her strength is
   const hard = R.createState(R.normalize({}, 'hard'), null, rng(1));
   assert.equal(R.motherView(hard).resting, false);
   // Once a cub is lost the HUD says she can't help, also while she is still on her way with a saved one.
-  const lost = R.createState(R.normalize({ logs: [] }, 'normal'), { catch: n.dragons.map(() => ({ dx: 0, dy: 0 })) }, rng(13));
+  const lost = R.createState(R.normalize({ ...D42_TIMING, logs: [] }, 'normal'), { catch: n.dragons.map(() => ({ dx: 0, dy: 0 })) }, rng(13));
   lost.dragon.x = -1000;
   lost.cubs[0].status = 'float';
   lost.pieces.push({ id: 'a', kind: 'branch', x: edge - 0.1, speed: 60, cub: 0, held: false });
@@ -444,7 +447,7 @@ await t('no passing: the cub waiting at the edge for the mother holds a log and 
   assert.ok(state.t >= begin + n.motherLeap - 1e-9, 'the spot freed before she reached the cub');
 });
 await t('release: a cub boards a log centred at its hole; the log floats in from the left a moment later', () => {
-  const n = R.normalize({ logs: [], firstFlood: 10 });
+  const n = R.normalize({ ...D42_TIMING, logs: [], firstFlood: 10 });
   const state = R.createState(n, still(n), rng(23));
   state.dragon.x = -1000;
   const hx = n.holes[0][0] * state.W;
@@ -460,7 +463,7 @@ await t('release: a cub boards a log centred at its hole; the log floats in from
   assert.equal(state.pieces.filter((q) => q.kind === 'log').length, 2);
 });
 await t('release: another cub\'s branch at the hole → the cub waits (also with a log there); a log partly over → waits, then boards', () => {
-  const n = R.normalize({ logs: [], firstFlood: 10 });
+  const n = R.normalize({ ...D42_TIMING, logs: [], firstFlood: 10 });
   const state = R.createState(n, still(n), rng(24));
   state.dragon.x = -1000;
   const hx = n.holes[0][0] * state.W;
@@ -485,7 +488,7 @@ await t('release: another cub\'s branch at the hole → the cub waits (also with
   assert.ok(s2.pieces.find((q) => q.id === 'l').x < 0, 'it did not board the log once centred');
 });
 await t('release: boards a log with a neighbour parked against it; waits when the boarded branch would overlap one', () => {
-  const n = R.normalize({ logs: [], firstFlood: 10 });
+  const n = R.normalize({ ...D42_TIMING, logs: [], firstFlood: 10 });
   const state = R.createState(n, still(n), rng(26));
   state.dragon.x = -1000;
   const hx = n.holes[0][0] * state.W;
@@ -503,7 +506,7 @@ await t('release: boards a log with a neighbour parked against it; waits when th
   R.step(s3, DT, {});
   assert.equal(s3.cubs[0].status, 'float', 'a neighbour touching by rounding counted as overlapping');
   // branchLength 160: a log centred at the hole with a piece 100 px away → the boarded branch would overlap: wait.
-  const n2 = R.normalize({ logs: [], firstFlood: 10, branchLength: 160 });
+  const n2 = R.normalize({ ...D42_TIMING, logs: [], firstFlood: 10, branchLength: 160 });
   const s2 = R.createState(n2, still(n2), rng(27));
   s2.dragon.x = -1000;
   s2.pieces.push(piece('l', 'log', hx, 0), piece('m', 'log', hx + 100, 0));
@@ -527,7 +530,7 @@ await t('release: logs blocking a hole for ever → the cub boards after the log
   for (const a of branches) for (const b of branches) if (a !== b) assert.ok(Math.abs(a.x - b.x) >= n.branchLength - 1e-6, 'two releases overlap');
 });
 await t('release: the log wait counts from each block by logs (a branch in between starts it again)', () => {
-  const n = R.normalize({ logs: [], firstFlood: 10 });
+  const n = R.normalize({ ...D42_TIMING, logs: [], firstFlood: 10 });
   const state = R.createState(n, still(n), rng(34));
   state.dragon.x = -1000;
   const hx = n.holes[0][0] * state.W;
@@ -554,20 +557,20 @@ await t('two branches at the edge on one step: one cub lost', () => {
 });
 await t('the current speeds up with the water: 1 at the start, currentRise at the top, still once decided; Lehká without it', () => {
   const n = R.normalize({}, 'normal');
-  assert.equal(n.currentRise, 1.3);
+  assert.equal(n.currentRise, 2);
   assert.equal(R.normalize({}, 'easy').currentRise, 1);
-  assert.equal(R.normalize({}, 'hard').currentRise, 1.3);
-  assert.equal(R.normalize({ currentRise: 2 }, 'easy').currentRise, 2); // one number: every level
-  assert.equal(R.normalize({ currentRise: 30 }, 'normal').currentRise, 1.3); // a typo falls back, not clamped to 3
-  assert.equal(R.normalize({ currentRise: { normal: 0.5 } }, 'normal').currentRise, 1.3);
-  assert.equal(R.normalize({ currentRise: 'x' }, 'hard').currentRise, 1.3);
+  assert.equal(R.normalize({}, 'hard').currentRise, 1.8);
+  assert.equal(R.normalize({ currentRise: 2.5 }, 'easy').currentRise, 2.5); // one number: every level
+  assert.equal(R.normalize({ currentRise: 30 }, 'normal').currentRise, 2); // a typo falls back, not clamped to 3
+  assert.equal(R.normalize({ currentRise: { normal: 0.5 } }, 'normal').currentRise, 2);
+  assert.equal(R.normalize({ currentRise: 'x' }, 'hard').currentRise, 1.8);
   const state = R.createState(n, still(n), rng(30));
   assert.equal(R.currentFactor(state), 1);
   state.t = R.floodTimes(n).at(-1) + 1;
-  assert.ok(Math.abs(R.currentFactor(state) - 1.3) < 1e-9);
+  assert.ok(Math.abs(R.currentFactor(state) - 2) < 1e-9);
   state.t = R.floodTimes(n)[1];
   const mid = R.currentFactor(state);
-  assert.ok(mid > 1 && mid < 1.3);
+  assert.ok(mid > 1 && mid < 2);
   state.outcome = 'failure';
   state.decidedAt = state.t;
   state.t += 20;
@@ -584,7 +587,7 @@ await t('the current speeds up with the water: 1 at the start, currentRise at th
   moving.pieces = [piece('l', 'log', 100, 60)];
   for (const cub of moving.cubs) cub.status = 'caught'; // no releases in the way
   R.step(moving, DT, {});
-  assert.ok(Math.abs(moving.pieces[0].x - (100 + 60 * 1.3 * DT)) < 1e-9);
+  assert.ok(Math.abs(moving.pieces[0].x - (100 + 60 * 2 * DT)) < 1e-9);
 });
 await t('the animation helpers: loopFrame orders, fps, pauses and phases; holdState; motherLooks', () => {
   const order = [0, 1, 0, 2];
@@ -621,10 +624,11 @@ await t('balance: a careful player (σ 25) wins Normální ≥ 85 %', () => {
   console.log(`     careful σ25 Normální ${(rate * 100).toFixed(1)} %`);
   assert.ok(rate >= 0.85, `a careful player wins Normální only ${rate}: a tuned value in DEFAULTS made it too hard; keep the floors or change them deliberately (D42)`);
 });
-await t('balance: a less precise careful player (σ 50) wins Těžká (7 cubs) ≥ 40 %', () => {
-  const rate = winRate(R.normalize({}, 'hard'), () => careful(50));
-  console.log(`     careful σ50 Těžká ${(rate * 100).toFixed(1)} %`);
-  assert.ok(rate >= 0.4, `a careful player wins Těžká only ${rate}: a tuned value in DEFAULTS made it too hard; keep the floors or change them deliberately (D42)`);
+// Since D44 (Sára's values, floods every 3 s) a less precise player (σ 50) wins Těžká only ~10 %: the floor is for σ 25.
+await t('balance: a careful player (σ 25) wins Těžká ≥ 45 %', () => {
+  const rate = winRate(R.normalize({}, 'hard'), () => careful(25));
+  console.log(`     careful σ25 Těžká ${(rate * 100).toFixed(1)} %, σ50 Normální ${(winRate(R.normalize({}, 'normal'), () => careful(50)) * 100).toFixed(1)} %`);
+  assert.ok(rate >= 0.45, `a careful player wins Těžká only ${rate}: a tuned value in DEFAULTS made it too hard; keep the floors or change them deliberately (D44)`);
 });
 
 // --- files ---------------------------------------------------------------------------------------------------------

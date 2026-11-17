@@ -36,17 +36,17 @@ export const EVENT_SOUNDS = { dive: 'dive', splash: 'splash', bump: 'bump', catc
 export const DEFAULTS = {
   // Field fractions, measured on badger_flood.png (2026-11-17). The holes in flood order: holeCubs[i] belongs to holes[i].
   holes: [[0.42, 0.80], [0.35, 0.785], [0.28, 0.77], [0.21, 0.73], [0.13, 0.68]],
-  holeCubs: [1, 1, 1, 2, 2], // Sára: 7 cubs, the last two holes with two (the play-test page also offers [1, 1, 2, 2, 3])
+  holeCubs: [1, 1, 2, 2, 3], // Sára: 9 cubs (D44; the play-test page also offers the 7 of D42, [1, 1, 1, 2, 2])
   burrow: [0.12, 0.47], // the new burrow, where the father waits
   waterStart: 0.86, // the painted water line; the game's band rises from here to the last hole
-  firstFlood: 6, // s
-  floodGap: 7, // s between floods, the same at every level
+  firstFlood: 2, // s (Sára's play-test values, D44)
+  floodGap: 3, // s between floods, the same at every level
   cubGap: 2.5, // s between the cubs of one hole
-  currentSpeed: { easy: 45, normal: 60, hard: 80 }, // px/s: how long a cub holds on before it floats away (Sára)
+  currentSpeed: { easy: 50, normal: 70, hard: 80 }, // px/s: how long a cub holds on before it floats away (Sára, D44)
   currentSpread: 0.15, // each piece's speed is the current ± this share
   // × the current at the highest water, rising with it (Sára: the game shouldn't get easier as the water brings the cubs
   // closer); Lehká without it (Sára: "jen na Normální a Těžké"; there a faster current helped the masher).
-  currentRise: { easy: 1, normal: 1.3, hard: 1.3 },
+  currentRise: { easy: 1, normal: 2, hard: 1.8 }, // D44
   motherSaves: { easy: 2, normal: 1, hard: 0 }, // Sára: the mother saves two cubs (Lehká) or one (Normální)
   mother: { x: 0.92, top: 0.55 }, // her boulder near the right edge: its top above the highest water
   branchLength: 90, // px, a branch with its cub (the balance checks were measured at 90)

@@ -113,7 +113,8 @@ src/engine/
                            (visualRenderer's containRect), the tilted dive turned around the claws, art
                            from public/assets/minigames/badger-rescue/, the dragons' fly strips from dragonAttack's
                            DEFAULTS, step() at most 1/60 s at a time; the cubs on the water by BRANCH_LINE, the
-                           animals' frames on the round's time, the mother's saved cub flying to the father (D43);
+                           animals' frames on the round's time, the mother's saved cub flying to the father (D43), the
+                           mother standing in the moss on her rock (D44);
                            HUD_TEXTS (registered with it)
     minigameHud.js         DOM overlay: title, score, skip menu, result dialog (Czech labels; the hits line; its
                            Pokračovat behind guardTaps; the top bar hidden under it, D33)

@@ -34,10 +34,10 @@ const SLIDERS = [
   ['Anna', 'annaGravity', 'Tíže trnu', 300, 1500, 20, ANNA.attack.gravity],
   ['Anna', 'annaWait', 'Čekání mezi trny (%)', 0, 100, 1, Math.round(ANNA.attack.refireAfter * 100), '% doby letu trnu'],
 ];
-const NINE_CUBS = [1, 1, 2, 2, 3]; // Sára's other layout (D42)
+const SEVEN_CUBS = [1, 1, 1, 2, 2]; // D42's layout (9 is the default since D44)
 const sum = (list) => list.reduce((a, b) => a + b, 0);
 const BADGER_SLIDERS = [
-  ['Kolo', 'cubs', 'Jezevčat (7 nebo 9)', 7, 9, 2, sum(BADGER.holeCubs), `7 = ${BADGER.holeCubs.join('-')}, 9 = ${NINE_CUBS.join('-')}`],
+  ['Kolo', 'cubs', 'Jezevčat (7 nebo 9)', 7, 9, 2, sum(BADGER.holeCubs), `7 = ${SEVEN_CUBS.join('-')}, 9 = ${BADGER.holeCubs.join('-')}`],
   ['Kolo', 'current', 'Rychlost proudu (px/s)', 20, 150, 5, BADGER.currentSpeed.normal],
   ['Kolo', 'mother', 'Máma zachrání', 0, 3, 1, BADGER.motherSaves.normal],
   ['Voda', 'firstFlood', 'První zaplavení (s)', 2, 15, 0.5, BADGER.firstFlood],
@@ -231,7 +231,7 @@ function badgerSpec() {
     title: 'Záchrana jezevčat',
     allowSkip: true,
     config: {
-      holeCubs: value('cubs') === 9 ? NINE_CUBS : BADGER.holeCubs,
+      holeCubs: value('cubs') === 7 ? SEVEN_CUBS : BADGER.holeCubs,
       currentSpeed: { normal: value('current') },
       currentRise: { normal: value('rise') }, // per level, like the others: Lehká stays without it
       motherSaves: { normal: value('mother') },
