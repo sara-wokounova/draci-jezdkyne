@@ -36,8 +36,13 @@ const game = (page) => page.evaluate(() => {
   const g = window.__vn.minigames.activeGame;
   return g?.state ? { t: g.state.t, safe: g.state.safe, total: g.cfg.total, phase: g.state.dragon.phase, cfg: g.cfg } : null;
 });
+/** Loads the play-test page and waits until its script has built the panel (on the live site that comes after `load`). */
+async function open(page, url) {
+  await page.goto(url);
+  await page.waitForFunction(() => window.__vn && document.querySelector('#pt-link')?.value);
+}
 async function startRound(page, query = '') {
-  await page.goto(`${base}playtest.html?game=jezevci${query}`);
+  await open(page, `${base}playtest.html?game=jezevci${query}`);
   await page.click('#pt-play');
   await page.waitForFunction(() => window.__vn.minigames.activeGame?.state);
 }
@@ -61,7 +66,7 @@ async function catchOne(page, key = 'Space') {
 }
 
 await check('page: the switch, heading, sliders, link without field=, defaults link', async (page) => {
-  await page.goto(`${base}playtest.html?game=jezevci`);
+  await open(page, `${base}playtest.html?game=jezevci`);
   assert.equal(await page.title(), 'Zkušební záchrana jezevčat');
   assert.equal(await page.textContent('#pt-heading'), 'Zkušební záchrana jezevčat');
   assert.equal(await page.locator('#pt-sliders input[type=range]').count(), 13);
@@ -75,7 +80,7 @@ await check('page: the switch, heading, sliders, link without field=, defaults l
   assert.match(page.url(), /\?game=jezevci&cubs=7/);
 });
 await check('page: the beaver page without game is as before (switch on Bobři, field= in the link)', async (page) => {
-  await page.goto(`${base}playtest.html?count=40`);
+  await open(page, `${base}playtest.html?count=40`);
   assert.equal(await page.title(), 'Zkušební nálet na bobry');
   assert.equal(await page.getAttribute('#pt-switch [data-game=beavers]', 'aria-current'), 'page');
   assert.equal(await page.isVisible('#pt-field-note'), true);
@@ -85,7 +90,7 @@ await check('page: the beaver page without game is as before (switch on Bobři, 
   assert.match(link, /&field=\d+x\d+$/);
   assert.doesNotMatch(link, /game=/);
   assert.equal(await page.locator('#pt-sliders input[type=range]').count(), 15);
-  await page.goto(`${base}playtest.html?game=nonsense&count=40`); // an unknown game: the beavers
+  await open(page, `${base}playtest.html?game=nonsense&count=40`); // an unknown game: the beavers
   assert.equal(await page.title(), 'Zkušební nálet na bobry');
 });
 await check('URL in: the sliders, 9 cubs, the values in the game config; a slider change keeps game=', async (page) => {
@@ -107,7 +112,7 @@ await check('URL in: the sliders, 9 cubs, the values in the game config; a slide
   assert.equal(await page.textContent('.mg-score'), 'V bezpečí: 0 z 9');
   assert.equal(await page.textContent('.mg-status'), 'Zachraň všechna!');
   // cubs=8 rounds to the slider's step: 7 or 9.
-  await page.goto(`${base}playtest.html?game=jezevci&cubs=8`);
+  await open(page, `${base}playtest.html?game=jezevci&cubs=8`);
   assert.equal(await page.inputValue('input[name=cubs]'), '9'); // the range's step of 2 from 7: 8 rounds up
   await page.locator('input[name=current]').fill('80');
   await page.locator('input[name=current]').dispatchEvent('change');
@@ -165,7 +170,7 @@ await check('round: skip while loading leaves no ticker and no listeners', async
   const held = [];
   let released = false;
   await page.route('**/badger-rescue/**', (route) => { if (released) route.continue(); else held.push(route); });
-  await page.goto(`${base}playtest.html?game=jezevci`);
+  await open(page, `${base}playtest.html?game=jezevci`);
   const cdp = await page.context().newCDPSession(page);
   const scripts = new Map();
   cdp.on('Debugger.scriptParsed', (s) => scripts.set(s.scriptId, s.url));
@@ -253,7 +258,7 @@ await check("dive: each dragon's drawn claws sit on the rules' catch point at th
   }
 });
 await check('labels: a scene\'s text labels win over the game\'s own, anything else is dropped', async (page) => {
-  await page.goto(`${base}playtest.html?game=jezevci`);
+  await open(page, `${base}playtest.html?game=jezevci`);
   await page.waitForFunction(() => window.__vn);
   await page.evaluate(() => {
     window.__vn.minigames.run({ type: 'badgerRescue', title: 'T', config: { motherSaves: { normal: 0 }, currentSpeed: { normal: 150 }, firstFlood: 2 },
@@ -278,7 +283,7 @@ await check('skip menu: the round pauses while it is open, and goes on after Zru
   assert.equal((await game(page)).phase, 'fly', 'the tap made while paused dived afterwards');
 });
 await check('flightY: a big value in a story config still flies above the dive bottom', async (page) => {
-  await page.goto(`${base}playtest.html?game=jezevci`);
+  await open(page, `${base}playtest.html?game=jezevci`);
   await page.waitForFunction(() => window.__vn);
   await page.evaluate(() => {
     window.__vn.minigames.run({ type: 'badgerRescue', title: 'T', config: { flightY: 0.95 } }, { difficulty: 'normal' });
