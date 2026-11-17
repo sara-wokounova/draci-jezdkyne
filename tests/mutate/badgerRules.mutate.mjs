@@ -24,12 +24,14 @@ if (isInside(REPO, BASE)) refuse(BASE);
 fs.mkdirSync(BASE, { recursive: true });
 const realBase = fs.realpathSync.native(BASE);
 if (isInside(fs.realpathSync.native(REPO), realBase)) refuse(realBase);
-// A folder of its own (never one that happens to be there already), removed again at the end.
-const COPY = fs.mkdtempSync(path.join(realBase, 'badger-rules-mutate-')).replaceAll('\\', '/');
 const files = ['src/engine/minigames/badgerRules.js', 'src/engine/minigames/configRules.js', 'src/engine/minigames/dragonAttack.js',
   'tests/badgerRules.test.mjs', 'public/assets/backgrounds/badger_flood.png',
   'public/assets/minigames/dragon-attack/roza_fly.png', 'public/assets/minigames/dragon-attack/emma_fly.png',
-  'public/assets/minigames/dragon-attack/anna_fly.png'];
+  'public/assets/minigames/dragon-attack/anna_fly.png',
+  ...fs.readdirSync(`${REPO}/public/assets/minigames/badger-rescue`).filter((n) => n.endsWith('.png'))
+    .map((n) => `public/assets/minigames/badger-rescue/${n}`)];
+// A folder of its own (never one that happens to be there already), removed again at the end.
+const COPY = fs.mkdtempSync(path.join(realBase, 'badger-rules-mutate-')).replaceAll('\\', '/');
 const DRAGON = 'src/engine/minigames/dragonAttack.js';
 const RULES = 'src/engine/minigames/badgerRules.js';
 const MUTATIONS = [
@@ -55,15 +57,40 @@ const MUTATIONS = [
   ['a catchPoint off the claws', RULES, 'catchPoint: [-104, 97]', 'catchPoint: [-104, 80]'],
   ['an event without its sound', RULES, "mother: 'mother', lost: 'lost' }", "mother: 'mother' }"],
   ['a JSON __proto__ key merged', 'src/engine/minigames/configRules.js', "      if (key === '__proto__') continue;", ''],
-  ['the branches freeze after the decision', RULES, '    if (piece.held && diving) continue;', '    if (decided || (piece.held && diving)) continue;'],
+  ['the branches freeze after the decision', RULES, '    if (!(piece.held && diving)) {', '    if (!decided && !(piece.held && diving)) {'],
   ['the water rises on after the decision', RULES, 'state.outcome ? Math.min(state.t, state.decidedAt) : state.t', 'state.t'],
-  ['a cub on its way counts as back', RULES, '    back: queue.length - onTheWay,', '    back: queue.length,'],
   ['her saves shown before she is back', RULES, '    savesShown: saves + onTheWay,', '    savesShown: saves,'],
   ['the HUD counts a cub still on its way', RULES, '    score: `${state.safe - mother.onTheWay} z', '    score: `${state.safe} z'],
   ['the HUD keeps her saves after a loss', RULES, "state.outcome === 'failure' ? 0 : mother.savesShown", 'mother.savesShown'],
-  ['two cubs lost on one step', RULES, '    if (state.outcome || piece.x < W - half) continue;', '    if (decided || piece.x < W - half) continue;'],
   ['the lost cub vanishes at once', RULES, '      piece.lost = true;\n', '      state.pieces.splice(state.pieces.indexOf(piece), 1);\n'],
-  ['the lost cub doesn\'t end the round', RULES, "      decide(state, 'failure', Math.min(LOST_MAX_SECONDS, Math.max(LOST_SECONDS, (2 * half) / piece.speed + LOST_MARGIN)));\n", ''],
+  ['the lost cub doesn\'t end the round', RULES, "      decide(state, 'failure', Math.min(LOST_MAX_SECONDS, Math.max(LOST_SECONDS, (2 * half) / (piece.speed * f) + LOST_MARGIN)));\n", ''],
+  // D43
+  ['the current not speeding up', RULES, '  return 1 + (cfg.currentRise - 1) * rise;', '  return 1;'],
+  ['the current speeding up after the decision', RULES, '(cfg.waterStart - roundWater(state))', '(cfg.waterStart - waterLevel(cfg, state.t))'],
+  ['Lehká speeding up', RULES, 'currentRise: { easy: 1, normal: 1.3, hard: 1.3 }', 'currentRise: { easy: 1.3, normal: 1.3, hard: 1.3 }'],
+  ['no guard for holes below the water start', RULES, '  if (!(cfg.waterStart > top)) return 1;\n', ''],
+  ['currentRise clamped instead of falling back', RULES, '(Number.isFinite(v) && v >= 1 && v <= 3 ? v : fallback)', '(Number.isFinite(v) ? Math.min(3, Math.max(1, v)) : fallback)'],
+  ['no passing off', RULES, '    return ahead ? Math.max(piece.x, Math.min(x, ahead.x - (halfLength(ahead, cfg) + halfLength(piece, cfg)))) : x;', '    return x;'],
+  ['moving back allowed', RULES, 'ahead ? Math.max(piece.x, Math.min(x, ahead.x - (halfLength(ahead, cfg) + halfLength(piece, cfg)))) : x', 'ahead ? Math.min(x, ahead.x - (halfLength(ahead, cfg) + halfLength(piece, cfg))) : x'],
+  ['a log at the edge no longer limiting', RULES, '      if (!piece.spot) piece.x = move(piece);\n      ahead = piece;', '      if (!piece.spot) piece.x = move(piece);\n      if (piece.spot || piece.x < W - half) ahead = piece;'],
+  ['a lost branch not limiting the one behind', RULES, '      piece.x += piece.speed * f * dt;\n      ahead = piece;', '      piece.x += piece.speed * f * dt;'],
+  ['no waiting-cub spot', RULES, "...(motherView(state).waiting > 0 ? [{ kind: 'branch', spot: true, x: W - bh }] : [])", '...[]'],
+  ['boarding off', RULES, 'x: log ? log.x : hx, speed: log ? log.speed : state.speed()', 'x: hx, speed: state.speed()'],
+  ['the boarded log not recycled', RULES, '    if (log) log.x = -halfLength(log, cfg) - log.speed * currentFactor(state) * LOG_RETURN_DELAY;\n', ''],
+  ['no return delay', RULES, ' - log.speed * currentFactor(state) * LOG_RETURN_DELAY;', ';'],
+  ['no wait for another cub\'s branch', RULES, "    if (state.pieces.some((p) => p.kind === 'branch' && overlaps(p, hx, bh, cfg))) continue;\n", ''],
+  ['the log before the branch at a release', RULES, "p.kind === 'branch' && overlaps(p, hx, bh, cfg))) continue;", "p.kind === 'branch' && overlaps(p, hx, bh, cfg)) && !state.pieces.some((p) => p.kind === 'log' && overlaps(p, hx, bh, cfg))) continue;"],
+  ['a log partly over the hole boarded', RULES, '!(Math.abs(log.x - hx) < bh && room)', '!room'],
+  ['no room check when boarding', RULES, '      const room = !state.pieces.some(', '      const room = true || !state.pieces.some('],
+  ['no log wait limit', RULES, ' && t - cub.logWaitSince < LOG_WAIT_MAX) continue;', ') continue;'],
+  ['touching counts as overlapping', RULES, '(halfLength(piece, cfg) + half) < -OVERLAP_EPS', '(halfLength(piece, cfg) + half) < 0'],
+  ['no arc for the mother\'s cub', RULES, "      state.arcs.push({ cub: cub.id, mother: true, begin: state.mother.busyUntil, end: state.mother.busyUntil + cfg.arcSeconds });\n", ''],
+  ['the mother ignores the cub waiting at the edge', RULES, " || motherView(state).waiting > 0;\n}", ';\n}'],
+  ['the head turns at once', RULES, 'want !== prev.value && t - prev.since >= min', 'want !== prev.value'],
+  ['the phase ignored', RULES, '(((t + phase) % (play + pause))', '(((t) % (play + pause))'],
+  ['BRANCH_LINE off the picture', RULES, 'export const BRANCH_LINE = 0.58;', 'export const BRANCH_LINE = 0.7;'],
+  ['the log wait never reset', RULES, '    if (logs.length === 0) cub.logWaitSince = null; // LOG_WAIT_MAX counts from the start of each block by logs\n', ''],
+  ['two cubs lost on one step', RULES, '    if (state.outcome || piece.x < W - half) continue;', '    if (decided || piece.x < W - half) continue;'],
 ];
 const only = process.argv[2];
 let missed = 0;
@@ -78,7 +105,7 @@ const control = () => {
 let lastOutput = '';
 const run = () => {
   try {
-    // A run takes about a second; a mutation that hangs the test counts as caught (it doesn't pass) after 5 minutes.
+    // A run takes a few seconds; a mutation that hangs the test counts as caught (it doesn't pass) after 5 minutes.
     execFileSync(process.execPath, [`${COPY}/tests/badgerRules.test.mjs`, COPY],
       { env: { ...process.env, NO_GIT: '1' }, stdio: 'pipe', timeout: 5 * 60 * 1000 });
     return true;

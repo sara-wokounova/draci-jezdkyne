@@ -19,6 +19,13 @@ const BADGER_BROWN = 0x6b5a4a; // the placeholders' colour while art is missing 
 /** A brown blob standing on its bottom: the placeholder for a missing badger sprite. */
 const blob = (r) => new Graphics().circle(0, -r, r).fill(BADGER_BROWN);
 const CLAW_DEPTH = 6; // px under the water line the claws reach at the dive's bottom
+const { BRANCH_LINE } = R; // the branch's line in cub_branch.png: drawn on the water, the cub's legs under it
+const BRANCH_SINK = 2; // px under the water line the branch's line lies
+// The animals' animation (D43): frame orders (0 = the still) and speeds; drawn on the round's time.
+const FATHER = { order: [0, 1, 0, 2], fps: 2.5, pause: 2 };
+const CUB = { order: [0, 1, 0, 2], fps: 3, phase: 0.4 }; // each cub its own phase (× its id)
+const TAIL = { order: [1, 0, 1, 0], fps: 5, pause: 1.5 }; // the mother's tail in bursts
+const HEAD_HOLD = 0.5; // s each state of the mother's head lasts at least
 const EFFECT_SECONDS = 0.5; // a splash's or a bump's ring
 
 /**
@@ -28,6 +35,8 @@ const EFFECT_SECONDS = 0.5; // a splash's or a bump's ring
  */
 export class BadgerRescueMinigame {
   static CLAW_DEPTH = CLAW_DEPTH; // read by the browser check
+  static BRANCH_LINE = BRANCH_LINE;
+  static BRANCH_SINK = BRANCH_SINK;
   constructor({ app, layer, config, hud, onComplete, difficulty }) {
     this.app = app;
     this.layer = layer;
@@ -43,6 +52,7 @@ export class BadgerRescueMinigame {
     this.lastStatus = '';
     this.lastScore = '';
     this.effects = []; // splashes and bumps: { view, age, type }
+    this.head = { value: false, since: 0 }; // the mother's head: turned to the river (held at least HEAD_HOLD)
     this.touch = matchMedia('(pointer: coarse)').matches;
     this.tick = this.tick.bind(this);
     this.handleKey = this.handleKey.bind(this);
@@ -88,13 +98,48 @@ export class BadgerRescueMinigame {
     return R.roundWater(this.state) * R.FIELD_HEIGHT;
   }
 
-  /** A sprite standing on its bottom centre, `width` game px wide, or null without its texture (a placeholder then). */
-  sprite(texture, width) {
+  /** A sprite standing on its bottom centre (or anchored `anchorY` down), `width` game px wide, or null without its
+   *  texture (a placeholder then). */
+  sprite(texture, width, anchorY = 1) {
     if (!texture) return null;
     const s = new Sprite(texture);
-    s.anchor.set(0.5, 1);
+    s.anchor.set(0.5, anchorY);
     s.scale.set(width / texture.width);
     return s;
+  }
+
+  /** Shows `texture` on an animal's sprite at its width (a placeholder, a Graphics, keeps its shape). */
+  showTexture(view, texture, width) {
+    if (!(view instanceof Sprite) || !texture || view.texture === texture) return;
+    view.texture = texture;
+    view.scale.set(width / texture.width);
+  }
+
+  /** A cub on its branch at the round's time: its still, or its animation frame when both frames were made. */
+  cubTexture(cubId) {
+    const { tex } = this;
+    if (!tex.cubBranch2 || !tex.cubBranch3) return tex.cubBranch;
+    const frame = R.loopFrame(this.state.t, CUB.order, CUB.fps, 0, cubId * CUB.phase);
+    return [tex.cubBranch, tex.cubBranch2, tex.cubBranch3][frame];
+  }
+
+  /** A cub on its branch, anchored on the branch's line (the placeholder: a bar centred on it with a blob). */
+  cubView() {
+    const L = this.cfg.branchLength;
+    return this.sprite(this.tex.cubBranch, L, BRANCH_LINE)
+      ?? new Graphics().rect(-L / 2, -4, L, 8).fill(0x5a3d22).circle(0, -18, 14).fill(BADGER_BROWN);
+  }
+
+  /** The mother's place on her rock (her feet). */
+  motherTop() {
+    const H = R.FIELD_HEIGHT;
+    // She stands on the stone, a little under the grass on its top (the art rises ~10 % above it).
+    return { x: this.cfg.mother.x * R.FIELD_WIDTH, y: this.cfg.mother.top * H + 0.1 * (H - this.cfg.mother.top * H) };
+  }
+
+  /** Where a cub rides on the mother standing at (x, y): also where a saved cub's flight to the father starts. */
+  carryPoint(x, y) {
+    return { x: x - this.cfg.sizes.mother / 4, y: y - 10 };
   }
 
   build() {
@@ -116,6 +161,7 @@ export class BadgerRescueMinigame {
     });
     const father = sprite(tex.father, sizes.father) ?? new Graphics().ellipse(0, -30, 55, 30).fill(BADGER_BROWN);
     father.position.set(cfg.burrow[0] * W, cfg.burrow[1] * H + 10);
+    this.father = father;
     this.root.addChild(father);
     this.home = new Container(); // cubs safe at the new burrow
     this.root.addChild(this.home);
@@ -131,9 +177,7 @@ export class BadgerRescueMinigame {
     this.motherWatch = sprite(tex.motherWatch, sizes.mother) ?? new Graphics().ellipse(0, -28, 55, 28).fill(BADGER_BROWN);
     this.motherRest = sprite(tex.motherRest, sizes.mother) ?? new Graphics().ellipse(0, -18, 60, 18).fill(BADGER_BROWN);
     this.motherCub = sprite(tex.cubFly, sizes.cubFly) ?? blob(12);
-    this.motherKids = new Container(); // cubs the mother brought back, on the rock in front of her
-    this.motherBack = 0;
-    this.root.addChild(this.waiting, this.motherWatch, this.motherRest, this.motherCub, this.motherKids);
+    this.root.addChild(this.waiting, this.motherWatch, this.motherRest, this.motherCub);
 
     this.dragonLayer = new Container();
     this.water = new Graphics();
@@ -178,12 +222,17 @@ export class BadgerRescueMinigame {
       if (!view) {
         view = piece.kind === 'log'
           ? this.sprite(this.tex.log, cfg.logLength) ?? new Graphics().roundRect(-cfg.logLength / 2, -14, cfg.logLength, 14, 7).fill(0x7a5230)
-          : this.sprite(this.tex.cubBranch, cfg.branchLength) ?? new Graphics().rect(-cfg.branchLength / 2, -8, cfg.branchLength, 8).fill(0x5a3d22).circle(0, -22, 14).fill(BADGER_BROWN);
+          : this.cubView();
         this.pieceLayer.addChild(view);
         this.pieceViews.set(piece.id, view);
       }
       const bob = Math.sin(state.t * 3 + piece.x * 0.05) * 2;
-      view.position.set(piece.x, surface + 10 + bob);
+      if (piece.kind === 'log') {
+        view.position.set(piece.x, surface + 10 + bob);
+      } else { // the branch on the water, the cub's legs under it (D43)
+        view.position.set(piece.x, surface + BRANCH_SINK + bob);
+        this.showTexture(view, this.cubTexture(piece.cub), cfg.branchLength);
+      }
     }
     for (const [id, view] of this.pieceViews) {
       if (!live.has(id)) {
@@ -199,6 +248,15 @@ export class BadgerRescueMinigame {
     this.drawDragon(surface, scale);
     this.drawArcs();
     this.drawMother(surface);
+    this.drawFather();
+  }
+
+  /** The father shifting his weight nervously (when both his frames were made). */
+  drawFather() {
+    const { tex } = this;
+    if (!tex.father || !tex.father2 || !tex.father3) return;
+    const frame = R.loopFrame(this.state.t, FATHER.order, FATHER.fps, FATHER.pause);
+    this.showTexture(this.father, [tex.father, tex.father2, tex.father3][frame], this.cfg.sizes.father);
   }
 
   drawDragon(surface, screenScale) {
@@ -255,6 +313,7 @@ export class BadgerRescueMinigame {
     const [bx, by] = [cfg.burrow[0] * R.FIELD_WIDTH, cfg.burrow[1] * R.FIELD_HEIGHT];
     const surface = (t) => R.waterLevel(cfg, t) * R.FIELD_HEIGHT;
     for (const arc of state.arcs) {
+      if (state.t < arc.begin) continue; // a mother's cub: she isn't back with it yet (D43)
       let view = this.arcViews.get(arc.cub);
       const k = arc.end > arc.begin ? (state.t - arc.begin) / (arc.end - arc.begin) : 1;
       if (k >= 1) {
@@ -271,8 +330,10 @@ export class BadgerRescueMinigame {
         this.arcViews.set(arc.cub, view);
       }
       if (!view) continue;
-      const y0 = surface(arc.begin);
-      view.position.set(arc.from + (bx - arc.from) * k, y0 + (by - y0) * k - Math.sin(Math.PI * k) * this.cfg.sizes.arcHeight);
+      // A caught cub flies from the water where it was caught; a mother's from where it rode on her, back on her rock.
+      const top = this.motherTop();
+      const from = arc.mother ? this.carryPoint(top.x, top.y) : { x: arc.from, y: surface(arc.begin) };
+      view.position.set(from.x + (bx - from.x) * k, from.y + (by - from.y) * k - Math.sin(Math.PI * k) * this.cfg.sizes.arcHeight);
     }
   }
 
@@ -289,10 +350,8 @@ export class BadgerRescueMinigame {
   drawMother(surface) {
     const { state, cfg } = this;
     const W = R.FIELD_WIDTH;
-    const topX = cfg.mother.x * W;
-    // She stands on the stone, a little under the grass on its top (the art rises ~10 % above it).
-    const topY = cfg.mother.top * R.FIELD_HEIGHT + 0.1 * (R.FIELD_HEIGHT - cfg.mother.top * R.FIELD_HEIGHT);
-    const { trip, carrying, waiting, back, resting } = R.motherView(state);
+    const { x: topX, y: topY } = this.motherTop();
+    const { trip, carrying, waiting, waitingCub, resting } = R.motherView(state);
     let x = topX;
     let y = topY;
     if (trip) {
@@ -302,35 +361,38 @@ export class BadgerRescueMinigame {
       x = topX + (W - cfg.sizes.mother / 4 - topX) * k;
       y = topY + (surface + 12 - topY) * k - Math.sin(Math.PI * k) * (cfg.sizes.mother / 3);
     }
-    // A saved cub waits at the edge until she reaches it (the middle of her trip), then rides back with her.
+    // A saved cub waits at the edge until she reaches it (the middle of her trip), then rides back with her. At most one
+    // waits (D43); it keeps its branch's animation phase, so the picture doesn't pop.
     if (waiting !== this.waiting.children.length) {
       this.waiting.removeChildren().forEach((view) => view.destroy());
-      for (let k = 0; k < waiting; k += 1) {
-        const view = this.sprite(this.tex.cubBranch, cfg.branchLength) ?? blob(12);
-        this.waiting.addChild(view);
-      }
+      if (waiting > 0) this.waiting.addChild(this.cubView());
     }
-    // Bunched at the edge (a few px apart), so a branch turning into a waiting cub doesn't jump back upstream.
-    this.waiting.children.forEach((view, k) => {
-      const x = W - cfg.branchLength / 2 - k * 12;
-      view.position.set(x, surface + 10 - k * 4 + Math.sin(state.t * 3 + x * 0.05) * 2); // bobbing as the pieces do
-    });
+    for (const view of this.waiting.children) {
+      const wx = W - cfg.branchLength / 2;
+      view.position.set(wx, surface + BRANCH_SINK + Math.sin(state.t * 3 + wx * 0.05) * 2); // bobbing as the pieces do
+      this.showTexture(view, this.cubTexture(waitingCub), cfg.branchLength);
+    }
     this.motherWatch.visible = !resting;
     this.motherRest.visible = resting;
     for (const view of [this.motherWatch, this.motherRest]) view.position.set(x, y);
     this.motherCub.visible = carrying;
-    this.motherCub.position.set(x - cfg.sizes.mother / 4, y - 10);
-    // Cubs the mother brought back sit beside her.
-    if (back !== this.motherBack) {
-      this.motherBack = back;
-      this.motherKids.removeChildren().forEach((view) => view.destroy());
-      for (let k = 0; k < back; k += 1) {
-        const cub = this.sprite(this.tex.cubPeek, this.cfg.sizes.motherCub) ?? blob(9);
-        // On the rock's top in front of her (the rock is about her width there).
-        cub.position.set(topX - cfg.sizes.mother * 0.3 + k * cfg.sizes.motherCub * 0.7, topY + 4);
-        this.motherKids.addChild(cub);
-      }
+    const carry = this.carryPoint(x, y);
+    this.motherCub.position.set(carry.x, carry.y);
+    this.drawMotherFrame(trip !== null || resting);
+  }
+
+  /** The mother watching (D43): her head turned towards the river while a cub floats on it (when both head frames were
+   *  made), her tail twitching in bursts (when its frame was made); her still while on a trip. */
+  drawMotherFrame(still) {
+    const { tex, state } = this;
+    this.head = R.holdState(this.head, R.motherLooks(state), state.t, HEAD_HOLD);
+    let texture = tex.motherWatch;
+    if (!still) {
+      const tail = R.loopFrame(state.t, TAIL.order, TAIL.fps, TAIL.pause) === 1;
+      if (this.head.value && tex.motherHead && tex.motherHeadTail) texture = tail ? tex.motherHeadTail : tex.motherHead;
+      else if (tail && tex.motherTail) texture = tex.motherTail;
     }
+    this.showTexture(this.motherWatch, texture, this.cfg.sizes.mother);
   }
 
   effect(type, x) {

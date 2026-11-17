@@ -50,6 +50,8 @@ const BADGER_SLIDERS = [
   ['Draci', 'rozaFly', 'Róza: rychlost letu (px/s)', 120, 500, 10, BADGER.dragons[0].speed],
   ['Draci', 'emmaFly', 'Emma: rychlost letu (px/s)', 120, 500, 10, BADGER.dragons[1].speed],
   ['Draci', 'annaFly', 'Anna: rychlost letu (px/s)', 120, 500, 10, BADGER.dragons[2].speed],
+  // Last in the link; a link without rise= gets the default 1.3, rise=1 turns the speed-up off (D43).
+  ['Kolo', 'rise', 'Zrychlení proudu u vysoké vody (×)', 1, 3, 0.05, BADGER.currentRise.normal, '1 = bez zrychlení'],
 ];
 const GAMES = {
   beavers: {
@@ -231,6 +233,7 @@ function badgerSpec() {
     config: {
       holeCubs: value('cubs') === 9 ? NINE_CUBS : BADGER.holeCubs,
       currentSpeed: { normal: value('current') },
+      currentRise: { normal: value('rise') }, // per level, like the others: Lehká stays without it
       motherSaves: { normal: value('mother') },
       firstFlood: value('firstFlood'),
       floodGap: value('floodGap'),

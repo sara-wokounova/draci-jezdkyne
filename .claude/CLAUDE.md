@@ -61,7 +61,7 @@ playtest.html              the play-test page (D33): #pixi-host, the slider pane
                            D42), #rotate-hint; no manifest
 playtest/index.html        …/playtest/ (the address handed out): a redirect to ../playtest.html keeping the query
 src/main.js                wires DOM elements → startVisualNovel()
-src/playtest.js            the play-test page: `?game=jezevci` the badger rescue (13 sliders, no field= in its link,
+src/playtest.js            the play-test page: `?game=jezevci` the badger rescue (14 sliders, no field= in its link,
                            D42), else the beavers: 15 sliders (beavers, goal, flights, each dragon's speeds, Anna's thorn),
                            the URL as its only state (+ field=WxH in the copied link), one round per "Hrát", the panel
                            inert 500 ms after it; the game's saved volumes read, never written; window.__vn (the test
@@ -105,12 +105,16 @@ src/engine/
                            'failure' (a throwing game → 'failure', D24; a throwing clean-up can't leave the HUD up, D27)
     configRules.js         positive, nonNegative, isPlainObject, mergeConfig: shared by the minigames, pure (D42)
     badgerRules.js         the badger cubs rescue's rules, pure (D42): DEFAULTS, normalize (typos → defaults), the water,
-                           createState / step (the floods, the cubs, the current, the dive, the mother, the end),
-                           catchOffsets, statusText, motherView, hudView; played by tests/badgerRules.test.mjs
+                           createState / step (the floods, the cubs, the current, the dive, the mother, the end; no
+                           passing, the releases' wait / board, the current speeding up with the water, D43),
+                           catchOffsets, statusText, motherView, hudView, currentFactor, loopFrame / holdState /
+                           motherLooks (the animals' animation, D43); played by tests/badgerRules.test.mjs
     badgerRescue.js        the badger cubs rescue in Pixi (D42): its field the contain rectangle of badger_flood.png
                            (visualRenderer's containRect), the tilted dive turned around the claws, art
                            from public/assets/minigames/badger-rescue/, the dragons' fly strips from dragonAttack's
-                           DEFAULTS, step() at most 1/60 s at a time; HUD_TEXTS (registered with it)
+                           DEFAULTS, step() at most 1/60 s at a time; the cubs on the water by BRANCH_LINE, the
+                           animals' frames on the round's time, the mother's saved cub flying to the father (D43);
+                           HUD_TEXTS (registered with it)
     minigameHud.js         DOM overlay: title, score, skip menu, result dialog (Czech labels; the hits line; its
                            Pokračovat behind guardTaps; the top bar hidden under it, D33)
     dragonAttack.js        the "Dračí nálet na bobry" minigame (all tunables in DEFAULTS, exported for the play-test page
@@ -144,7 +148,7 @@ scripts/cleanBeavers.mjs         the beaver sheets cut by their own pieces into 
 scripts/reexportCreatures.mjs    a creature's poses on one canvas (D37): node scripts/reexportCreatures.mjs <id>…; reads art/
                                  only, writes public/assets/characters/<id>/ (every pose of the creature together)
 scripts/measureEmmaAnchors.mjs   prints Emma's attack anchors, found from her face in each attack frame (D32; no arguments)
-scripts/cropBadgerSprites.mjs    the badger rescue's 8 sprites from art/ and jezevec_neutral.png (D42; no arguments; ffmpeg)
+scripts/cropBadgerSprites.mjs    the badger rescue's 15 sprites from art/ and jezevec_neutral.png (D42; no arguments; ffmpeg)
 art/                             source art kept in git but not deployed (originals of the packed strips, Emma's flight
                                  poses and their frames list, the beaver sheets, the badger rescue's sprites
                                  (minigames/badger-rescue/), the backgrounds, the music and the sound effects)
@@ -295,8 +299,14 @@ Good to know: conditions inside a scene see that scene's own changes (its `set`/
   `public/assets/minigames/badger-rescue/` (Runway, transparent: `gpt-image-2.6-flare`, since `gpt-image-2` refuses a
   transparent picture with a style reference; originals in `art/minigames/badger-rescue/`), each cropped to its alpha
   box and scaled with ffmpeg lanczos to its width (cub_branch 256, cub_peek 128, cub_fly 160, log 256, mother_watch and
-  mother_rest 320, boulder 240); `father.png` is `jezevec_neutral.png` cropped the same way (320). Made by
-  `node scripts/cropBadgerSprites.mjs` (no arguments; reads art/ and characters/jezevec, writes the 8 files).
+  mother_rest 320, boulder 240); `father.png` is `jezevec_neutral.png` cropped the same way (320). The animation
+  frames (D43, 2026-11-17: `father2`/`3`, `cub_branch2`/`3`, `mother_watch_tail`/`_head`/`_headtail`) are Runway edits
+  of those stills' originals (`father_paw`, `father_head`, `cub_legs`, `cub_paw`, `mother_tail`, `mother_head`,
+  `mother_headtail` in `art/minigames/badger-rescue/`), each lined up on its still's source by a scale and an offset
+  pinned in the script's `FRAMES` (the father's at ~0.64, against the re-exported `jezevec_neutral.png`: re-running
+  `reexportCreatures.mjs` for jezevec makes them stale, and `tests/badgerRules.test.mjs`'s alignment check fails then)
+  and cropped to the still's exact size. Made by `node scripts/cropBadgerSprites.mjs` (no arguments; reads art/ and
+  characters/jezevec, writes the 15 files; the stills rebuild byte for byte).
 - Music: `public/assets/music/*.mp3` (~3.6–4.8 MB each, streamed as HTML5 audio), referenced
   by key from `story.assets.music`; scenes pick a track with `music`, the menu with
   `menuMusic` (D21, D22). Every deployed track is made from its original in `art/music/`, **9 dB quieter**

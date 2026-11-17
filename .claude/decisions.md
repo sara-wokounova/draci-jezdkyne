@@ -1110,3 +1110,65 @@ and removes the copy after. Moving the older suite in, with the reliable browser
 built from the plan's browser list: the field at seven viewports and after resizes (two sizes are checked), the
 result guard (the HUD's own, checked by the beaver game's checks), the tilt's clearance under the claws, and a check that `cropBadgerSprites.mjs` rebuilds the committed sprites
 byte for byte (it needs ffmpeg; done by hand on 2026-11-17: identical).
+
+## D43 — The badger rescue polished: cubs on the water, no piece over another, the animals move, a faster current (2026-11-17) — Accepted
+Supersedes: D42's drawing of the cubs at `surface + 10` on their bottom edge, its releases at the hole whatever floats
+there, its cubs saved by the mother sitting on her rock, its one speed of the current per level, its still animals,
+and its "8 files" for `cropBadgerSprites.mjs` (now 15).
+Decision:
+- A cub on its branch is anchored on the branch's line (`BRANCH_LINE` 0.58 of `cub_branch.png`'s height, measured: the
+  middle row of the rows with at least 220 px of alpha > 8; the node test measures it again) and drawn 2 px under the
+  water line, its legs under the water band (also the cub waiting at the edge, and the placeholders).
+- No piece floats over another. No passing: from the most downstream, each piece moves at most up to touching the one
+  ahead (a stable sort: on a tie the piece created first leads), never back; a faster one follows a slower one ("trains",
+  Sára's choice over one speed for every piece); a log limits the pieces behind it until it wraps; a lost branch floats
+  away freely but limits the one behind it; while a saved cub waits at the edge for the mother, its spot holds the next
+  piece (so she saves one cub per `motherLeap`, never two on one step). At a release: another cub's branch over the
+  new branch's stretch → the cub waits in its hole; else a bare log centred at the hole, with room around it → the cub
+  boards it (the branch takes the log's place and speed, the log floats in again from the left 1.5 s later,
+  `LOG_RETURN_DELAY`); a log only partly over the hole or without room → the cub waits, at most `LOG_WAIT_MAX` 2 s,
+  then boards the nearest regardless (a story config could otherwise block a hole for ever). Touching pieces never count
+  as overlapping through rounding (1e-6 px).
+- The cub the mother saved flies to the father (the same arc as a caught cub, from where it rode on her, once she is
+  back on her rock); nothing sits on her rock any more; the round's result waits for that flight.
+- The current speeds up as the water rises: × `currentRise` at the highest hole's level, linear from the painted water
+  line (`{ easy: 1, normal: 1.3, hard: 1.3 }`, a number from 1 to 3 else the level's default; one number in a story
+  config speeds Lehká up too), still once the round is decided. The play-test page's 14th slider (`rise=`, last in the
+  link; an older link plays at 1.3, `rise=1` turns it off).
+- The animals move (7 Runway edits of the stills' originals, `gpt-image-2.6-flare`, 8 generations in all): the father
+  shifts his weight (a paw lifted, his head lowered; 0-1-0-2 at 2.5 fps, then 2 s still); a cub on its branch paddles
+  and lifts a paw (0-1-0-2 at 3 fps, each cub its own phase, kept when its branch becomes the waiting cub); the mother's
+  tail twitches in bursts (5 fps, 4 swaps, 1.5 s still), her head turned down towards the river while a cub floats on
+  it or waits at the edge (each head state held at least 0.5 s), her still while on a trip and resting. All on the
+  round's time (they pause with the game). A missing frame: the father or a cub plays its still; the mother turns her
+  head only with both head frames, else faces out and twitches with `motherTail`, without it her still. Each frame is
+  lined up on its still's source by a scale and an offset found in a scratch search on a part that doesn't move, pinned
+  in `cropBadgerSprites.mjs`'s `FRAMES`, cropped with the still's box to the still's exact size; edits that poked out of
+  the still's box were regenerated (the first raised tail).
+Why: Sára's requests (2026-11-17): "jezevčata plavou nad vodou … aby větev plavala na vodě"; "když připlave větev zrovna
+v okamžiku, kdy jezevče opouští noru … ta původní by měla zmizet … jako že na ni nastoupí"; "je to celé takové strnulé
+… táta jezevec by mohl nervózně postávat, máma jezevčice sledovat upřeně plovoucí jezevčata a hýbat nervózně ocasem";
+"hlava zachráněného jezevce u mámy divně interferuje … všechny ty zachráněné zobrazila u táty"; "vyhrát to je na
+počítači vcelku lehké … proud by se zrychloval s tím, jak voda stoupá". Her answers: the cub waits in its hole; cubs
+animated too; the log back from the left with a small delay; the saved cub flies to the father in an arc; the speed-up
+only on Normální and Těžká ("Lehká bez zrychlení": there a faster current made the masher win more, 14.6 → 27–34 %);
+the trains; the mother turning her head too; the sprite budget soft. The plan went through 15 disprover rounds; Sára
+then ended the loop ("to už jsou blbosti … ukonči to a implementuj").
+Consequences: balance with the committed values (500 seeded rounds): masher Normální 1.8 %, Lehká 14.8 %, jittery masher
+2.2 %, careful σ25 Normální 100 %, σ50 Těžká 52.6 % (D42: 9.8 / 21.8 / 15.6 / 100 / 63.2 %). The simulated players
+don't see what Sára felt (higher water looks easier: the cubs are nearer the dragon; in the rules a dive takes 0.35 s
+whatever the height), so whether 1.3 cancels it is for her play-test and the slider. A cub waits in its hole in most
+rounds (77 % Normální, 90 % Lehká) but briefly (at most ~1.3 s Normální, ~2.4 s Lehká); with extreme sliders up to
+~70 s, invisible meanwhile (its hole is under water). Trains: on Normální a branch touches another piece ~18 % of the
+time on screen. After a loss, logs stop behind branches parked at the edge for up to 5 s. A log recycled to the left can
+land over another off screen (it stays put there until the gap opens: never drawn overlapping). A boarding after the
+2 s log limit can overlap a neighbour (extreme configs only). Config log positions closer than a log apart start drawn
+over each other until the gap opens. A story config with a hole near the right edge could release a branch over the
+waiting cub. A dive onto the cub waiting at the edge is a splash (it isn't a piece). The cub branch's right twig stays
+~6 px above the water (8 with the bob: the branch slants). The mother looks at the river ~90 % of the time after the
+first flood (a cub almost always floats); Sára judges whether "towards the river" should mean a cub near her instead.
+The father's frames are pinned against the re-exported `jezevec_neutral.png`: re-running `reexportCreatures.mjs` for
+jezevec makes them stale (the alignment check fails). ~0.9 MB more to download (the 7 frames). `motherView().back` and
+`sizes.motherCub` are gone. Checks: `tests/badgerRules.test.mjs` (the rules, the frames' sizes and alignment,
+`BRANCH_LINE`), 55 mutations in `tests/mutate/badgerRules.mutate.mjs`, 22 browser checks (each D43 one shown failing
+with its fix reverted).

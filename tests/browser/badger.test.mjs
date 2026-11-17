@@ -69,13 +69,14 @@ await check('page: the switch, heading, sliders, link without field=, defaults l
   await open(page, `${base}playtest.html?game=jezevci`);
   assert.equal(await page.title(), 'Zkušební záchrana jezevčat');
   assert.equal(await page.textContent('#pt-heading'), 'Zkušební záchrana jezevčat');
-  assert.equal(await page.locator('#pt-sliders input[type=range]').count(), 13);
+  assert.equal(await page.locator('#pt-sliders input[type=range]').count(), 14);
   assert.equal(await page.getAttribute('#pt-switch [data-game=jezevci]', 'aria-current'), 'page');
   assert.equal(await page.getAttribute('#pt-switch [data-game=beavers]', 'aria-current'), null);
   assert.equal(await page.isVisible('#pt-field-note'), false);
   assert.equal(await page.getAttribute('#pt-defaults', 'href'), 'playtest.html?game=jezevci');
   const link = await page.inputValue('#pt-link');
   assert.match(link, /playtest\.html\?game=jezevci&cubs=7&current=60&mother=1&/);
+  assert.match(link, /&rise=1\.3$/, 'the current speed-up last in the link (D43)');
   assert.doesNotMatch(link, /field=/);
   assert.match(page.url(), /\?game=jezevci&cubs=7/);
 });
@@ -94,8 +95,9 @@ await check('page: the beaver page without game is as before (switch on Bobři, 
   assert.equal(await page.title(), 'Zkušební nálet na bobry');
 });
 await check('URL in: the sliders, 9 cubs, the values in the game config; a slider change keeps game=', async (page) => {
-  await startRound(page, '&cubs=9&current=100&mother=0&branch=120&reach=20&dive=0.5&miss=2&rozaFly=400&firstFlood=3&floodGap=4&cubGap=1');
+  await startRound(page, '&cubs=9&current=100&mother=0&branch=120&reach=20&dive=0.5&miss=2&rozaFly=400&firstFlood=3&floodGap=4&cubGap=1&rise=2');
   const { cfg } = await game(page);
+  assert.equal(cfg.currentRise, 2);
   assert.deepEqual(cfg.holeCubs, [1, 1, 2, 2, 3]);
   assert.equal(cfg.total, 9);
   assert.equal(cfg.currentSpeed, 100);
@@ -165,6 +167,120 @@ await check('round: the mother saves one, rests after it, and the status follows
   await page.waitForFunction(() => document.querySelector('.mg-status').textContent === 'Máma už nemůže', null, { timeout: 2000 });
   assert.equal(await page.textContent('.mg-score'), 'V bezpečí: 1 z 7');
 });
+await check('round: the cub the mother saved flies from her to the father once she is back; nothing sits on her rock (D43)', async (page) => {
+  await startRound(page, '&current=150&firstFlood=2');
+  await page.waitForFunction(() => window.__vn.minigames.activeGame.state.mother.queue.length === 1, null, { timeout: 20000 });
+  // Before her trip ends: no flight, nobody at the father.
+  const before = await page.evaluate(() => {
+    const game = window.__vn.minigames.activeGame;
+    // Nothing on her rock: no picture of a cub within her width of her place (the cub she carries is hidden then).
+    const top = game.motherTop();
+    const onRock = game.root.children.filter((v) => v.visible && v !== game.motherWatch && v !== game.motherRest
+      && v !== game.motherCub && Math.abs(v.x - top.x) < 60 && Math.abs(v.y - top.y) < 30 && v.width < 60).length;
+    return { arcs: game.arcViews.size, home: game.home.children.length, onRock };
+  });
+  assert.deepEqual(before, { arcs: 0, home: 0, onRock: 0 });
+  // The flight starts where the cub rode on her, back on her rock.
+  await page.waitForFunction(() => window.__vn.minigames.activeGame.arcViews.size === 1, null, { timeout: 5000 });
+  const start = await page.evaluate(() => {
+    const game = window.__vn.minigames.activeGame;
+    const view = [...game.arcViews.values()][0];
+    const top = game.motherTop();
+    return { at: view && [view.x, view.y], want: Object.values(game.carryPoint(top.x, top.y)), t: game.state.t, end: game.state.mother.queue[0].end };
+  });
+  assert.ok(start.t >= start.end - 1e-9, `the flight started at ${start.t}, before she was back (${start.end})`);
+  assert.ok(Math.hypot(start.at[0] - start.want[0], start.at[1] - start.want[1]) < 40, `the flight starts at ${start.at}, not at her (${start.want})`);
+  await page.waitForFunction(() => window.__vn.minigames.activeGame.home.children.length === 1, null, { timeout: 5000 });
+  // Afterwards too: the only cub heads are the peeking ones and the one at the father (none on her rock).
+  const heads = await page.evaluate(() => {
+    const game = window.__vn.minigames.activeGame;
+    let n = 0;
+    const walk = (v) => { if (v.texture === game.tex.cubPeek) n += 1; (v.children ?? []).forEach(walk); };
+    walk(game.root);
+    return { n, want: game.peeks.length + game.home.children.length };
+  });
+  assert.equal(heads.n, heads.want, 'a cub head sits somewhere else (on her rock?)');
+});
+await check('branches float on the water: a cub on its branch is anchored on the branch line, drawn just under the surface (D43)', async (page) => {
+  await startRound(page);
+  await page.evaluate(() => {
+    const s = window.__vn.minigames.activeGame.state;
+    s.cubs[0].status = 'float';
+    s.pieces.push({ id: 'test', kind: 'branch', x: 500, speed: 0, cub: 0, held: false });
+  });
+  await page.waitForFunction(() => window.__vn.minigames.activeGame.pieceViews.has('test'));
+  const r = await page.evaluate(() => {
+    const game = window.__vn.minigames.activeGame;
+    const view = game.pieceViews.get('test');
+    return { anchor: view.anchor.y, y: view.y, surface: game.surfaceY(), line: game.constructor.BRANCH_LINE, sink: game.constructor.BRANCH_SINK };
+  });
+  assert.equal(r.anchor, r.line);
+  assert.ok(Math.abs(r.y - (r.surface + r.sink)) <= 2.01, `the branch line at ${r.y}, the surface at ${r.surface}`);
+});
+await check('the animals move: the father, the mother and a cub on its branch change pictures; the mother looks at the river (D43)', async (page) => {
+  await startRound(page);
+  const textures = () => page.evaluate(() => {
+    const game = window.__vn.minigames.activeGame;
+    const cub = game.pieceViews.get('test');
+    return { father: game.father.texture.uid, mother: game.motherWatch.texture.uid, cub: cub?.texture.uid ?? null,
+      head: game.head.value, t: game.state.t };
+  });
+  const first = await textures();
+  const seen = { father: new Set([first.father]), mother: new Set([first.mother]) };
+  for (let i = 0; i < 25 && (seen.father.size < 2 || seen.mother.size < 2); i += 1) {
+    await page.waitForTimeout(200);
+    const now = await textures();
+    seen.father.add(now.father);
+    seen.mother.add(now.mother);
+  }
+  assert.ok(seen.father.size >= 2, 'the father never moved in 5 s');
+  assert.ok(seen.mother.size >= 2, 'the mother never moved in 5 s');
+  assert.equal(first.head, false, 'her head is turned to the river with nothing on it');
+  // A branch on the field (after her head's first hold): a cub that moves, and she turns her head towards the river.
+  await page.waitForFunction(() => window.__vn.minigames.activeGame.state.t > 0.6);
+  await page.evaluate(() => {
+    const s = window.__vn.minigames.activeGame.state;
+    s.cubs[0].status = 'float';
+    s.pieces.push({ id: 'test', kind: 'branch', x: 500, speed: 0, cub: 0, held: false });
+  });
+  await page.waitForFunction(() => window.__vn.minigames.activeGame.head.value === true, null, { timeout: 1000 });
+  const cubSeen = new Set();
+  for (let i = 0; i < 12 && cubSeen.size < 2; i += 1) {
+    cubSeen.add((await textures()).cub);
+    await page.waitForTimeout(150);
+  }
+  assert.ok(cubSeen.size >= 2, 'the cub on its branch never moved in 2 s');
+  const motherNow = await page.evaluate(() => {
+    const game = window.__vn.minigames.activeGame;
+    return [game.tex.motherHead.uid, game.tex.motherHeadTail.uid].includes(game.motherWatch.texture.uid);
+  });
+  assert.ok(motherNow, 'her head is not turned with a cub on the river');
+});
+await check('a missing frame: the father plays his still without father2; the mother faces out and twitches without her head+tail frame', async (page) => {
+  await page.route('**/badger-rescue/father2.png', (route) => route.fulfill({ status: 404 }));
+  await page.route('**/badger-rescue/mother_watch_headtail.png', (route) => route.fulfill({ status: 404 }));
+  await startRound(page);
+  await page.waitForFunction(() => window.__vn.minigames.activeGame.state.t > 0.6);
+  await page.evaluate(() => {
+    const s = window.__vn.minigames.activeGame.state;
+    s.cubs[0].status = 'float';
+    s.pieces.push({ id: 'test', kind: 'branch', x: 500, speed: 0, cub: 0, held: false });
+  });
+  const father = new Set();
+  const mother = new Set();
+  for (let i = 0; i < 25; i += 1) {
+    const r = await page.evaluate(() => {
+      const game = window.__vn.minigames.activeGame;
+      const name = (tex) => Object.keys(game.tex).find((k) => game.tex[k] === tex);
+      return [name(game.father.texture), name(game.motherWatch.texture)];
+    });
+    father.add(r[0]);
+    mother.add(r[1]);
+    await page.waitForTimeout(200);
+  }
+  assert.deepEqual([...father], ['father'], 'the father moved without his frames');
+  assert.deepEqual([...mother].sort(), ['motherTail', 'motherWatch'], 'she should face out and twitch');
+}, undefined, { allowErrors: /404/ });
 await check('round: skip while loading leaves no ticker and no listeners', async (page) => {
   // The art held until after the skip; then start() carries on after its await and must stop there.
   const held = [];
@@ -300,6 +416,23 @@ await check('art missing: every badger sprite and fly strip 404 → placeholders
   await page.route('**/minigames/badger-rescue/**', (route) => route.fulfill({ status: 404 }));
   await page.route('**/minigames/dragon-attack/*_fly.png', (route) => route.fulfill({ status: 404 }));
   await startRound(page, '&mother=0&current=150&firstFlood=2');
+  // The placeholders on the water line: a floating cub's bar centred just under it, a cub waiting for the mother there too.
+  const ph = await page.evaluate(() => {
+    const game = window.__vn.minigames.activeGame;
+    const s = game.state;
+    s.cubs[0].status = 'float';
+    s.pieces.push({ id: 'ph', kind: 'branch', x: 500, speed: 0, cub: 0, held: false });
+    s.mother.queue.push({ cub: 1, begin: s.t + 1, end: s.t + 2.2 });
+    game.draw();
+    const bar = game.pieceViews.get('ph');
+    const waiting = game.waiting.children[0];
+    const line = game.surfaceY() + game.constructor.BRANCH_SINK;
+    s.pieces.pop();
+    s.mother.queue.pop();
+    s.cubs[0].status = 'hole'; // as it was
+    return { bar: bar.y - line, waiting: waiting.y - line, sprite: bar.constructor.name };
+  });
+  assert.ok(Math.abs(ph.bar) <= 2.01 && Math.abs(ph.waiting) <= 2.01, `the placeholders sit ${ph.bar}, ${ph.waiting} px off the line`);
   await catchOne(page); // a dive with the vector dragon
   await page.waitForFunction(() => window.__vn.minigames.activeGame.state.safe === 1);
   await page.waitForSelector('.mg-result:not(.hidden)', { timeout: 20000 });

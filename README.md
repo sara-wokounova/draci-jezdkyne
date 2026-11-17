@@ -282,16 +282,22 @@ complete one-dragon list.
 The water rises over the badgers' burrow; each flooded hole's cubs climb onto branches that the current carries right.
 A tap makes the flying dragon dive straight down; a cub on a branch under its claws is caught and flown to the new
 burrow. A cub reaching the right edge is saved by its mother while she has strength (`motherSaves`: Lehká 2,
-Normální 1, Těžká 0), else the round is lost; it is won when every cub is safe. Play it on
+Normální 1, Těžká 0), else the round is lost; it is won when every cub is safe. Pieces never float over each other
+(a faster one follows a slower one; a cub waits in its hole while another cub's branch is there, or boards a bare log
+at its hole), and the current speeds up as the water rises (D43). Play it on
 `assets/backgrounds/badger_flood.png` (the game lines its field up with that picture). `holes` must have exactly five entries (else the defaults). Tunables (all in `DEFAULTS` in
 `src/engine/minigames/badgerRules.js`, the pure rules the node checks play), among them: `holeCubs` (five numbers, one
-per hole, 1–5 each, at most 15 cubs), `currentSpeed` and `motherSaves` per difficulty (`{ easy, normal, hard }`, or one number for all), `currentSpread`, `firstFlood`,
+per hole, 1–5 each, at most 15 cubs), `currentSpeed`, `motherSaves` and `currentRise` per difficulty (`{ easy, normal, hard }`, or one number for all;
+`currentRise` is the current's factor at the highest water, 1–3, else the level's default: `{ easy: 1, normal: 1.3, hard: 1.3 }`, so one number
+speeds Lehká up too), `currentSpread`, `firstFlood`,
 `floodGap`, `cubGap`, `branchLength`, `logLength`, `logs` (at most 8), `reach`, `dive` (`down`, `up`,
 `missCooldown`, `bumpCooldown`, `tilt`), `dragons` (at most 6, dragon i drawn with the beaver game's dragon i % 3 (Róza, Emma, Anna): `speed`, `catchPoint`: the claws in strip px of dragonAttack's fly strip from its anchor, the eye,
 on fly frame `diveFrame`), `dragonWidth`,
 `flightY`, `flightGap`, `arcSeconds`, `motherLeap`, `motherReturn`, the picture's places (`holes`, `burrow`,
 `waterStart`, `mother`), `sizes` (drawn widths, and `arcHeight` the caught cub's flight's height; to resize by eye), `labels` (the status texts; the HUD's own texts
-come from `HUD_TEXTS` in badgerRescue.js, overridden by a scene's `labels`), `assets` and `sounds` (`dive`, `splash`, `bump`,
+come from `HUD_TEXTS` in badgerRescue.js, overridden by a scene's `labels`), `assets` (the stills and the animation
+frames `father2`, `father3`, `cubBranch2`, `cubBranch3`, `motherTail`, `motherHead`, `motherHeadTail`: each frame the
+size of its still, or it is drawn at the still's width; an animal plays its still when a frame it needs is missing) and `sounds` (`dive`, `splash`, `bump`,
 `caught`, `mother`, `lost`; each `{ src, volume }`, a bare path or `null`, as in the beaver game; none yet). A typo falls back to the default.
 
 ### Play-test page
@@ -299,8 +305,10 @@ come from `HUD_TEXTS` in badgerRescue.js, overridden by a scene's `labels`), `as
 `playtest.html` (handed out as `…/playtest/`, a redirect that keeps the query) plays one round of a minigame at a
 time. Without `game` it is the beaver battle, with 15 sliders: the beavers (count, spacing, speed, speed-up), the goal (%) and the flights per dragon, each
 dragon's flight and shot speed, Anna's thorn angle, gravity and her wait between thorns (% of a thorn's on-screen time).
-`?game=jezevci` is the badger cubs rescue (D42) with 13 sliders of its own (the cubs 7 or 9, the current, the mother's
-saves, the floods, the branch, the reach, the dive, each dragon's speed); its link carries no field size.
+`?game=jezevci` is the badger cubs rescue (D42) with 14 sliders of its own (the cubs 7 or 9, the current, the mother's
+saves, the floods, the branch, the reach, the dive, each dragon's speed, the current's speed-up at high water, D43: last
+in the link; a link without `rise=` plays at its default 1.3, `rise=1` turns it off); its link carries no
+field size.
 The values live only in the URL (written when a slider is let go); "Kopírovat odkaz" copies a `playtest.html?…` link
 that also records the tester's field size (`field=WxH`, in game px; information only, never read back). It uses the
 game's saved music and effects volumes and never saves anything. Dev: `http://localhost:5173/playtest.html`.

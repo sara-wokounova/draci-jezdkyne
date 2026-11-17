@@ -46,7 +46,7 @@ in Firefox. Since D31 the sheets are the smaller part (~1.7 MB), so on a slow li
 (Emma's strips add ~0.7 MB since D32). A
 resumed battle (D26) buffers at its position first (a range request): in Chrome on a slow link ~3–4 s instead of ~1 s.
 Rest of the fix: preload the sheets (and start the battle music's download) from the scenes before `beaver_battle`.
-The badger rescue (D42) is lighter: its 8 sprites ~0.8 MB, the dragons' fly strips, and `zachrana.mp3` (3.5 MB,
+The badger rescue (D42) is lighter: its 15 sprites ~1.7 MB (with D43's 7 frames), the dragons' fly strips, and `zachrana.mp3` (3.5 MB,
 streamed); its background is the scene's own (preloaded with the scene, once step 2 puts it in the story).
 
 ### P2 — Minigame art missing → 404s (verified 2026-10-17; partly fixed 2026-10-28, 2026-10-30 and 2026-10-31 in `57d6432`, verified live)
