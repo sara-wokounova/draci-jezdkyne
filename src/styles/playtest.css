@@ -117,3 +117,7 @@
   font-weight: 700;
   text-decoration: none;
 }
+
+#pt-panel [hidden] {
+  display: none; /* over .pt-row's grid: the level select on the games without levels (D46) */
+}

@@ -1,6 +1,7 @@
 import { MinigameHud } from './minigameHud.js';
 import { DragonAttackMinigame } from './dragonAttack.js';
 import { BadgerRescueMinigame, HUD_TEXTS as BADGER_HUD } from './badgerRescue.js';
+import { ZubrMelodyMinigame, HUD_TEXTS as ZUBR_HUD } from './zubrMelody.js';
 
 /**
  * Manages the registry of available minigames and runs them as part of the
@@ -32,14 +33,15 @@ export class MinigameManager {
     // Built-in minigames.
     this.register('dragonAttack', (context) => new DragonAttackMinigame(context));
     this.register('badgerRescue', (context) => new BadgerRescueMinigame(context), BADGER_HUD);
+    this.register('zubrMelody', (context) => new ZubrMelodyMinigame(context), ZUBR_HUD);
   }
 
   /**
    * Register a minigame factory under a type name.
    * @param {string} type
    * @param {(context: object) => { start: Function, destroy: Function }} factory
-   * @param {{ labels?: object }} [hudTexts] The game's own HUD labels (`instructions` among them); a scene's `labels` and
-   *   `instructions` still override them (D42).
+   * @param {{ title?: string, labels?: object }} [hudTexts] The game's own HUD title and labels (`instructions` among
+   *   them); a scene's `title`, `labels` and `instructions` still override them (D42, D46).
    */
   register(type, factory, hudTexts) {
     this.registry.set(type, { factory, hudTexts: hudTexts ?? {} });
@@ -80,7 +82,7 @@ export class MinigameManager {
     this.root.classList.add('minigame-active');
 
     const hud = new MinigameHud(this.root, {
-      title: spec.title,
+      title: typeof spec.title === 'string' ? spec.title : texts.title, // the game's own (D46: the song's name in one place)
       allowSkip: spec.allowSkip !== false,
       instructions: spec.instructions, // the HUD takes text only, else its labels.instructions
       // A scene's labels win where they are text (anything else would drop the game's own label for the HUD's default).

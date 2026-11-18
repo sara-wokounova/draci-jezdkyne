@@ -45,8 +45,12 @@ fi
 for s in "${SOUNDS[@]}"; do
   [[ "${PICK[$s]}" =~ ^[abc]$ ]] || { echo "no pick for $s yet: set PICK in $0" >&2; exit 1; }
 done
+# Never into art/ (the originals), also through a link at the output folder (as the other asset scripts, D23, D42);
+# checked before anything is made. (Untested in the repo; tried by hand on 2026-11-18 with a junction into art/.)
+case "$(realpath -m "$P")/" in "$(realpath art)/"*) echo "refusing: $P leads into art/" >&2; exit 1 ;; esac
 mkdir -p "$P"
 for s in "${SOUNDS[@]}"; do
   v="${s}_${PICK[$s]}"
+  rm -f "$P/$s.mp3" # a link there is removed, never written through (into art/)
   ffmpeg -y -i "$A/$v.mp3" -af "$(chain "$s"),volume=${GAIN[$v]}dB,$L" $E "$P/$s.mp3"
 done

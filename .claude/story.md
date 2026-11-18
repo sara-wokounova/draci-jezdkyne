@@ -1,7 +1,7 @@
 # Story
 
 Title: **Dračí jezdkyně** (story id `draci-jezdkyne-z-vlpu`). Language: Czech.
-Audience: children. Tone: fairy tale ("Bylo, nebylo…").
+Audience: children who can read, 8–11 years old (Sára, 2026-11-18). Tone: fairy tale ("Bylo, nebylo…").
 Setting (D34): the Slavs in the 10th century, historically accurate except the magic and the dragons
 (villages and gords, a prince and his nobles; no castles, towns or fishponds).
 
@@ -147,7 +147,11 @@ a2_kam: "Do hlubokého lesa" → location les:  les_sona (first: sets sona; prom
                                              (back after giving up: reka_jezevec shows its lines 8–10 instead of 0–7)
                                              reka_vily → reka_vily_pomoc (vily, studanka)
         "Do hor"            → location hory: hory_doupe (first, if vedma) → hory_doupe_vejce (vejce)
-                                             hory_zubr → hory_zubr_pomoc (zubr, melodie)
+                                             hory_zubr → hory_zubr_zpev [minigame, D46: the song against curses]
+                                               ├─ victory → hory_zubr_pomoc (zubr, melodie)
+                                               └─ failure → hory_zubr_prohra (no line, the dazed wisent): retry → the
+                                                  minigame | "Odletět a vrátit se později." (giveUp, zubr_prohra) → a2_cesta
+                                             (back after giving up: hory_zubr shows its lines 14–17 instead of 0–13)
         "Za vědmou"  (sona)     → vedma_01 (vedma, haj_znam; blame → vedma_zlost | understand → vedma_pochopeni,
                                   vedma_pratele) → vedma_voda
         "Do háje"  (haj_znam)   → haj_lisky (the fox family, free, D41) → haj_01 (haj) → haj_otazka ⇄ haj_nebe / haj_zeme (hlas) / haj_nav (studanka), two of three
@@ -202,8 +206,18 @@ a big water on the shortest night, flooding the riders' gord on the way). Acts 2
   vila, hejkal; the fox family is its own character, `liskova_rodina`, since D37), staged at `left` beside the rider; since
   D37 each has its `scale` and `raise` (Sára's sizes as a start, to adjust by eye), small animals standing higher, behind
   the riders. The badger cubs rescue (D42) is in the story since D45 (the badger event; its texts by the Fable agent, the
-  lose screen without a line; its six sounds wait for Sára's picks) and on the play-test page
-  (`…/playtest/?game=jezevci`); the other three minigames not yet.
+  lose screen without a line; its six sounds Sára's picks) and on the play-test page
+  (`…/playtest/?game=jezevci`). The wisent's song (D46: an echo game, Róza sings, the player taps the stars, the calm
+  rule "Tichý hlas") is in the story (`hory_zubr` → `hory_zubr_zpev` → `hory_zubr_pomoc` / `hory_zubr_prohra`) and on
+  the play-test page (`…/playtest/?game=zubr`); `hory_zubr`'s new lines and `hory_zubr_pomoc`'s rewritten ones by the
+  Fable agent (2026-11-17/18). The song is "stará píseň proti kletbám" (Sára's name; never "ukolébavka"), passed from
+  Róza's grandmother to her mother to her; its words (Fable, Sára's pick): „Cizí píseň ztrácí moc, / kolem tebe dýchá
+  noc. / Slyšíš? Volám jméno tvé, / vrať se k sobě, srdce mé.“ (`LYRIC` in zubrRules.js); it is the melody (`melodie`)
+  the finale can reuse to wake Bezzubka. After Sára's play-test (2026-11-18): a replay button instead of the automatic
+  replay, every level echoing the four lines one at a time (Těžká flawless), the words shown; its three sounds are her
+  picks. The víly's drain and the search from
+  the dragon's back not yet. Flagged for Sára in the wisent's texts: `hory_zubr_pomoc` line 1's "chvilku" and the
+  wisent's own herd (lines 4, 15, pomoc 5 and 8), near the song.
 - Dragons: Róza rides Bezzubka, Emma Běska, Anna Buřinoha (Sára, 2026-11-15).
 - Lunch branch ends with the flooded town (bad ending). Its end-card text was
   drafted by Claude on 2026-10-28; rewrite if wanted.
@@ -222,5 +236,6 @@ a big water on the shortest night, flooding the riders' gord on the way). Acts 2
   wordless women's voices), `playful` (a2_liska, a2_hejkal from its first line, haj_lisky), `tesak_lair`
   (hory_doupe_vejce), `sacred_grove` (haj_*, a wordless choir), `danger` (a2_unos, a2_konec: Bezzubka taken),
   `village_day` (a2_vecer3, a2_odpocinek: the gord), `zachrana` (the badger rescue and its lose screen,
-  reka_jezevec_zachrana, reka_jezevec_prohra, D45); the rest (Soňa, the fawn, the badger, the wisent, the way to the
+  reka_jezevec_zachrana, reka_jezevec_prohra, D45); silence in the wisent's song and on its lose screen (hory_zubr_zpev,
+  hory_zubr_prohra, D46: only the song's tones sound); the rest (Soňa, the fawn, the badger, the wisent, the way to the
   lair) `forest_ground`, the flights and the hub `dragon_flight`.

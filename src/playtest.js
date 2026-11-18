@@ -5,15 +5,18 @@ import { VisualRenderer } from './engine/visualRenderer.js';
 import { MinigameManager } from './engine/minigames/minigameManager.js';
 import { DEFAULTS, worldScale } from './engine/minigames/dragonAttack.js';
 import { DEFAULTS as BADGER } from './engine/minigames/badgerRules.js';
+import { DEFAULTS as ZUBR, LEVELS } from './engine/minigames/zubrRules.js';
+import { isPlainObject } from './engine/minigames/configRules.js';
+import { Howler } from 'howler';
 import { AudioManager } from './engine/audioManager.js';
-import { setEffectsVolume } from './engine/sfx.js';
+import { effectsOutput, loadTestSound, resumeAudio, setEffectsVolume } from './engine/sfx.js';
 import { AutoSave } from './engine/autoSave.js';
 import { fullscreenOnTap } from './engine/inputController.js';
 import { TAP_GUARD_MS } from './engine/uiController.js';
 
 // The play-test page (D33): one round of a minigame at a time, its main numbers on sliders, the URL the only state (a
-// tester sends Sára the link). Nothing is sent anywhere or stored. `?game=jezevci` plays the badger cubs rescue (D42);
-// without it, the beaver battle, as before.
+// tester sends Sára the link). Nothing is sent anywhere or stored. `?game=jezevci` plays the badger cubs rescue (D42),
+// `?game=zubr` the wisent's song (D46, with a level select: `level=`); without it, the beaver battle, as before.
 
 const [ROZA, EMMA, ANNA] = DEFAULTS.dragons; // in DEFAULTS' order (spec() too)
 // [group, URL key, label, min, max, step, default, hint]; spec() passes each value into the game's config.
@@ -53,6 +56,19 @@ const BADGER_SLIDERS = [
   // Last in the link; a link without rise= gets the default 1.3, rise=1 turns the speed-up off (D43).
   ['Kolo', 'rise', 'Zrychlení proudu u vysoké vody (×)', 1, 3, 0.05, BADGER.currentRise.normal, '1 = bez zrychlení'],
 ];
+// The wisent's song (D46). A default given by level ({ easy, normal, hard }) makes a per-level slider: it jumps to the
+// level's default when the level changes and is passed as { [level]: value }.
+const ZUBR_SLIDERS = [
+  ['Kolo', 'mistakes', 'Chyb do útoku', 1, 8, 1, ZUBR.mistakes],
+  ['Kolo', 'red', 'Rubínčiny tóny na frázi', 0, 3, 1, ZUBR.rubinka],
+  ['Načasování', 'echoLead', 'Ozvěna začíná před posledním tónem (s)', 0, 1, 0.05, ZUBR.echoLead],
+  ['Načasování', 'followLag', 'Odpuštění po zhasnutí hvězdy (s)', 0, 2, 0.1, ZUBR.followLag],
+  ['Načasování', 'anticipate', 'Odpuštění před rozsvícením (s)', 0, 0.5, 0.05, ZUBR.anticipate],
+  ['Načasování', 'restartPause', 'Pauza pro nový začátek (doby)', 1, 8, 0.25, ZUBR.restartPause],
+  ['Tichý hlas', 'burst', 'Ťuknutí najednou', 1.5, 6, 0.1, ZUBR.voice.burst],
+  ['Tichý hlas', 'calm', 'Ťuknutí za sekundu', 1, 8, 0.125, ZUBR.voice.calm],
+  ['Píseň', 'beat', 'Doba (s)', 0.3, 1, 0.05, ZUBR.beat],
+];
 const GAMES = {
   beavers: {
     game: 'beavers', // never written into its URL: the page as before D42
@@ -72,8 +88,20 @@ const GAMES = {
     field: false, // the field is always the background's rectangle
     spec: badgerSpec,
   },
+  zubr: {
+    game: 'zubr',
+    sliders: ZUBR_SLIDERS,
+    scene: { background: { type: 'image', src: 'assets/backgrounds/mountain_meadow.png' } }, // the game draws on it
+    music: null, // the round has no music: only the song sounds (D46)
+    heading: 'Zkušební píseň pro zubra',
+    field: false,
+    levels: true, // the level select
+    tones: true, // synthesised tones: the latency line, the audio set up at the page's load and inside the Hrát click
+    spec: zubrSpec,
+  },
 };
-const GAME = new URLSearchParams(location.search).get('game') === 'jezevci' ? GAMES.jezevci : GAMES.beavers;
+const asked = new URLSearchParams(location.search).get('game');
+const GAME = asked && asked !== 'beavers' && Object.hasOwn(GAMES, asked) ? GAMES[asked] : GAMES.beavers;
 
 const root = document.querySelector('#game-root');
 const panel = document.querySelector('#pt-panel');
@@ -88,6 +116,9 @@ document.querySelector('#pt-field-note').hidden = !GAME.field;
 const inUrl = GAME !== GAMES.beavers; // the beaver page's links stay as they were before D42
 document.querySelector('#pt-defaults').href = inUrl ? `playtest.html?game=${GAME.game}` : 'playtest.html';
 document.querySelector(`#pt-switch [data-game="${GAME.game}"]`).setAttribute('aria-current', 'page');
+const levelSelect = document.querySelector('#pt-level');
+document.querySelector('#pt-level-row').hidden = !GAME.levels;
+document.querySelector('#pt-latency').hidden = !GAME.tones;
 const inputs = buildSliders(document.querySelector('#pt-sliders'));
 readUrl();
 
@@ -96,9 +127,13 @@ const visuals = new VisualRenderer(stage, { characters: {} });
 const minigames = new MinigameManager(stage, { root });
 // The game's own saved volumes, read only (same origin, the story id): this page never saves.
 const volumes = AutoSave.readSettings('draci-jezdkyne-z-vlpu'); // read only: both save keys stay as they are
-const audio = new AudioManager({ [GAME.music[0]]: GAME.music[1] }, volumes.musicVolume);
+// A game without music still gets the manager: its hidden-page mute (D22) covers the effects too.
+const audio = new AudioManager(GAME.music ? { [GAME.music[0]]: GAME.music[1] } : {}, volumes.musicVolume);
 setEffectsVolume(volumes.effectsVolume);
-audio.playMusic(GAME.music[0]); // starts with the page's first input (D22) and loops for the whole visit
+if (GAME.music) audio.playMusic(GAME.music[0]); // starts with the page's first input (D22) and loops for the whole visit
+// The page's first Howl now, so Howler's one-time context replacement (a non-44.1 kHz device) happens before any round,
+// not after the Hrát click has resumed the context the tones use; it also arms Howler's first-touch unlock.
+if (GAME.tones) loadTestSound();
 fullscreenOnTap(); // Android testers play the game's field (D12)
 window.__vn = { stage, minigames, audio }; // the check scripts' hook, as in the game
 
@@ -115,6 +150,11 @@ window.addEventListener('resize', () => {
 });
 
 for (const input of Object.values(inputs)) input.addEventListener('change', writeUrl);
+// A level change: the per-level sliders jump to that level's defaults; every other value stays (no reload).
+levelSelect.addEventListener('change', () => {
+  levelDefaults();
+  writeUrl();
+});
 // A held Enter presses a panel button once (sliders keep their key repeats).
 panel.addEventListener('keydown', (event) => {
   if (event.repeat && event.target.closest('button')) event.preventDefault();
@@ -144,7 +184,14 @@ play.addEventListener('click', async () => {
   if (playing) return; // Enter, an attack key, would otherwise start a second round
   playing = true;
   panel.hidden = true;
-  await minigames.run(GAME.spec(), { difficulty: 'normal' }); // the sliders set the normal level's values
+  if (GAME.tones) { // inside the click: the tones' bus on the live context, resumed by a user activation
+    effectsOutput();
+    resumeAudio();
+    setTimeout(showLatency, 1500);
+  }
+  const level = GAME.levels ? levelSelect.value : 'normal'; // the beavers' and the badger's sliders set Normální's values
+  await minigames.run(GAME.spec(level), { difficulty: level });
+  if (GAME.tones) showLatency();
   panel.hidden = false;
   guardPanel();
   playing = false;
@@ -164,7 +211,7 @@ function buildSliders(container) {
     const row = document.createElement('label');
     row.className = 'pt-row';
     const input = Object.assign(document.createElement('input'), { type: 'range', min, max, step, name: key });
-    input.value = String(value);
+    input.value = String(isPlainObject(value) ? value.normal : value);
     const output = document.createElement('output');
     const show = () => { output.textContent = input.value.replace('-', '−'); };
     input.addEventListener('input', show);
@@ -182,6 +229,9 @@ function buildSliders(container) {
  *  range and rounds it to its step itself, with clean decimals. */
 function readUrl() {
   const params = new URLSearchParams(location.search);
+  // The level first, then its defaults into the per-level sliders, then the link's own values.
+  if (GAME.levels && LEVELS.includes(params.get('level'))) levelSelect.value = params.get('level');
+  if (GAME.levels) levelDefaults();
   for (const [key, input] of Object.entries(inputs)) {
     const raw = params.get(key);
     if (raw === null || raw.trim() === '' || !Number.isFinite(Number(raw))) continue;
@@ -190,9 +240,29 @@ function readUrl() {
   }
 }
 
+/** The per-level sliders at the selected level's defaults. */
+function levelDefaults() {
+  for (const [, key, , , , , value] of GAME.sliders) {
+    if (!isPlainObject(value)) continue;
+    inputs[key].value = String(value[levelSelect.value]);
+    inputs[key].dispatchEvent(new Event('input')); // its shown value
+  }
+}
+
 function query() {
   const values = Object.entries(inputs).map(([key, input]) => [key, input.value]);
-  return new URLSearchParams(inUrl ? [['game', GAME.game], ...values] : values);
+  const head = inUrl ? [['game', GAME.game], ...(GAME.levels ? [['level', levelSelect.value]] : [])] : [];
+  return new URLSearchParams([...head, ...values]);
+}
+
+/** The audio's own latency figure (base + output), once a round's context runs; Safari reports none. */
+function showLatency() {
+  const ctx = Howler.ctx;
+  if (ctx?.state !== 'running') return;
+  const out = ctx.outputLatency;
+  document.querySelector('#pt-latency').textContent = Number.isFinite(out) && out > 0
+    ? `Zpoždění zvuku: ${Math.round(((ctx.baseLatency || 0) + out) * 1000)} ms`
+    : 'Zpoždění zvuku: nehlášeno';
 }
 
 /** The values into the address bar (written on `change`, not on every `input`: Safari throws after 100 history
@@ -242,6 +312,24 @@ function badgerSpec() {
       reach: value('reach'),
       dive: { ...BADGER.dive, down: value('dive'), up: value('dive'), missCooldown: value('miss') },
       dragons: BADGER.dragons.map((dragon, i) => ({ ...dragon, speed: speeds[i] })),
+    },
+  };
+}
+
+function zubrSpec(level) {
+  // New objects: ZUBR (the game's DEFAULTS) is never written to.
+  return {
+    type: 'zubrMelody', // its title the game's own (HUD_TEXTS), as in the story
+    allowSkip: true,
+    config: {
+      mistakes: { [level]: value('mistakes') },
+      rubinka: { [level]: value('red') },
+      echoLead: value('echoLead'),
+      followLag: value('followLag'),
+      anticipate: value('anticipate'),
+      restartPause: value('restartPause'),
+      voice: { burst: value('burst'), calm: value('calm') },
+      beat: value('beat'),
     },
   };
 }

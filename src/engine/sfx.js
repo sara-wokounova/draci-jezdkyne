@@ -23,6 +23,7 @@ const howls = new Map(); // src → Howl, or null once it failed
 let limitedCtx = null; // the AudioContext the limiter was built on
 let effectsVolume = 1; // startup sets the saved one (setEffectsVolume)
 let roundAwake = false; // keepAudioAwake: a minigame round runs
+let output = null; // effectsOutput(): { ctx, gain }
 
 // A hidden page mid-round (a phone locked): Pixi's ticker stops, the round never ends, and Howler is muted (D22):
 // let the context sleep as usual until the page comes back (the next tap or key resumes it).
@@ -33,6 +34,39 @@ document.addEventListener('visibilitychange', () => {
 /** Nastavení → Hlasitost efektů, 0–1. */
 export function setEffectsVolume(volume) {
   effectsVolume = volume;
+  try {
+    if (output) output.gain.gain.value = EFFECT_MIX * volume;
+  } catch {
+    // never throws
+  }
+}
+
+/**
+ * A gain node at EFFECT_MIX × the effects slider into Howler's master gain (so the limiter, the hidden page's mute and
+ * the slider apply), for sounds made in code (the wisent song's tones, D46). One per Howler AudioContext: a new one when
+ * Howler has replaced its context. Null without Web Audio. Call it after the round's Howls (the page's first Howl can
+ * replace the context).
+ */
+export function effectsOutput() {
+  try {
+    Howler.volume(); // sets up Howler's AudioContext if nothing has yet
+    const ctx = Howler.ctx;
+    if (!Howler.usingWebAudio || !ctx || !Howler.masterGain) return null;
+    limitEffects();
+    if (output?.ctx === ctx) return output.gain;
+    try {
+      output?.gain.disconnect();
+    } catch {
+      // the old context is gone
+    }
+    const gain = ctx.createGain();
+    gain.gain.value = EFFECT_MIX * effectsVolume;
+    gain.connect(Howler.masterGain);
+    output = { ctx, gain };
+    return gain;
+  } catch {
+    return null;
+  }
 }
 
 /** The page's Howl for an effect file, loading from the first call; null without Web Audio or once it failed. */

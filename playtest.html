@@ -10,15 +10,18 @@
     <meta name="robots" content="noindex" /><!-- for a few testers, for a while -->
   </head>
   <body>
-    <!-- The play-test page (D33): a minigame with its main numbers on sliders, handed out as …/playtest/ (D42: ?game=jezevci). -->
+    <!-- The play-test page (D33): a minigame with its main numbers on sliders, handed out as …/playtest/ (D42: ?game=jezevci; D46: ?game=zubr). -->
     <main id="game-root" aria-label="Zkušební nálet na bobry">
       <section id="pixi-host" aria-hidden="true"></section>
 
       <section id="pt-panel" class="glass-panel">
-        <nav id="pt-switch" aria-label="Minihra"><a href="playtest.html" data-game="beavers">Bobři</a> · <a href="playtest.html?game=jezevci" data-game="jezevci">Jezevčata</a></nav>
+        <nav id="pt-switch" aria-label="Minihra"><a href="playtest.html" data-game="beavers">Bobři</a> · <a href="playtest.html?game=jezevci" data-game="jezevci">Jezevčata</a> · <a href="playtest.html?game=zubr" data-game="zubr">Zubr</a></nav>
         <h1 id="pt-heading">Zkušební nálet na bobry</h1>
         <p class="pt-intro">Nastav hodnoty, zahraj si a pošli odkaz s nastavením, které se ti hrálo nejlépe.<span id="pt-field-note"> Odkaz obsahuje i velikost tvé obrazovky.</span></p>
+        <label id="pt-level-row" class="pt-row" hidden><span>Obtížnost</span>
+          <select id="pt-level"><option value="easy">Lehká</option><option value="normal" selected>Normální</option><option value="hard">Těžká</option></select></label>
         <div id="pt-sliders"></div>
+        <p id="pt-latency" class="pt-intro" hidden>Zpoždění zvuku: zjistí se po prvním kole</p>
         <div class="pt-actions">
           <button id="pt-play" class="choice-button" type="button">Hrát</button>
           <button id="pt-copy" class="control-button" type="button">Kopírovat odkaz</button>

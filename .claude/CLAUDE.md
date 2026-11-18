@@ -1,6 +1,6 @@
 # Dračí jezdkyně — project guide
 
-Czech-language visual novel for kids about three dragon riders (Róza, Emma, Anna).
+Czech-language visual novel for children who can read (8–11, Sára 2026-11-18) about three dragon riders (Róza, Emma, Anna).
 Plain JavaScript + Vite, rendered with PixiJS, deployed to GitHub Pages.
 
 - Live: https://sara-wokounova.github.io/draci-jezdkyne/
@@ -36,19 +36,24 @@ npm run dev            # Vite dev server (the play-test page: /playtest.html)
 npm run build          # production build into dist/ (CI runs this)
 npm run preview        # serve dist/
 npm run clean-sprites  # strip baked checkerboard from character PNGs (in place; skips already-transparent files)
-npm test               # the node checks in tests/ (story rules, the save, the story files, the badger rescue); CI runs them before every deploy
+npm test               # the node checks in tests/ (story rules, the save, the story files, the badger rescue, the wisent song); CI runs them before every deploy
 node tests/browser/badger.test.mjs <base url>   # the badger rescue in Chrome (Playwright; a running server)
 node tests/browser/badgerStory.test.mjs <base url>   # the badger rescue in the story (D45: the lose screen, give-up, sounds)
 node tests/mutate/badgerRules.mutate.mjs        # fail-before for its rules test (MUTATE_TMP: where its copy goes)
 node tests/mutate/act2a.mutate.mjs             # fail-before for act2a.test.mjs's badger checks (D45; same MUTATE_TMP)
 node tests/badgerSfx.test.mjs                  # the badger rescue's sounds (ffmpeg; levels, rebuild, stacks, headroom)
 bash scripts/build-badger-sfx.sh [--measure]   # the badger rescue's sounds from Sára's picks (PICK in the script, D45)
+node tests/browser/zubr.test.mjs <base url>    # the wisent song on the play-test page (D46; the dev server for its offline-voices check)
+node tests/browser/zubrStory.test.mjs <base url>   # the wisent song in the story (D46: the lose screen, the quiet hold, give-up)
+node tests/mutate/zubrRules.mutate.mjs          # fail-before for its rules test (D46; MUTATE_TMP)
+node tests/zubrSfx.test.mjs                    # the wisent song's sounds (ffmpeg; levels, rebuild)
+bash scripts/build-zubr-sfx.sh [--measure]     # its sounds from Sára's picks (PICK in the script; refuses while "?")
                                                 # (npm test also runs tests/cropBadgerSprites.test.mjs: its art/ guard)
 ```
 
 `npm test` (D38) runs `tests/storyflow.test.mjs`, `tests/autosave.test.mjs`, `tests/story.test.mjs`,
-`tests/act2a.test.mjs` (Act 2a's calendar and text rules, D40; the badger rescue's minigame paths and cub count, D45), `tests/badgerRules.test.mjs` (the badger rescue's rules
-and balance, D42), `tests/cropBadgerSprites.test.mjs` (that script's `art/` guard, D42; its fake repo in the same temp folder) and `tests/story-history.test.mjs` (needs git; its synthetic repos live in the system temp folder, or `STORY_TEST_TMP`: run it
+`tests/act2a.test.mjs` (Act 2a's calendar and text rules, D40; the badger rescue's minigame paths and cub count, D45; the wisent song's, D46), `tests/badgerRules.test.mjs` (the badger rescue's rules
+and balance, D42), `tests/zubrRules.test.mjs` (the wisent song's rules, lyric and balance, D46), `tests/cropBadgerSprites.test.mjs` (that script's `art/` guard, D42; its fake repo in the same temp folder) and `tests/story-history.test.mjs` (needs git; its synthetic repos live in the system temp folder, or `STORY_TEST_TMP`: run it
 locally as `STORY_TEST_TMP=C:/tmp/claude/story-test-tmp npm test` in Git Bash (forward slashes: bash eats backslashes),
 `$env:STORY_TEST_TMP='C:\tmp\claude\story-test-tmp'; npm test` in PowerShell, the temp-folder rule); a failure stops the deploy. No linter. Most Playwright check scripts (and the node checks for the sprite scripts, the music and the
 sound-effect files, which need ffmpeg) still live outside the repo (see the Tests section of workflow.md; moving them
@@ -63,12 +68,13 @@ index.html                 DOM shell: #pixi-host canvas, #top-controls (← Back
                            #end-card, #main-menu (main page: Pokračovat / Nová hra / Nastavení / Galerie; pages:
                            Nová hra confirmation, Nastavení, Galerie);
                            #rotate-hint (portrait phones, outside #game-root); links public/manifest.webmanifest
-playtest.html              the play-test page (D33): #pixi-host, the slider panel #pt-panel (#pt-switch: Bobři / Jezevčata,
-                           D42), #rotate-hint; no manifest
+playtest.html              the play-test page (D33): #pixi-host, the slider panel #pt-panel (#pt-switch: Bobři / Jezevčata /
+                           Zubr, D42, D46; #pt-level, the level select; #pt-latency), #rotate-hint; no manifest
 playtest/index.html        …/playtest/ (the address handed out): a redirect to ../playtest.html keeping the query
 src/main.js                wires DOM elements → startVisualNovel()
 src/playtest.js            the play-test page: `?game=jezevci` the badger rescue (14 sliders, no field= in its link,
-                           D42), else the beavers: 15 sliders (beavers, goal, flights, each dragon's speeds, Anna's thorn),
+                           D42), `?game=zubr` the wisent song (9 sliders, the level select `level=`: per-level sliders
+                           jump to the level's defaults; the audio latency line; no music; D46), else the beavers: 15 sliders (beavers, goal, flights, each dragon's speeds, Anna's thorn),
                            the URL as its only state (+ field=WxH in the copied link), one round per "Hrát", the panel
                            inert 500 ms after it; the game's saved volumes read, never written; window.__vn (the test
                            hook, as in the game)
@@ -105,10 +111,12 @@ src/engine/
   sfx.js                   sound effects (D29): one Web Audio Howl per file for the page, played only when loaded
                            with the AudioContext running (never late, never thrown); the effects slider and its
                            test sound; resumeAudio; no auto-suspend during a round (keepAudioAwake); the effects'
-                           safety limiter (a soft clipper after Howler's master gain, ceiling −3.2 dBFS, D31)
+                           safety limiter (a soft clipper after Howler's master gain, ceiling −3.2 dBFS, D31);
+                           effectsOutput() (a gain at the effects level into Howler's master gain, for tones made in
+                           code, D46)
   effects/atmosphereEffects.js   sunsetGlow, wind, snow
   minigames/
-    minigameManager.js     registry (register(type, factory, hudTexts), D42); run(spec, { difficulty }) → 'victory' |
+    minigameManager.js     registry (register(type, factory, hudTexts: the game's own title and labels), D42, D46); run(spec, { difficulty }) → 'victory' |
                            'failure' (a throwing game → 'failure', D24; a throwing clean-up can't leave the HUD up, D27);
                            a loss with the scene's `loseResult: false` settles at once, without the result dialog (D45)
     configRules.js         positive, nonNegative, isPlainObject, mergeConfig: shared by the minigames, pure (D42)
@@ -124,6 +132,21 @@ src/engine/
                            animals' frames on the round's time, the mother's saved cub flying to the father (D43), the
                            mother standing in the moss on her rock (D44);
                            HUD_TEXTS (registered with it)
+    zubrRules.js           the wisent song's rules, pure (D46): LYRIC and SONG (the song's words and its name
+                           as the player sees it: the one place for each in the code),
+                           DEFAULTS (the tune, the levels, the calm meter, the echo's timing, drawing), normalize,
+                           demoTimeline (Rubínka's red tones), createState / step / tap (the echo judged by alignment,
+                           the grace, restarts, the calm meter, the charge), canReplay / replay / replayHint (the replay
+                           button; nothing replays by itself, D46), lyricSyllables / phraseWords (the words shown), noteInput / finished (the quiet
+                           before a lost round's end), lit, shown, mistView, quietView, hudView
+    zubrMelody.js          the wisent song in Pixi (D46): the field on mountain_meadow.png's rectangle, the stars, the
+                           wisent (zubr_neutral) with drawn mist, puffs and lean, Róza's poses, the voice meter, the
+                           charge with Bezzubka's fly strip; taps applied to the rules at once (canvas pointerdown,
+                           Digit/Numpad 1–5 by `event.code`), the replay button "Ještě jednou" (or R), the words of the line
+                           being sung (lit as Róza sings and the player echoes), the tones through effectsOutput(), the audio session
+                           'playback' for the round (Safari 17+); HUD_TEXTS (the HUD's title, zubrRules' SONG, and texts)
+    zubrTones.js           the song's tones synthesised with Web Audio (D46): a flute voice per key, Rubínka's reed
+    zubrStars.js           STAR_SHAPES and drawStar (the five stars' shapes)
     minigameHud.js         DOM overlay: title, score, skip menu, result dialog (Czech labels; the hits line; its
                            Pokračovat behind guardTaps; the top bar hidden under it, D33)
     dragonAttack.js        the "Dračí nálet na bobry" minigame (all tunables in DEFAULTS, exported for the play-test page
@@ -143,11 +166,12 @@ public/story/story-v2.json the story's main file (fetched at runtime, not bundle
                            them characters.json and compatibility.json (movedScenes, D39);
                            public/story/story.json is the old story, frozen for cached old tabs (never edited)
 tests/                     the node checks (npm test, D38); tests/browser/ (Playwright, D42: badger.test.mjs,
-                           badgerStory.test.mjs) and tests/mutate/ (fail-before runners sharing runMutations.mjs, D42,
+                           badgerStory.test.mjs, zubr.test.mjs, zubrStory.test.mjs) and tests/mutate/ (fail-before runners sharing runMutations.mjs, D42,
                            D45); the rest of the Playwright suite still in C:\tmp\claude
 public/assets/             backgrounds/, characters/<id>/<id>_<pose>.png, minigames/dragon-attack/, minigames/badger-rescue/,
                            minigames/dragon-attack/sfx/ (the effects, mp3, ≤ 15 KB each; the badger rescue's in
-                           minigames/badger-rescue/sfx/ once picked, ≤ 20 KB, D45), music/ (mp3, ~3.6–4.8 MB
+                           minigames/badger-rescue/sfx/, ≤ 20 KB, D45; the wisent song's in minigames/zubr/sfx/,
+                           D46), music/ (mp3, ~3.6–4.8 MB
                            each, streamed)
 scripts/removeCheckerboard.mjs   flood-fills light-gray checkerboard to alpha (--enclosed, --glow, --force); --black keys a sheet
                                  painted on black (D30)
@@ -156,6 +180,7 @@ scripts/packFrames.mjs           scattered sheet frames → one-row strip, ancho
 scripts/build-music.sh           the deployed music from art/music/ (9 dB quieter, D29)
 scripts/build-sfx.sh             the minigame's sound effects from art/minigames/dragon-attack/sfx/ (D29)
 scripts/build-badger-sfx.sh      the badger rescue's from Sára's picks in art/minigames/badger-rescue/sfx/variants/ (D45)
+scripts/build-zubr-sfx.sh        the wisent song's from Sára's picks in art/minigames/zubr/sfx/variants/ (D46)
 scripts/cleanBeavers.mjs         the beaver sheets cut by their own pieces into padded cells (D31; no arguments)
 scripts/reexportCreatures.mjs    a creature's poses on one canvas (D37): node scripts/reexportCreatures.mjs <id>…; reads art/
                                  only, writes public/assets/characters/<id>/ (every pose of the creature together)
@@ -225,7 +250,8 @@ on top with CSS. Layout bugs are almost always in `main.css`; scene-fit bugs in
   "next": "other_scene",                  // or a list: [{ "if": "pul>=6", "next": "evening" }, { "next": "hub" }]
   "minigame": { "type": "dragonAttack", "title": "…", "allowSkip": true,
                 "onVictory": "id", "onFailure": "id", "config": {},
-                "loseResult": false },   // a scene of its own, no lines; loseResult false: a loss shows no dialog (D45)
+                "loseResult": false },   // a scene of its own, no lines; loseResult false: a loss shows no dialog (D45);
+                                         // "title" left out: the game's own (zubrMelody's song name, D46)
   "end": { "good": false, "title": "…", "text": "…" }
 }
 ```
@@ -320,6 +346,17 @@ Good to know: conditions inside a scene see that scene's own changes (its `set`/
   `reexportCreatures.mjs` for jezevec makes them stale, and `tests/badgerRules.test.mjs`'s alignment check fails then)
   and cropped to the still's exact size. Made by `node scripts/cropBadgerSprites.mjs` (no arguments; reads art/ and
   characters/jezevec, writes the 15 files; the stills rebuild byte for byte).
+- The wisent song (D46) needs no new art: `mountain_meadow.png`, `zubr_neutral.png` (its painted misty eyes; the eye and
+  nostril points are config, checked on the file by `tests/zubrRules.test.mjs`: a re-exported wisent fails it until
+  they are measured again), Róza's story poses (unflipped: they face left) and Bezzubka's fly strip; the stars, the mist,
+  the puffs, the dusk and the voice meter are drawn in Pixi. Its tones are synthesised (`zubrTones.js`), no files. Its
+  three sounds (snort, charge, clear) are Runway variants in `art/minigames/zubr/sfx/variants/` (committed as
+  downloaded), built by `bash scripts/build-zubr-sfx.sh` (D45's chain; snort ≤ 0.9 s, charge and clear ≤ 1.5 s) into
+  `public/assets/minigames/zubr/sfx/` from Sára's picks (`PICK`: snort b, charge b, clear c), which `DEFAULTS.sounds` names.
+  The song's words are `LYRIC` in `zubrRules.js` (one syllable per note); the story quotes its first two lines in
+  `hory_zubr` line 11 (the test checks the quote). The song's name as the player sees it is `SONG` in `zubrRules.js`
+  (the HUD's title "Píseň proti kletbám", Fable's short form; also on the play-test page) and the story's own lines
+  (`hory_zubr` line 10: "starou píseň proti kletbám"; the test checks that a line holds the name).
 - Music: `public/assets/music/*.mp3` (~3.6–4.8 MB each, streamed as HTML5 audio), referenced
   by key from `story.assets.music`; scenes pick a track with `music`, the menu with
   `menuMusic` (D21, D22). Every deployed track is made from its original in `art/music/`, **9 dB quieter**

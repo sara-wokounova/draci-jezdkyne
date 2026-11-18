@@ -190,10 +190,11 @@
       "add": {
         "pul": 1
       },
-      "next": "hory_zubr_pomoc",
+      "next": "hory_zubr_zpev",
       "lines": [
         {
-          "text": "Na horské louce stál zubr. Obrovský, tmavý jako skála a právě tak nehybný. Tráva kolem něj byla nedotčená, jako by se už dlouho ani nepásl."
+          "text": "Na horské louce stál zubr. Obrovský, tmavý jako skála a právě tak nehybný. Tráva kolem něj byla nedotčená, jako by se už dlouho ani nepásl.",
+          "if": "!zubr_prohra"
         },
         {
           "speaker": "anna",
@@ -209,10 +210,24 @@
               "position": "right",
               "pose": "nervous"
             }
-          ]
+          ],
+          "if": "!zubr_prohra"
         },
         {
-          "text": "Buřinoha k němu zvědavě natáhla krk. Zubr zafuněl a ohnal se rohy, až se zachvěly okolní smrky. Ale díval se přitom skrz ni, někam, kde nebylo nic."
+          "text": "Buřinoha k němu zvědavě natáhla krk. Zubr zafuněl a ohnal se rohy, až se zachvěly okolní smrky. Ale díval se přitom skrz ni, někam, kde nebylo nic.",
+          "if": "!zubr_prohra",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
         },
         {
           "speaker": "emma",
@@ -228,7 +243,8 @@
               "position": "right",
               "pose": "nervous"
             }
-          ]
+          ],
+          "if": "!zubr_prohra"
         },
         {
           "speaker": "anna",
@@ -244,7 +260,8 @@
               "position": "right",
               "pose": "sad"
             }
-          ]
+          ],
+          "if": "!zubr_prohra"
         },
         {
           "speaker": "roza",
@@ -260,6 +277,238 @@
               "position": "right",
               "pose": "talking"
             }
+          ],
+          "if": "!zubr_prohra"
+        },
+        {
+          "text": "Róza se zhluboka nadechla a zakřičela, až se to rozlehlo po celé louce: „Zubře! Prober se! Vzbuď se!“",
+          "if": [
+            "!haj_zeme",
+            "!zubr_prohra"
+          ],
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "excited"
+            }
+          ]
+        },
+        {
+          "text": "Zubr zařval, sklonil rohy a vyrazil přímo na ni. Bezzubka chňapla Rózu za plášť v poslední chvíli a vytáhla ji do vzduchu.",
+          "if": [
+            "!haj_zeme",
+            "!zubr_prohra"
+          ],
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Křikem to nepůjde! Jen ho děsíš. Zkus to potichu, jako když konejšíš Bezzubku po bouřce.",
+          "if": [
+            "!haj_zeme",
+            "!zubr_prohra"
+          ],
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Počkej, Rózo, nekřič! Vzpomeň si na Triglava: „Omámení zlomí klidný hlas, ne křik.“ Zkus to potichu, jako když konejšíš Bezzubku po bouřce.",
+          "if": [
+            "haj_zeme",
+            "!zubr_prohra"
+          ],
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "Potichu… Zazpívám mu starou píseň proti kletbám. Babička ji zpívala mámě a máma mně. Zlému kouzlu bere moc a toho, kdo ji slyší, volá zpátky k sobě.",
+          "if": "!zubr_prohra",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "Jak to jen bylo… „Cizí píseň ztrácí moc, kolem tebe dýchá noc.“ Ano. Tiše, úplně tiše.",
+          "if": "!zubr_prohra",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "text": "Róza sklouzla z Bezzubky a pomalu, s prázdnýma rukama, šla k zubrovi.",
+          "if": "!zubr_prohra",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "text": "Když se nadechla ke zpěvu, obloha nad loukou trochu potemněla, jako by si píseň sama přivolala hvězdy. Jedna po druhé se začaly rozsvěcovat a každá čekala na svůj tón.",
+          "if": "!zubr_prohra",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "text": "Zubr stál na horské louce pořád stejně, tmavý a nehybný, s očima plnýma mlhy. Ani tráva kolem něj se nepohnula.",
+          "if": "zubr_prohra",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "speaker": "emma",
+          "text": "Pořád je v tom kouzle. A stádo ho dole v údolí pořád volá.",
+          "if": "zubr_prohra",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "roza",
+          "text": "Tak ještě jednou. Tiše a zvolna, tón za tónem. Však ty mě uslyšíš, veliký.",
+          "if": "zubr_prohra",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "talking"
+            }
+          ]
+        },
+        {
+          "text": "Nad loukou zase potemněla obloha a hvězdy se začaly jedna po druhé rozsvěcovat.",
+          "if": "zubr_prohra",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hory_zubr_zpev",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/mountain_meadow.png"
+      },
+      "characters": [],
+      "minigame": {
+        "type": "zubrMelody",
+        "allowSkip": true,
+        "loseResult": false,
+        "onVictory": "hory_zubr_pomoc",
+        "onFailure": "hory_zubr_prohra",
+        "config": {}
+      }
+    },
+    {
+      "id": "hory_zubr_prohra",
+      "background": {
+        "type": "image",
+        "src": "assets/backgrounds/mountain_meadow.png"
+      },
+      "characters": [
+        {
+          "id": "zubr",
+          "position": "left",
+          "pose": "neutral"
+        }
+      ],
+      "choiceLayout": "center",
+      "lines": [],
+      "choices": [
+        {
+          "text": "Zkusit to znovu.",
+          "next": "hory_zubr_zpev"
+        },
+        {
+          "text": "Odletět a vrátit se později.",
+          "next": "a2_cesta",
+          "giveUp": true,
+          "set": [
+            "zubr_prohra"
           ]
         }
       ]
@@ -285,40 +534,7 @@
       "next": "a2_cesta",
       "lines": [
         {
-          "text": "Zubr stál a dýchal ztěžka, jako by nesl na hřbetě celý les.",
-          "characters": [
-            {
-              "id": "zubr",
-              "position": "left",
-              "pose": "neutral"
-            },
-            {
-              "id": "anna",
-              "position": "right",
-              "pose": "nervous"
-            }
-          ]
-        },
-        {
-          "text": "Róza se zhluboka nadechla a zakřičela, až se to rozlehlo po skalách: „Hej, zubře! Probuď se!“",
-          "if": "!haj_zeme"
-        },
-        {
-          "text": "Zubr zařval a vyrazil přímo proti ní. Bezzubka ji v poslední chvíli popadla za plášť a vytáhla do vzduchu.",
-          "if": "!haj_zeme"
-        },
-        {
-          "speaker": "anna",
-          "text": "Křikem to nepůjde! Zkus to potichu, Rózo. Jako když konejšíš Bezzubku po bouřce.",
-          "if": "!haj_zeme"
-        },
-        {
-          "speaker": "anna",
-          "text": "Počkej, Rózo. Triglav říkal: klidný hlas, ne křik.",
-          "if": "haj_zeme"
-        },
-        {
-          "text": "Róza seskočila z Bezzubky na zem. Šla pomalu, s prázdnýma rukama, a tiše začala zpívat ukolébavku, kterou jí zpívala máma a mámě zase její máma: o měsíci, co pase hvězdy na nebeské louce.",
+          "text": "Poslední tón odplul nad louku a ztichl. Zubr stál a dýchal ztěžka, jako by nesl na hřbetě celý les.",
           "characters": [
             {
               "id": "zubr",
@@ -333,7 +549,75 @@
           ]
         },
         {
-          "text": "Zubr přestal funět. Uši se mu pohnuly. Mlha v jeho očích zřídla, roztrhala se jako pára nad hrncem – a pak zamrkal.",
+          "text": "Pět hvězd jedna po druhé pohaslo a obloha nad loukou zase zesvětlala. Jen v trávě jako by ještě chvilku zněla ozvěna písně."
+        },
+        {
+          "speaker": "emma",
+          "text": "Pst… Ani se nehněte. Podívejte, jak se mu chvějí boky. On poslouchal.",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "emma",
+              "position": "right",
+              "pose": "nervous"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Tak vidíš. Potichu to šlo, a křikem ne. Někdy se vyplatí mě poslechnout.",
+          "if": "!haj_zeme",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "speaker": "anna",
+          "text": "Triglav měl pravdu. Omámení zlomil klidný hlas, ne křik.",
+          "if": "haj_zeme",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "anna",
+              "position": "right",
+              "pose": "happy"
+            }
+          ]
+        },
+        {
+          "text": "Zubr přestal funět. Uši se mu pohnuly, nejdřív jedno, pak druhé, jako by teprve teď zaslechl bučení z údolí.",
+          "characters": [
+            {
+              "id": "zubr",
+              "position": "left",
+              "pose": "neutral"
+            },
+            {
+              "id": "roza",
+              "position": "right",
+              "pose": "neutral"
+            }
+          ]
+        },
+        {
+          "text": "Mlha v jeho očích zřídla, roztrhala se jako pára nad hrncem – a pak zamrkal.",
           "characters": [
             {
               "id": "zubr",
@@ -353,11 +637,11 @@
         },
         {
           "speaker": "zubr",
-          "text": "Tvoje píseň byla tišší než její, a přece mě dovedla domů. Vrátila jsi mi rozum, maličká. Až budete potřebovat něco prorazit, vyvrátit nebo rozdupat, zubří stádo přijde."
+          "text": "Tvoje píseň byla tišší než její, a přece jí vzala moc. Zavolala jsi mě a já se vrátil k sobě. Až budete potřebovat něco prorazit, vyvrátit nebo rozdupat, zubří stádo přijde."
         },
         {
           "speaker": "roza",
-          "text": "Tichá písnička zmůže víc než všechen křik světa. To si zapamatuju. I tu melodii."
+          "text": "Tichá píseň zmůže víc než všechen křik světa. To si zapamatuju. I tu melodii, tón po tónu."
         }
       ]
     }

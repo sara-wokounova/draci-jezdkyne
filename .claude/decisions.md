@@ -1271,3 +1271,127 @@ removed, the hold-then-mash one also with repeats left out of the key quiet),
 limiter takes a peaky clip lower, as D29 found for Anna's hit, −16.9); `tests/browser/badger.test.mjs`'s art routes narrowed to `*.png`. The
 sound checks in the browser use six existing dragon-attack files through the routed scene config (the play-test page
 can't set `sounds`), so they test the wiring before Sára's picks exist.
+
+## D46 — The wisent's song: an echo minigame with a calm rule, in the story and on the play-test page (2026-11-18) — Accepted
+Supersedes: D40's `hory_zubr` → `hory_zubr_pomoc` straight (now through the minigame); `hory_zubr_pomoc`'s narrated
+shout and singing (the shout moved before the game, the singing is the game); story.md's audience "children" (now
+readers of 8–11).
+Decision:
+- The audience is children who can read, 8–11 years old (Sára, 2026-11-18): the levels are tuned for them.
+- A third minigame, `zubrMelody` (the wisent event's quest), Sára's variant A ("echo") with variant B's calm rule
+  ("Tichý hlas"). Five stars (D4 E4 G4 A4 B4, an E minor pentatonic: any order of taps sounds consonant), each its own
+  colour (Okabe–Ito), shape (circle, triangle, diamond, star, rosette) and pitch. Róza sings a step of the song, each
+  note lighting its star; the player taps the stars in the same order (the canvas's `pointerdown`, or Digit/Numpad 1–5
+  by `event.code`: a Czech layout's number row types `+ ě š č ř`). The echo opens 0.5 s before Róza's last onset
+  (`echoLead`) and is judged by alignment (the longest run of the latest taps that matches the step's start), so a child
+  following her lights and then echoing lines up wherever its echo starts; in the grace (until her held note ends +
+  `followLag` 1.0 s) a tap that breaks every alignment is forgiven on a star she lights, lights within `anticipate` 0.25
+  s, or lit under 1.0 s ago (never one Rubínka's red tone lit since); a fall back is a restart only after a pause of
+  `restartPause` 2.75 beats or in the grace, else a mistake. Nothing is ever replayed by itself (Sára's play-test: the stall replay started while she was tapping;
+  then, 2026-11-18, also no replay for a child who hasn't tapped): the replay button "Ještě jednou" (upper left, a disc with a circular arrow, its label above;
+  hit circle of radius 56 game px, ≥ 44 CSS px across at 568×270, clear of the stars, the meter, the words and the HUD bar; or R by
+  `event.code`, no repeat, no modifier) makes Róza sing the step again, free (no mistake, nothing on the meter), and the
+  echo starts over; it is enabled only in the echo once her last note has ended (`timeline.end`; dimmed while she
+  sings, in a snort, a success, the finale, the charge and the hold), and pulses after `hintAfter` (6 / 10 / 20 s) without a tap, counted from the echo's opening or the last tap, so an idle
+  child gets the hint too. On Těžká (no mistake allowed) the HUD's status reads "Bez chyby!" (until the mistake) instead of the snort count
+  (`labels.flawless`, whenever `mistakes` is 1). The charge's sound replaces the snort's on the mistake that charges
+  (the last one on every level, Těžká's only one): one sound, not two at once. A loss ends only from the hold (the
+  charge's end time and its phase time could round apart, leaving a lost round frozen in the charge without the hold's
+  ring: found by a flaky browser check).
+  The words of the line being sung show under the stars, between the wisent and Róza (two rows, bold, 32 game px,
+  14.4 CSS px at 568×270, on a dark backing): her sounding syllable gold, the echoed ones white, the next underlined, the
+  rest dimmed; faded out with the stars at a charge, and none where a story's phrase has no lyric line of its length.
+  The calm meter is a leaky bucket: +1 a tap, −3.125 a second (not tied to the beat), over 3.5 a shout (a mistake, also
+  over a demo; in the intro only the burst); the top segment at 80 % warns. A mistake: the snort (head jerk, puffs, mist
+  thicker); on the 6th / 3rd / 1st mistake (Lehká / Normální / Těžká) the charge (Bezzubka, Róza's fly strip, rises out of a dust puff
+  in Róza's place); a lost round ends only after 1.5 s without any tap, click or key anywhere (`quietEnd`, at most
+  `quietMax` 15 s after the charge; a closing ring round the meter shows it), so a child tapping on through the charge
+  doesn't land on the lose screen's choices; D24's backstop ends it at once. After the last step Róza sings the whole
+  song (28 notes, 19.2 s), the mist thins to a veil, and the result says "Píseň dozpívána": the story wakes the wisent.
+- The levels (Sára after her play-test: 14 tones can't be remembered; 7 a step, fewer mistakes allowed instead; Těžká
+  "úplně bez chyby"): every level echoes the four lines one at a time (`steps` one list, 7 notes each), `mistakes` 6 /
+  3 / 1 (5, 2 and no mistake allowed), no red tones (`rubinka` 0: Rubínka's sour reed stays in the code for a story
+  config, the balance didn't need it); ♩ = 150, 3/4, each trochee long–short, a line's
+  last syllable held. The play-test page lost its Postup, stall and idle-replay sliders (9 sliders). The whole song is
+  sung by Róza, not echoed (a deviation from variant A, said to Sára).
+- The song: "stará píseň proti kletbám" (Sára's name, 2026-11-18; never "ukolébavka"), passed from Róza's grandmother to
+  her mother to her; its words by the Fable agent, Sára's pick of ten: „Cizí píseň ztrácí moc, / kolem tebe dýchá noc. /
+  Slyšíš? Volám jméno tvé, / vrať se k sobě, srdce mé.“ (AABB, 7 trochaic syllables a line; the planned notes kept, line
+  3 is new words on line 1's tune). In the code the words live only in `LYRIC` (zubrRules.js), checked against the
+  phrases' note counts and `hory_zubr` line 11's quote; the name the player sees lives in `SONG` (zubrRules.js, beside
+  the lyric; the HUD's title through `HUD_TEXTS`: "Píseň proti kletbám", Fable's short form) and the story's own lines
+  (`hory_zubr` line 10, which the test checks holds the name). `MinigameManager.register`'s HUD texts may carry the
+  game's own `title` (used when the scene gives none: the story's minigame scene leaves it out). Act 2a's time-of-day
+  rule skips the song's quoted words ("dýchá noc"). The song is the melody (`melodie`) the finale can reuse (a shorter
+  configuration through `steps`, `finale` and `rubinka`).
+- The tones are synthesised with Web Audio (`zubrTones.js`: a flute voice, an 8 ms attack for a tap, one voice per star
+  for Róza and one per star for the player, one for the red tones), not samples: nothing to load, exact pitches, any
+  length, no credits. They go through `sfx.js`'s new `effectsOutput()` (a gain at `EFFECT_MIX` × the effects slider into
+  Howler's master gain: the limiter, the hidden page's mute and the slider apply; rebuilt when Howler replaces its
+  context); a tone plays only while the context runs; a tap is applied to the rules in its own input task (its tone
+  starts there, at `currentTime`); Róza's notes on the frame (a `ponytail:` note, issues.md). The round sets
+  `navigator.audioSession.type = 'playback'` where it exists (Safari 17+) and the type before back at its end (and while
+  the page is hidden), so the tones are heard on a silenced iPhone (this round has no HTML5 music to do that; set only
+  for the round, so the other games and a muted phone in class stay as they were: the security review). No music in the
+  round or on its lose screen.
+- The art is the existing `mountain_meadow.png`, `zubr_neutral.png` (its painted misty eyes; the eye and nostril points
+  measured and checked on the file), Róza's story poses and Bezzubka's fly strip; the stars, mist, puffs, dusk and meter
+  are drawn. Only the wisent and Róza singing are awaited at the start.
+- The story: `hory_zubr` lines 0–5 gain `"!zubr_prohra"` (line 2 the stage copy), lines 6–13 appended (the shout, the
+  charge, Anna, or after the grove Anna remembering Triglav, Róza recalling the song, the stars lighting), lines 14–17
+  for the return after giving up (`zubr_prohra`); `hory_zubr_zpev` (the minigame, `loseResult: false`, no music, no
+  stage); `hory_zubr_prohra` (no line, the dazed wisent, a free retry and "Odletět a vrátit se později.", `giveUp`, as
+  D45); `hory_zubr_pomoc`'s lines rewritten in place (still `set: ["zubr", "melodie"]`). Texts by the Fable agent.
+- The play-test page: `?game=zubr` (looked up with `Object.hasOwn`), 9 sliders, a level select (`level=`: the per-level
+  sliders jump to its defaults, the rest stay, no reload; a link is read level first, then its defaults, then its own
+  values; shown only where the game has levels), the context's latency line, no music (its `AudioManager` still mutes on
+  a hidden page), the page's first Howl at load (Howler's one-time context replacement before any round) and the tones'
+  bus set up and resumed inside the Hrát click.
+- Three sound effects (snort, charge, clear) from Runway, three variants each (15 credits), committed as downloaded in
+  `art/minigames/zubr/sfx/variants/`, built by `scripts/build-zubr-sfx.sh` (D45's chain) into
+  `public/assets/minigames/zubr/sfx/`: Sára's picks snort b, charge b, clear c (2026-11-18).
+Why: Sára (2026-11-17): "A s tím pravidlem o klidu z B, postav to a otestujeme to na detech"; (2026-11-18) "je to
+tomirene na deti, ktere umi cist tak je to tak 8-11 let. tudiz bych rekla, ze je to moc lehke", the lyric on her words
+and then her pick of a fully rhyming one, "asi by se ta písen nemela nazyvat ukolebavkou, ale proste pisni proti
+ovlivneni zlem", the name; after her play-test "it automatically started to repeat the song when I was pressing the
+stars … there is a button for that" and "14 tonu je moc … snizovat pocet moznych chyb mi prijde lepsi. slova bych tam
+mozna ukazovala … na nejtezsi … jen by to muselo byt uplne bez chyby". The plan went through 12 disprover rounds, 3 more
+for the revision and 5 for the button, the levels and the words. The calm rule as a
+bucket: a per-tap threshold let a perfect masher of short steps through; the grace and the restart pause protect careful
+children (followers at a normal reaction win every round). The memory models were recalibrated so an adult can't hold
+the old 14-note step (23 % on the old Normální): the error per note grows with the square of the excess over the span
+(8-year-old 4.5 notes, 11-year-old 5, adult 6), a tune echoed before counts as 85 % of its notes (line 3 has line 1's),
+a retry cuts the error ×0.9 at most twice (so free replays can't erase the levels: an assumption, not data), a lost
+child stops mid-echo and presses the button (60 / 80 / 95 %) or guesses. Balance (1000 seeded rounds through the rules):
+8-year-old 86.5 / 45.5 / 9.2 %, 9–10-year-old 95.8 / 66.3 / 18.7 %, 11-year-old 99.7 / 87.1 / 32.5 %, adult 100 / 99.6 /
+71.0 % (Lehká / Normální / Těžká; children pressing the button before each new line up to ~10 points more); every masher
+and "the right stars as fast as a finger goes" 0 %. Těžká flawless: its 11-year-old at 32.5 % is not "absurd" (the
+brief's rule; one allowed gives 25.6 / 66.6 %, as far over as flawless is under). Red tones: not needed by any target.
+Consequences: Těžká is under both children's targets (8-year-old ~9 % against 15–20, 11-year-old ~32 % against 50);
+one allowed mistake (`mistakes: { hard: 2 }`, the play-test slider) is the alternative, for Sára's play-test with
+children. On flawless Těžká a careful child loses to timing too: a slow, very jittery follower (lag 0.9 ± 0.35 s) wins
+~45 % (Normální ~93 %), and starting over sooner than 1.1 s after a pause is a fall back, so the charge (the button is
+the free way to start over). A steady tapper who knows the tune wins every level. Old play-test links keep their
+`mistakes=` (the same meaning; only the defaults moved). Old links' `replay=` (the idle replay) is ignored. Těžká stays
+flawless and the automatic replay is gone (Sára's answers, 2026-11-18); the balance didn't move (the simulated children
+never waited for it). A child who keeps tapping steadily without looking ends the quiet hold at its first 1.5
+s gap and can then pick a lose-screen choice by chance (Back undoes a give-up). A player with the effects at 0 hears no
+song (the stars still show it). The wisent and Róza are drawn smaller in the game than in the story, and after a charge
+the wisent jumps from the game's place and size to the story's on the lose screen (no dialog in between; cosmetic). A
+child tapping at 1.1 s or slower makes every slip back onto the phrase's start a silent restart, not a
+snort: the lenient rule as planned, for Sára to watch (no automatic replay any more). On a win the audio session and the last notes end only when the
+result closes. A shout mid-demo lets Róza's note already ringing ring on through the snort (cosmetic). A whole song at
+the caps (8 phrases × 16 notes × 4 beats at a 2 s beat) would last ~17 minutes; no config comes near. A correct note
+equal to the step's first star after a ≥ 1.1 s hesitation, then the start's second note, reads as a restart (the same
+taps as a child starting again; the next wrong tap gets the snort, one tap late): the third review panel's medium, kept
+lenient as planned because the stricter rule made the planned restarter lose every Lehká round. A player saved on the
+old `hory_zubr_pomoc` reads the new texts with `zubr` already set. For ~10 minutes after the deploy a cached bundle
+without `zubrMelody` can meet the no-cache `lokace-hory.json`: "Unknown minigame type" → an instant loss → the lose
+screen, each retry the same; giving up is the way on for that visit. Once deployed, `hory_zubr_zpev`, `hory_zubr_prohra`
+and `zubr_prohra` are permanent. The sound-effect scripts refuse an output folder that leads into `art/` (checked before
+anything is made, a link at an output file removed rather than written through: `build-zubr-sfx.sh`, and
+`build-badger-sfx.sh` aligned to it); no repo check covers them (tried by hand with a junction). With `finale: false`
+(the planned shorter reuse) the round wins without the shimmer (`clear` belongs to the finale): the reuse decides. Tones already ringing ring on through a pause and a success or snort
+(cosmetic). Checks: `tests/zubrRules.test.mjs` (in `npm test`; fail-before `tests/mutate/zubrRules.mutate.mjs`),
+`tests/act2a.test.mjs` (the rescues as a table; `tests/mutate/act2a.mutate.mjs` gains the wisent's),
+`tests/browser/zubr.test.mjs`, `tests/browser/zubrStory.test.mjs`, `tests/zubrSfx.test.mjs` (hand-run, ffmpeg).

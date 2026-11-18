@@ -13,6 +13,24 @@ and the mutation runners for current checks are to move into `tests/` as their o
 browser checks run in CI before every deploy (Sára's answers), the slow ones and those needing ffmpeg or Firefox via
 an npm script. One-off measurements and the old snapshots (`*.d32.mjs`, `*.d33.mjs`) stay out.
 
+### P3 — The wisent song's demo notes are played on the frame (D46, 2026-11-18)
+Róza's notes start when `step()` reaches them: ≤ 17 ms late at 60 fps, ≤ 33 ms at 30 fps, uneven on a phone dropping to
+20–30 fps. Fix if Sára hears the demo limp: schedule each note ahead on the audio clock with a ~50 ms lookahead
+(the `ponytail:` comment in zubrMelody.js).
+
+### P3 — The wisent song's tones, latency and audio session not tried on real phones (D46, 2026-11-18)
+Checked in Chrome only. To try on an iPhone and an Android phone: a tap's tone feels immediate (the play-test page shows
+the context's own figure, "Zpoždění zvuku"); the tones with the iPhone's silent switch on (`navigator.audioSession.type =
+'playback'` for the round, Safari 17+; older iOS: silent, the game playable without sound); after an iOS interruption or a hidden page
+the intro and the first demo (or the rest of a demo the phone was locked in: a hidden page lets Howler suspend the
+context after 30 s; the page's return resumes it, which iOS may refuse) play silently (lights only) until a tap's
+`pointerup` resumes the audio (D29's class).
+
+### P3 — The story's choice keys 1–9 need Shift on a Czech keyboard (found in planning D46, 2026-11-18)
+`inputController.js` reads `event.key`: on the Czech layout's number row the unshifted keys type `+ ě š č ř ž ý á í`, so
+"1"/"2" on a choice panel need Shift (or the numpad). The wisent song's star keys read `event.code` (Digit1–5,
+Numpad1–5). Pre-existing; fix if it matters: read `event.code` (Digit/Numpad) for the choices too.
+
 ### P3 — The frozen story.json and its old key stay until a cleanup (D37, 2026-11-16)
 `public/story/story.json` (the old one-line story) stays for cached old tabs and is never edited
 (`tests/story.test.mjs` checks its hash). Remove it in a later cleanup commit, together with: `tests/story.test.mjs`'s two
@@ -224,6 +242,11 @@ Step 2 of D42: `reka_jezevec` went straight to `reka_jezevec_pomoc`. Fix (D45): 
 (`reka_jezevec_zachrana`) → `reka_jezevec_pomoc` or the lose screen `reka_jezevec_prohra` (a free retry, a give-up), the
 Fable texts, the sounds' variants (the picks: the fixed P3 above). Checks: `tests/act2a.test.mjs`,
 `tests/browser/badgerStory.test.mjs`.
+
+### P3 — The wisent song's three sounds waited for Sára's picks (D46, 2026-11-18) — fixed 2026-11-18, not yet live
+`DEFAULTS.sounds` in zubrRules.js were `null`. Fix: Sára's picks (snort b, charge b, clear c) set in
+`scripts/build-zubr-sfx.sh`'s `PICK`, built into `public/assets/minigames/zubr/sfx/`, named by `DEFAULTS.sounds`. Checks:
+`tests/zubrSfx.test.mjs`, `tests/zubrRules.test.mjs` (the files exist and are in git).
 
 ### P3 — Remove the unlisted act2a-den1..3.json (D40, 2026-11-16) — fixed 2026-11-17
 The old Act 2a draft's parts stayed in git, unlisted, for D40's deploy (Pages' cache window); removed (`git rm`) the day after.

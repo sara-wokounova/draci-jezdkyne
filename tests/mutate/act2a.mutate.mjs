@@ -1,12 +1,14 @@
 // Fail-before for tests/act2a.test.mjs: breaks the story (or the cub count) one thing at a time in a copy and runs the
 // test there; every mutation must make it fail, and the controls marked `pass` must not. D40's calendar and text rules
-// (moved in from C:\tmp\claude\act2a-build\mutate.mjs) and D45's badger rescue.
+// (moved in from C:\tmp\claude\act2a-build\mutate.mjs), D45's badger rescue and D46's wisent song.
 //   node tests/mutate/act2a.mutate.mjs [part of a mutation name]
 // The copy: see runMutations.mjs. On Windows in Git Bash: MUTATE_TMP=C:/tmp/claude/mutate node tests/mutate/act2a.mutate.mjs
 import fs from 'node:fs';
 import { REPO, runMutations } from './runMutations.mjs';
+import { lyricLine } from '../../src/engine/minigames/zubrRules.js';
 
-const files = ['src/engine/storyFlow.js', 'src/engine/minigames/badgerRules.js', 'src/engine/minigames/configRules.js',
+const files = ['src/engine/storyFlow.js', 'src/engine/minigames/badgerRules.js', 'src/engine/minigames/zubrRules.js',
+  'src/engine/minigames/configRules.js',
   ...fs.readdirSync(`${REPO}/public/story`).filter((n) => n.endsWith('.json')).map((n) => `public/story/${n}`)];
 const STORY = 'public/story/';
 const ACT = `${STORY}act2a.json`;
@@ -80,5 +82,18 @@ runMutations({
     ['the count as a digit', REKA, lineText('reka_jezevec', 7, (t) => `${t} Je jich 9.`), { pass: true }],
     ['a pinned holeCubs with new texts', REKA, (text) => scene('reka_jezevec_zachrana', (s) => { s.minigame.config = { holeCubs: [1, 1, 1, 2, 2] }; })(
       text.replaceAll('Devět', 'Sedm').replaceAll('devět', 'sedm').replaceAll('Deváté', 'Sedmé').replaceAll('deváté', 'sedmé')), { pass: true }],
+    // D46: the wisent's song.
+    ['the wisent\'s retry costs time', HORY, scene('hory_zubr_prohra', (s) => { s.choices[0].add = { pul: 1 }; })],
+    ['the wisent\'s give-up without giveUp', HORY, scene('hory_zubr_prohra', (s) => { delete s.choices[1].giveUp; })],
+    ['the wisent\'s give-up without zubr_prohra', HORY, scene('hory_zubr_prohra', (s) => { delete s.choices[1].set; })],
+    ['a return line on the first visit too', HORY, scene('hory_zubr', (s) => { delete s.lines[15].if; })],
+    ['a first-visit line on the return too', HORY, scene('hory_zubr', (s) => { s.lines[12].if = 'pul<9'; })],
+    ['the song\'s victory onto the lose screen', HORY, scene('hory_zubr_zpev', (s) => { s.minigame.onVictory = 'hory_zubr_prohra'; })],
+    ['hory_zubr straight to its win', HORY, scene('hory_zubr', (s) => { s.next = 'hory_zubr_pomoc'; })],
+    ['melodie set by hory_zubr', HORY, scene('hory_zubr', (s) => { s.set = ['melodie']; })],
+    ['zubr set on the lose screen', HORY, scene('hory_zubr_prohra', (s) => { s.choices[0].set = ['zubr']; })],
+    ['a "noc" of the narration in hory_zubr', HORY, lineText('hory_zubr', 12, (t) => `${t} Padala noc.`)],
+    ['the song\'s words outside a quote', HORY, lineText('hory_zubr', 12, (t) => `${t} ${lyricLine(1)}`)],
+    ['the song\'s words quoted elsewhere in hory_zubr', HORY, lineText('hory_zubr', 16, (t) => `${t} „${lyricLine(0)} ${lyricLine(1)}“`), { pass: true }],
   ],
 });

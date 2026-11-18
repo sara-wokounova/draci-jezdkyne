@@ -1,6 +1,7 @@
 // Act 2a's calendar check (D40): the days and locations walked through every choice and every possible location pick,
-// from Act 1's end to a2_konec, plus static checks of the text rules; since D45 also the badger rescue's minigame (both
-// outcomes, the retry, the give-up and the return) and its texts' cub count (badgerRules.js's holeCubs). Update it when
+// from Act 1's end to a2_konec, plus static checks of the text rules; since D45 also the rescues' minigames (both
+// outcomes, the retry, the give-up and the return: the badger's, D45, and the wisent's song, D46) and the badger texts'
+// cub count (badgerRules.js's holeCubs). Update it when
 // Act 2a's structure changes, or when Act 2b gives a2_konec a way on. Fail-before: tests/mutate/act2a.mutate.mjs.
 //   node tests/act2a.test.mjs [repoOrCopy]
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -9,6 +10,7 @@ import fs from 'node:fs';
 const root = (process.argv[2] ?? fileURLToPath(new URL('..', import.meta.url))).replaceAll('\\', '/').replace(/\/$/, '');
 const F = await import(pathToFileURL(`${root}/src/engine/storyFlow.js`).href);
 const R = await import(pathToFileURL(`${root}/src/engine/minigames/badgerRules.js`).href); // pure, for the cub count
+const Z = await import(pathToFileURL(`${root}/src/engine/minigames/zubrRules.js`).href); // pure, for the song's words
 const DIR = `${root}/public/story/`;
 const read = (name) => JSON.parse(fs.readFileSync(DIR + name, 'utf8'));
 const main = read('story-v2.json');
@@ -31,6 +33,16 @@ for (const id of ['act1_end', 'a2_rano1', 'a2_liska', 'a2_kam', 'haj_otazka', 'a
   }
 }
 const ok = (message) => console.log(`ok   ${message}`);
+// The location events whose quest is a minigame with a lose screen (D45, D46): the helpers only through the game's
+// victory; the lose screen a retry and a give-up (setting lostFlag); the event's first visit and its return after giving
+// up each with their own lines (firstEnd: the first visit's last lines; returnLines: exactly the return's).
+const RESCUES = [
+  { event: 'reka_jezevec', game: 'reka_jezevec_zachrana', win: 'reka_jezevec_pomoc', lose: 'reka_jezevec_prohra',
+    helpers: ['jezevci'], lostFlag: 'jezevci_prohra', location: 'reka', firstEnd: '3,4,5,6,7', returnLines: '8,9,10' },
+  { event: 'hory_zubr', game: 'hory_zubr_zpev', win: 'hory_zubr_pomoc', lose: 'hory_zubr_prohra',
+    helpers: ['zubr', 'melodie'], lostFlag: 'zubr_prohra', location: 'hory', firstEnd: '10,11,12,13', returnLines: '14,15,16,17' },
+];
+const returns = new Map(RESCUES.map((r) => [r.event, 0])); // each event entered again after giving up its rescue
 const conditionNames = (value) => (value === undefined ? [] : (Array.isArray(value) ? value : [value]))
   .map((c) => String(c).replace(/^!/, '').replace(/ *(>=|<) *\d+$/, ''));
 
@@ -44,6 +56,7 @@ const conditionList = (value) => (value === undefined ? [] : (Array.isArray(valu
 const TIME_SCENES = /^(a2_rano[123]|a2_noc.*|a2_vecer3|a2_unos|a2_konec|a2_kam|les_sona|les_sona_slib|les_sona_ne)$/;
 const VEDMA_SCENES = new Set(['vedma_01', 'vedma_zlost', 'vedma_pochopeni', 'vedma_voda']);
 const staticProblems = [];
+const SONG_LINES = Z.LYRIC.map((_, i) => Z.lyricLine(i).replace(/[.,]$/, ''));
 for (const id of act2aIds) {
   const scene = story.scenes.get(id);
   const own = new Set(Array.isArray(scene.set) ? scene.set : []);
@@ -64,7 +77,9 @@ for (const id of act2aIds) {
     if (/Rubín[kč]/.test(text) && !VEDMA_SCENES.has(id) && !conditionList(item.if).includes('vedma')) {
       staticProblems.push(`${id} ${where} names Rubínka, a name only the vědma tells: add "if": "vedma" (and a "!vedma" twin saying "čarodějnice")`);
     }
-    const timeText = text.replace(/nejkratší\S* noc\S*/gi, ''); // the shortest night is the solstice, not a time of day
+    // The shortest night is the solstice, not a time of day; the song's words quoted („…“, in hory_zubr) are the song's.
+    const timeText = text.replace(/nejkratší\S* noc\S*/gi, '')
+      .replace(/„[^“]*“/g, (quote) => SONG_LINES.reduce((s, line) => s.replaceAll(line, ''), quote));
     if (TIME.test(timeText) && !TIME_SCENES.test(id) && !conditionNames(item.if).includes('pul')) {
       staticProblems.push(`${id} ${where} names a time of day ("${timeText.match(TIME)[0]}"), but this scene can come at any half-day: rephrase, or add an "if" on "pul"`);
     }
@@ -132,7 +147,6 @@ const done = new Set();
 const onPath = new Set();
 let states = 0;
 let endings = 0;
-let badgerReturns = 0; // reka_jezevec entered again after giving up its rescue
 let problems = 0;
 const problem = (message) => {
   if (problems < 20) fail(message);
@@ -148,17 +162,21 @@ function enter(id, memory, taps, from = null) {
   if (land.scene.lines.length === 0 && !land.scene.minigame && F.followUp(story, land.scene, m).kind !== 'choices') {
     return problem(`a pass-through shown: ${sid}`);
   }
-  // The badger rescue (D45): its helper only through the minigame's victory; the return after giving up its own lines.
-  if (get(m, 'jezevci') && !get(memory, 'jezevci') && !(sid === 'reka_jezevec_pomoc' && from === 'reka_jezevec_zachrana')) {
-    problem(`jezevci set by ${sid} (from ${from}), not by the badger rescue's victory`);
-  }
-  if (sid === 'reka_jezevec') {
+  // The rescues (D45, D46): the helpers only through the minigame's victory; the return after giving up its own lines.
+  for (const r of RESCUES) {
+    for (const name of r.helpers) {
+      if (get(m, name) && !get(memory, name) && !(sid === r.win && from === r.game)) {
+        problem(`${name} set by ${sid} (from ${from}), not by ${r.game}'s victory`);
+      }
+    }
+    if (sid !== r.event) continue;
     const shown = F.visibleLines(land.scene, m).join(',');
-    if (get(m, 'jezevci_prohra')) {
-      badgerReturns += 1;
-      if (shown !== '8,9,10') problem(`reka_jezevec after giving up shows lines ${shown}, not 8–10`);
-    } else if (shown.split(',').some((i) => Number(i) >= 8) || !shown.endsWith('3,4,5,6,7')) {
-      problem(`reka_jezevec's first visit shows lines ${shown}`);
+    const back = r.returnLines.split(',');
+    if (get(m, r.lostFlag)) {
+      returns.set(r.event, returns.get(r.event) + 1);
+      if (shown !== r.returnLines) problem(`${sid} after giving up shows lines ${shown}, not ${r.returnLines}`);
+    } else if (shown.split(',').some((i) => back.includes(i)) || !shown.endsWith(r.firstEnd)) {
+      problem(`${sid}'s first visit shows lines ${shown}`);
     }
   }
   // Entry rules (the scene's own changes already applied).
@@ -221,26 +239,28 @@ function walk(scene, line, memory, taps, from = null) {
       }
     }
   }
-  if (scene.id === 'reka_jezevec' && (after.kind !== 'next' || after.id !== 'reka_jezevec_zachrana')) {
-    problem(`reka_jezevec leads to ${after.id ?? after.kind}, not the minigame`);
+  const rescue = RESCUES.find((r) => r.event === scene.id || r.lose === scene.id);
+  if (rescue?.event === scene.id && (after.kind !== 'next' || after.id !== rescue.game)) {
+    problem(`${scene.id} leads to ${after.id ?? after.kind}, not the minigame`);
   }
-  if (scene.id === 'reka_jezevec_prohra') {
+  if (rescue?.lose === scene.id) {
     const choices = after.choices ?? [];
-    const retry = choices.filter((c) => c.next === 'reka_jezevec_zachrana' && c.giveUp !== true);
+    const retry = choices.filter((c) => c.next === rescue.game && c.giveUp !== true);
     const giveUp = choices.filter((c) => c.giveUp === true);
     if (choices.length !== 2 || retry.length !== 1 || giveUp.length !== 1) {
-      problem(`reka_jezevec_prohra shows ${choices.length} choices (${retry.length} retry, ${giveUp.length} giveUp), not a retry and a give-up`);
+      problem(`${scene.id} shows ${choices.length} choices (${retry.length} retry, ${giveUp.length} giveUp), not a retry and a give-up`);
     }
   }
   const targets = after.kind === 'minigame' ? [[scene.minigame.onVictory, memory], [scene.minigame.onFailure, memory]]
     : after.kind === 'choices' ? after.choices.flatMap((c) => {
     // A give-up (D37) un-plays its event, as the engine does (startVisualNovel.js's pickChoice).
     const m = c.giveUp === true ? F.giveUpMemory(story, scene, c, memory) : F.applyChanges(memory, c);
-    if (c.giveUp === true && scene.id === 'reka_jezevec_prohra') {
-      if (get(m, 'pul') !== pul) problem(`giving up the badger rescue changed pul ${pul} → ${get(m, 'pul')}`);
-      if (get(m, 'reka_jezevec') || !get(m, 'jezevci_prohra')) problem('giving up the badger rescue didn\'t un-play it or set jezevci_prohra');
-      if (pul < 6 && !F.eventCandidates(story, 'reka', m).some((e) => e.scene === 'reka_jezevec')) {
-        problem(`after giving up at pul ${pul} the dam can't offer the badger again`);
+    if (c.giveUp === true && rescue?.lose === scene.id) {
+      const { event, lostFlag, location } = rescue;
+      if (get(m, 'pul') !== pul) problem(`giving up ${event}'s rescue changed pul ${pul} → ${get(m, 'pul')}`);
+      if (get(m, event) || !get(m, lostFlag)) problem(`giving up ${event}'s rescue didn't un-play it or set ${lostFlag}`);
+      if (pul < 6 && !F.eventCandidates(story, location, m).some((e) => e.scene === event)) {
+        problem(`after giving up at pul ${pul} the location ${location} can't offer ${event} again`);
       }
     }
     if (c.location === undefined) return [[c.next, m]];
@@ -275,5 +295,5 @@ unseen.slice(0, 20).forEach(([id, i]) => fail(`${id} line ${i} is never shown`, 
 if (problems > 20) fail(`… and ${problems - 20} more`);
 if (!problems && !unseen.length) ok(`walk: ${states} states, ${endings} endings on a2_konec; every line shown; the calendar, the night, the abduction, Triglav and the picks hold`);
 if (endings === 0) fail('no path reaches a2_konec');
-if (badgerReturns === 0) fail('no path comes back to the badger after giving up its rescue');
+for (const [event, count] of returns) if (count === 0) fail(`no path comes back to ${event} after giving up its rescue`);
 process.exit(failures ? 1 : 0);
